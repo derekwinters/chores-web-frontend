@@ -4,40 +4,46 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import App from "../App";
-import { AuthProvider } from "../contexts/AuthContext";
 import * as client from "../api/client";
-import * as auth from "../utils/auth";
 
 vi.mock("../api/client");
-vi.mock("../utils/auth");
+vi.mock("../contexts/AuthContext", () => ({
+  AuthProvider: ({ children }) => children,
+  useAuth: () => ({
+    isAuthenticated: true,
+    setupNeeded: false,
+    user: { username: "alice", is_admin: true },
+    loading: false,
+    login: vi.fn(),
+    logout: vi.fn(),
+    changePassword: vi.fn(),
+  }),
+}));
 
 function wrap(ui) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(
-    <AuthProvider>
-      <QueryClientProvider client={qc}>{ui}</QueryClientProvider>
-    </AuthProvider>
-  );
+  return render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>);
 }
 
 describe("App Title", () => {
   beforeEach(() => {
     vi.resetAllMocks();
-    auth.getToken.mockReturnValue("fake-token");
-    auth.setToken.mockImplementation(() => {});
-    auth.clearToken.mockImplementation(() => {});
-    auth.isAuthenticated.mockReturnValue(true);
     client.getChores.mockResolvedValue([]);
-    client.getPeople.mockResolvedValue([]);
+    client.getPeople.mockResolvedValue([
+      { id: 1, name: "Alice", username: "alice", color: "#3B6EA0", is_admin: true },
+    ]);
     client.getPointsSummary.mockResolvedValue([]);
     client.getConfig.mockResolvedValue({ title: "Family Chores" });
     client.getSetupStatus.mockResolvedValue({ setup_needed: false });
     localStorage.clear();
   });
 
-  it("displays default app title", () => {
+  it("displays default app title", async () => {
     wrap(<App />);
-    expect(screen.getByText("Family Chores")).toBeInTheDocument();
+    await waitFor(() => {
+      const titles = screen.getAllByText("Family Chores");
+      expect(titles.length).toBeGreaterThan(0);
+    });
   });
 
   it("fetches app title from config", async () => {
@@ -50,9 +56,11 @@ describe("App Title", () => {
 
   it("shows title edit field in settings", async () => {
     wrap(<App />);
-    fireEvent.click(screen.getByText("Settings").closest("button"));
+    // Settings is accessed via the /settings route - navigate there via the topnav Settings button
+    await waitFor(() => screen.getByRole("button", { name: /settings/i }));
+    fireEvent.click(screen.getByRole("button", { name: /settings/i }));
     await waitFor(() => {
-      expect(screen.getByLabelText(/app title|page title/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/app title/i)).toBeInTheDocument();
     });
   });
 
@@ -61,14 +69,15 @@ describe("App Title", () => {
     client.updateConfig.mockResolvedValue({ title: "My Chores" });
     wrap(<App />);
 
-    fireEvent.click(screen.getByText("Settings").closest("button"));
-    await waitFor(() => screen.getByLabelText(/app title|page title/i));
+    await waitFor(() => screen.getByRole("button", { name: /settings/i }));
+    fireEvent.click(screen.getByRole("button", { name: /settings/i }));
+    await waitFor(() => screen.getByLabelText(/app title/i));
 
-    const input = screen.getByLabelText(/app title|page title/i);
+    const input = screen.getByLabelText(/app title/i);
     await user.clear(input);
     await user.type(input, "My Chores");
 
-    fireEvent.click(screen.getByRole("button", { name: /save|update/i }));
+    fireEvent.click(screen.getByRole("button", { name: /save/i }));
 
     await waitFor(() => {
       expect(client.updateConfig).toHaveBeenCalledWith(expect.objectContaining({ title: "My Chores" }));
@@ -80,17 +89,19 @@ describe("App Title", () => {
     client.updateConfig.mockResolvedValue({ title: "My Chores" });
     wrap(<App />);
 
-    fireEvent.click(screen.getByText("Settings").closest("button"));
-    await waitFor(() => screen.getByLabelText(/app title|page title/i));
+    await waitFor(() => screen.getByRole("button", { name: /settings/i }));
+    fireEvent.click(screen.getByRole("button", { name: /settings/i }));
+    await waitFor(() => screen.getByLabelText(/app title/i));
 
-    const input = screen.getByLabelText(/app title|page title/i);
+    const input = screen.getByLabelText(/app title/i);
     await user.clear(input);
     await user.type(input, "My Chores");
 
-    fireEvent.click(screen.getByRole("button", { name: /save|update/i }));
+    fireEvent.click(screen.getByRole("button", { name: /save/i }));
 
     await waitFor(() => {
-      expect(screen.getByText("My Chores")).toBeInTheDocument();
+      const titles = screen.getAllByText("My Chores");
+      expect(titles.length).toBeGreaterThan(0);
     });
   });
 
@@ -98,12 +109,15 @@ describe("App Title", () => {
     client.getConfig.mockResolvedValue({ title: "Persistent Title" });
     wrap(<App />);
 
-    await waitFor(() => expect(screen.getByText("Persistent Title")).toBeInTheDocument());
+    await waitFor(() => {
+      const titles = screen.getAllByText("Persistent Title");
+      expect(titles.length).toBeGreaterThan(0);
+    });
 
-    fireEvent.click(screen.getByText("Board").closest("button"));
-    expect(screen.getByText("Persistent Title")).toBeInTheDocument();
+    fireEvent.click(screen.getAllByText("Board")[0].closest("a"));
+    expect(screen.getAllByText("Persistent Title").length).toBeGreaterThan(0);
 
-    fireEvent.click(screen.getByText("Settings").closest("button"));
-    expect(screen.getByText("Persistent Title")).toBeInTheDocument();
+    fireEvent.click(screen.getAllByText("Chores")[0].closest("a"));
+    expect(screen.getAllByText("Persistent Title").length).toBeGreaterThan(0);
   });
 });

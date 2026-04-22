@@ -42,7 +42,8 @@ describe("UserManagement", () => {
   it("shows add user button", async () => {
     wrap(<UserManagement />);
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: /\+ add user/i })).toBeInTheDocument();
+      // Button has MdAdd icon + "Add User" text; use title attribute for lookup
+      expect(screen.getByTitle("Add user")).toBeInTheDocument();
     });
   });
 
@@ -51,15 +52,16 @@ describe("UserManagement", () => {
     client.createPerson.mockResolvedValue({ id: 3, name: "Charlie", color: "#4A8C6F", goal_7d: 25, goal_30d: 100, is_admin: false });
 
     wrap(<UserManagement />);
-    await waitFor(() => screen.getByRole("button", { name: /\+ add user/i }));
-    const addBtn = screen.getByRole("button", { name: /\+ add user/i });
-    fireEvent.click(addBtn);
+    await waitFor(() => screen.getByTitle("Add user"));
+    fireEvent.click(screen.getByTitle("Add user"));
 
     const nameInput = screen.getByLabelText(/display name/i);
     await user.type(nameInput, "Charlie");
 
-    // Note: Username is auto-generated from name in the actual app,
-    // but in the form it's shown as a field. We just need to trigger save.
+    // Username field is required; fill it too
+    const usernameInput = screen.getByLabelText(/username/i);
+    await user.type(usernameInput, "charlie");
+
     fireEvent.click(screen.getByRole("button", { name: /save/i }));
 
     await waitFor(() => {
@@ -87,10 +89,12 @@ describe("UserManagement", () => {
     const user = userEvent.setup();
     wrap(<UserManagement />);
 
-    await waitFor(() => screen.getByRole("button", { name: /\+ add user/i }));
-    fireEvent.click(screen.getByRole("button", { name: /\+ add user/i }));
+    await waitFor(() => screen.getByTitle("Add user"));
+    fireEvent.click(screen.getByTitle("Add user"));
     const nameInput = screen.getByLabelText(/display name/i);
     await user.type(nameInput, "Charlie");
+    const usernameInput = screen.getByLabelText(/username/i);
+    await user.type(usernameInput, "charlie");
     fireEvent.click(screen.getByRole("button", { name: /save/i }));
 
     await waitFor(() => {

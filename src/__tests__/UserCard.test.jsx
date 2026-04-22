@@ -18,6 +18,7 @@ function dateStr(offsetDays) {
 }
 
 const DUE_CHORE = {
+  id: "vacuum",
   unique_id: "vacuum",
   name: "Vacuum",
   state: "due",
@@ -31,6 +32,7 @@ const DUE_CHORE = {
 };
 
 const SOON_CHORE = {
+  id: "dishes",
   unique_id: "dishes",
   name: "Dishes",
   state: "complete",
@@ -86,34 +88,49 @@ describe("UserCard", () => {
     expect(screen.getByText("1")).toBeInTheDocument();
   });
 
-  it("expands due now section (auto-opens when chores present)", () => {
+  it("shows due now chore name as clickable button", () => {
     wrap(<UserCard person={PERSON} chores={[DUE_CHORE]} people={PEOPLE} summary={SUMMARY} />);
+    // Due chores are shown as buttons that open a modal; chore name is visible
     expect(screen.getByText("Vacuum")).toBeInTheDocument();
-    expect(screen.getByText("Complete")).toBeInTheDocument();
-    expect(screen.getByText("Skip")).toBeInTheDocument();
+    // Complete/Skip appear inside the modal after clicking the chore button
+    expect(screen.queryByText("Complete")).not.toBeInTheDocument();
   });
 
-  it("due soon section is collapsed by default but toggleable", () => {
+  it("opens modal with Complete and Skip when due chore is clicked", async () => {
+    wrap(<UserCard person={PERSON} chores={[DUE_CHORE]} people={PEOPLE} summary={SUMMARY} />);
+    fireEvent.click(screen.getByText("Vacuum"));
+    await waitFor(() => {
+      expect(screen.getByText("Complete")).toBeInTheDocument();
+      expect(screen.getByText("Skip")).toBeInTheDocument();
+    });
+  });
+
+  it("due soon section shows chores inline", () => {
     wrap(<UserCard person={PERSON} chores={[SOON_CHORE]} people={PEOPLE} summary={SUMMARY} />);
-    expect(screen.queryByText("Dishes")).not.toBeInTheDocument();
-    fireEvent.click(screen.getByText("due soon"));
+    // Due soon chores are shown directly via ChoreRowActions with mode="soon"
     expect(screen.getByText("Dishes")).toBeInTheDocument();
   });
 
   it("shows Mark due button for soon chores", () => {
     wrap(<UserCard person={PERSON} chores={[SOON_CHORE]} people={PEOPLE} summary={SUMMARY} />);
-    fireEvent.click(screen.getByText("due soon"));
+    // Mark due appears inline for soon chores
     expect(screen.getByText("Mark due")).toBeInTheDocument();
   });
 
-  it("calls completeChore with person name on Complete click", async () => {
+  it("calls completeChore with person name on Complete click inside modal", async () => {
     wrap(<UserCard person={PERSON} chores={[DUE_CHORE]} people={PEOPLE} summary={SUMMARY} />);
+    // Open modal by clicking chore name
+    fireEvent.click(screen.getByText("Vacuum"));
+    await waitFor(() => screen.getByText("Complete"));
     fireEvent.click(screen.getByText("Complete"));
     await waitFor(() => expect(client.completeChore).toHaveBeenCalledWith("vacuum", "Alice"));
   });
 
-  it("calls skipChore on Skip click", async () => {
+  it("calls skipChore on Skip click inside modal", async () => {
     wrap(<UserCard person={PERSON} chores={[DUE_CHORE]} people={PEOPLE} summary={SUMMARY} />);
+    // Open modal by clicking chore name
+    fireEvent.click(screen.getByText("Vacuum"));
+    await waitFor(() => screen.getByText("Skip"));
     fireEvent.click(screen.getByText("Skip"));
     await waitFor(() => expect(client.skipChore).toHaveBeenCalledWith("vacuum"));
   });
@@ -125,12 +142,13 @@ describe("UserCard", () => {
   });
 
   it("does not show chores due more than 7 days away in soon section", () => {
-    const farChore = { ...SOON_CHORE, next_due: dateStr(10), unique_id: "far" };
+    const farChore = { ...SOON_CHORE, id: "far", unique_id: "far", next_due: dateStr(10) };
     wrap(<UserCard person={PERSON} chores={[farChore]} people={PEOPLE} summary={SUMMARY} />);
-    fireEvent.click(screen.getByText("due soon"));
-    // count should be 0, section disabled
-    const toggle = screen.getByText("due soon").closest("button");
-    expect(toggle).toBeDisabled();
+    // Chore due in 10 days is outside the 7-day window and should not appear
+    expect(screen.queryByText("Dishes")).not.toBeInTheDocument();
+    // Due Soon count should be 0
+    const dueSoonHeaders = screen.getAllByText(/Due Soon/i);
+    expect(dueSoonHeaders.length).toBeGreaterThan(0);
   });
 
   it("shows green color for points ahead of goal (>0.8)", () => {

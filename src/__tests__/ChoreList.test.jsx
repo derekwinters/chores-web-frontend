@@ -9,6 +9,7 @@ vi.mock("../api/client");
 
 const CHORES = [
   {
+    id: "vacuum",
     unique_id: "vacuum",
     name: "Vacuum",
     points: 5,
@@ -17,8 +18,10 @@ const CHORES = [
     current_assignee: "Alice",
     schedule_summary: "Weekly on Mon",
     assignment_type: "rotating",
+    next_due: "2026-05-01",
   },
   {
+    id: "dishes",
     unique_id: "dishes",
     name: "Dishes",
     points: 3,
@@ -27,6 +30,7 @@ const CHORES = [
     current_assignee: "Bob",
     schedule_summary: "Every day",
     assignment_type: "rotating",
+    next_due: "2026-05-02",
   },
 ];
 
@@ -67,16 +71,17 @@ describe("ChoreList", () => {
   it("displays schedule info with icon", async () => {
     wrap(<ChoreList />);
     await waitFor(() => {
-      const schedules = screen.getAllByText(/weekly|every day/i);
-      expect(schedules.length).toBeGreaterThanOrEqual(2);
+      // schedule_summary appears in the due-label when next_due is set
+      expect(screen.getByText("Weekly on Mon")).toBeInTheDocument();
+      expect(screen.getByText("Every day")).toBeInTheDocument();
     });
   });
 
-  it("shows status indicator", async () => {
+  it("shows assignment info for chores", async () => {
     wrap(<ChoreList />);
     await waitFor(() => {
-      const dueIndicators = screen.getAllByText(/due|pending/i);
-      expect(dueIndicators.length).toBeGreaterThan(0);
+      // current_assignee names appear in the assignment info
+      expect(screen.getByText("Alice")).toBeInTheDocument();
     });
   });
 

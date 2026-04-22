@@ -41,8 +41,8 @@ const PEOPLE = [
 ];
 
 const CHORES = [
-  { unique_id: "vacuum", name: "Vacuum", disabled: false },
-  { unique_id: "trash", name: "Take out trash", disabled: false },
+  { id: "vacuum", unique_id: "vacuum", name: "Vacuum", disabled: false },
+  { id: "trash", unique_id: "trash", name: "Take out trash", disabled: false },
 ];
 
 function wrap(ui) {

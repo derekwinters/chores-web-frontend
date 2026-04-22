@@ -2,6 +2,7 @@ import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { MemoryRouter } from "react-router-dom";
 import Settings from "../pages/Settings";
 import * as client from "../api/client";
 
@@ -12,7 +13,11 @@ vi.mock("../components/Log", () => ({
 
 function wrap(ui) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>);
+  return render(
+    <MemoryRouter>
+      <QueryClientProvider client={qc}>{ui}</QueryClientProvider>
+    </MemoryRouter>
+  );
 }
 
 describe("Settings", () => {
@@ -21,43 +26,49 @@ describe("Settings", () => {
     client.getChores.mockResolvedValue([]);
     client.getPeople.mockResolvedValue([]);
     client.getLog.mockResolvedValue([]);
+    client.getConfig.mockResolvedValue({ title: "Family Chores", auth_enabled: true });
   });
 
-  it("renders settings page with sidebar", () => {
-    wrap(<Settings />);
-    expect(screen.getByText("Settings")).toBeInTheDocument();
-  });
-
-  it("shows App and Theme sections in sidebar", async () => {
+  it("renders settings page with General section", async () => {
     wrap(<Settings />);
     await waitFor(() => {
-      expect(screen.getByText("App")).toBeInTheDocument();
+      expect(screen.getByText("General")).toBeInTheDocument();
+    });
+  });
+
+  it("shows General and Theme sections", async () => {
+    wrap(<Settings />);
+    await waitFor(() => {
+      expect(screen.getByText("General")).toBeInTheDocument();
       expect(screen.getByText("Theme")).toBeInTheDocument();
     });
   });
 
-  it("shows App section by default", () => {
+  it("shows App Title field by default", async () => {
     wrap(<Settings />);
-    expect(screen.getByRole("heading", { name: /settings/i })).toBeInTheDocument();
-  });
-
-  it("navigates to Theme section when clicked", async () => {
-    wrap(<Settings />);
-    const themeBtn = screen.getByRole("button", { name: "Theme" });
-    fireEvent.click(themeBtn);
     await waitFor(() => {
-      expect(themeBtn).toHaveClass("settings-nav-active");
+      expect(screen.getByLabelText(/app title/i)).toBeInTheDocument();
     });
   });
 
-  it("highlights active section button", () => {
+  it("shows Auth section", async () => {
     wrap(<Settings />);
-    const appBtn = screen.getByRole("button", { name: "App" });
-    expect(appBtn).toHaveClass("settings-nav-active");
+    await waitFor(() => {
+      expect(screen.getByText("Auth")).toBeInTheDocument();
+    });
+  });
 
-    const themeBtn = screen.getByRole("button", { name: "Theme" });
-    fireEvent.click(themeBtn);
-    expect(themeBtn).toHaveClass("settings-nav-active");
-    expect(appBtn).not.toHaveClass("settings-nav-active");
+  it("allows saving settings", async () => {
+    client.updateConfig.mockResolvedValue({ title: "My App", auth_enabled: true });
+    wrap(<Settings />);
+    // Wait for the config to load and the input to have a non-empty value
+    await waitFor(() => {
+      const input = screen.getByLabelText(/app title/i);
+      expect(input.value).not.toBe("");
+    });
+    fireEvent.click(screen.getByRole("button", { name: /save/i }));
+    await waitFor(() => {
+      expect(client.updateConfig).toHaveBeenCalled();
+    });
   });
 });

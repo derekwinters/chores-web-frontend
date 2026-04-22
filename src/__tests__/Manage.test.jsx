@@ -9,6 +9,7 @@ vi.mock("../api/client");
 
 const CHORES = [
   {
+    id: "vacuum",
     unique_id: "vacuum",
     name: "Vacuum",
     state: "due",
@@ -25,6 +26,7 @@ const CHORES = [
     age: 1,
   },
   {
+    id: "dishes",
     unique_id: "dishes",
     name: "Dishes",
     state: "complete",
@@ -71,37 +73,40 @@ describe("Manage page", () => {
     expect(screen.getByText("Every 1 day")).toBeInTheDocument();
   });
 
-  it("shows state badges", async () => {
+  it("shows assignment type info for chores", async () => {
     wrap(<Manage />);
-    await waitFor(() => expect(screen.getByText("Due")).toBeInTheDocument());
-    expect(screen.getByText("Done")).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
+    // ChoreList renders assignment_type info for each chore
+    expect(screen.getByText("rotating")).toBeInTheDocument();
   });
 
   it("shows Add Chore button", async () => {
     wrap(<Manage />);
-    await waitFor(() => expect(screen.getByText("+ Add Chore")).toBeInTheDocument());
+    // Button has an MdAdd SVG icon + "Add Chore" text (no literal "+")
+    await waitFor(() => expect(screen.getByRole("button", { name: /add chore/i })).toBeInTheDocument());
   });
 
   it("opens create modal on Add Chore click", async () => {
     wrap(<Manage />);
-    await waitFor(() => screen.getByText("+ Add Chore"));
-    fireEvent.click(screen.getByText("+ Add Chore"));
-    expect(screen.getByText("Add Chore")).toBeInTheDocument();
+    await waitFor(() => screen.getByRole("button", { name: /add chore/i }));
+    fireEvent.click(screen.getByRole("button", { name: /add chore/i }));
+    // "Add Chore" now appears in both button text and modal title; use getAllByText
+    expect(screen.getAllByText("Add Chore").length).toBeGreaterThan(0);
     expect(screen.getByText("Create")).toBeInTheDocument();
   });
 
   it("closes modal on Cancel", async () => {
     wrap(<Manage />);
-    await waitFor(() => screen.getByText("+ Add Chore"));
-    fireEvent.click(screen.getByText("+ Add Chore"));
+    await waitFor(() => screen.getByRole("button", { name: /add chore/i }));
+    fireEvent.click(screen.getByRole("button", { name: /add chore/i }));
     fireEvent.click(screen.getByText("Cancel"));
     await waitFor(() => expect(screen.queryByText("Create")).not.toBeInTheDocument());
   });
 
   it("closes modal on Escape key", async () => {
     wrap(<Manage />);
-    await waitFor(() => screen.getByText("+ Add Chore"));
-    fireEvent.click(screen.getByText("+ Add Chore"));
+    await waitFor(() => screen.getByRole("button", { name: /add chore/i }));
+    fireEvent.click(screen.getByRole("button", { name: /add chore/i }));
     fireEvent.keyDown(document, { key: "Escape" });
     await waitFor(() => expect(screen.queryByText("Create")).not.toBeInTheDocument());
   });

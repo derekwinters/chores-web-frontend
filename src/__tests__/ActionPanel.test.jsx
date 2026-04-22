@@ -8,6 +8,7 @@ import * as client from "../api/client";
 vi.mock("../api/client");
 
 const makeChore = (overrides = {}) => ({
+  id: "dishes",
   unique_id: "dishes",
   name: "Dishes",
   state: "due",

@@ -8,6 +8,7 @@ import * as client from "../api/client";
 vi.mock("../api/client");
 
 const CHORE = {
+  id: "vacuum",
   unique_id: "vacuum",
   name: "Vacuum",
   state: "due",
