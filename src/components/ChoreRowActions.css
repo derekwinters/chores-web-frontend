@@ -1,0 +1,145 @@
+.chore-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: var(--radius);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  transition: background 0.2s ease;
+}
+
+.chore-row.done {
+  background: var(--accent-bg);
+  border-color: var(--accent);
+}
+
+/* Icon box */
+.chore-row-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.chore-row-icon.done {
+  background: var(--accent-btn);
+  border-color: var(--accent-btn);
+}
+
+.chore-icon-check {
+  font-size: 16px;
+  color: #fff;
+}
+
+.chore-icon-pts {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: -0.5px;
+}
+
+/* Info */
+.chore-row-info {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 1;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.chore-row-name {
+  font-weight: 500;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chore-row-age {
+  font-size: 0.72rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.chore-row-age.overdue { color: var(--danger); }
+.chore-row-age.today   { color: var(--warning); }
+.chore-row-age.future  { color: var(--text-muted); }
+
+.chore-row-due {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.chore-row-assignee {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.assignee-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Buttons */
+.chore-row-btns {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.btn-xs {
+  padding: 0.25rem 0.65rem;
+  font-size: 0.78rem;
+}
+
+/* Gold points badge */
+.pts-badge {
+  padding: 3px 8px;
+  border-radius: 99px;
+  background: var(--gold-bg);
+  color: var(--gold);
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Reassign */
+.chore-row-reassign {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.reassign-select-xs {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.78rem;
+  font-family: inherit;
+  cursor: pointer;
+  max-width: 8rem;
+}
+
+.chore-row-error {
+  width: 100%;
+  font-size: 0.75rem;
+  color: var(--danger);
+}

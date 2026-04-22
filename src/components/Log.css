@@ -1,0 +1,229 @@
+.log {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.page-header h2 {
+  margin: 0;
+}
+
+.page-header button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.action-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.action-text {
+  white-space: nowrap;
+}
+
+.log-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  align-items: end;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.filter-group label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+}
+
+.filter-group select,
+.filter-group input {
+  padding: 0.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
+.filter-group select:focus,
+.filter-group input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.log-entries {
+  overflow-x: auto;
+}
+
+.log-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  font-size: 0.9rem;
+}
+
+.log-table thead {
+  background: var(--surface);
+  border-bottom: 2px solid var(--border);
+}
+
+.log-table th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.log-table tbody tr {
+  border-bottom: 1px solid var(--border);
+}
+
+.log-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.log-table tbody tr:hover {
+  background: var(--surface);
+}
+
+.log-table td {
+  padding: 0.75rem 1rem;
+  color: var(--text);
+}
+
+.log-timestamp {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  white-space: nowrap;
+  width: 180px;
+}
+
+.log-actor {
+  font-weight: 500;
+  width: 280px;
+}
+
+.log-target-type {
+  width: 120px;
+}
+
+.target-badge {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+}
+
+.log-target {
+  font-weight: 500;
+}
+
+.log-action {
+  width: 100px;
+}
+
+.action-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  color: var(--text);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border: 1px solid var(--border);
+}
+
+.log-content {
+  font-family: monospace;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-muted);
+}
+
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-muted);
+}
+
+.log-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 0;
+  margin-top: 1rem;
+}
+
+.page-info {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  min-width: 150px;
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .page-header button {
+    padding: 0.5rem;
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+    justify-content: center;
+  }
+
+  .action-text {
+    display: none;
+  }
+
+  .action-icon {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .log-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-group {
+    width: 100%;
+  }
+}

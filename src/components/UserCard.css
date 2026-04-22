@@ -1,0 +1,137 @@
+.user-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: var(--shadow);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.user-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.uc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.uc-identity {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.uc-name {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* Points grid */
+.uc-points-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.uc-points-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.uc-points-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+}
+
+.uc-points-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.uc-pts-unit {
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--text-muted);
+  margin-left: 3px;
+}
+
+.uc-goal-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.uc-divider {
+  border-top: 1px solid var(--border);
+}
+
+/* Due grid */
+.uc-due-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.uc-due-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.uc-due-header {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+}
+
+.uc-due-count {
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--warning);
+}
+
+.uc-due-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.uc-chore-link {
+  background: none;
+  border: none;
+  padding: 0.4rem 0.75rem;
+  border-radius: 4px;
+  color: var(--accent);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.2s;
+}
+
+.uc-chore-link:hover {
+  background-color: var(--surface2);
+}
+
+@media (max-width: 640px) {
+  .uc-points-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .uc-due-grid {
+    grid-template-columns: 1fr;
+  }
+}

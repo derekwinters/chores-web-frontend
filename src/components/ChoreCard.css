@@ -1,0 +1,22 @@
+.chore-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  transition: background 0.1s, border-color 0.1s;
+  user-select: none;
+}
+.chore-card:hover { background: var(--surface2); }
+.chore-card.selected { border-color: var(--accent); background: var(--surface2); }
+
+.chore-card.today .chore-age { color: var(--warning); }
+.chore-card.warn .chore-age { color: var(--warning); }
+.chore-card.overdue .chore-age { color: var(--danger); }
+.chore-card.future .chore-age { color: var(--text-muted); }
+
+.chore-name { font-weight: 500; }
+.chore-age { font-size: 0.8rem; color: var(--text-muted); white-space: nowrap; }

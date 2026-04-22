@@ -1,0 +1,52 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #080c14;
+  --surface: #16202e;
+  --surface2: #1e2d40;
+  --border: #2c3f58;
+  --text: #dce8f5;
+  --text-muted: #7899b8;
+  --accent: #73B1DD;
+  --accent-btn: #3574B3;
+  --accent-bg: rgba(115,177,221,0.1);
+  --gold: #c9a84c;
+  --gold-bg: rgba(201,168,76,0.13);
+  --danger: #e05c6a;
+  --warning: #e8a930;
+  --success: #3db87a;
+  --radius: 12px;
+  --shadow: 0 1px 4px rgba(0,0,0,0.3), 0 4px 16px rgba(0,0,0,0.2);
+  --shadow-lg: 0 2px 8px rgba(0,0,0,0.4), 0 12px 40px rgba(0,0,0,0.3);
+  font-family: 'DM Sans', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: 99px;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-family: inherit;
+  transition: opacity 0.15s, transform 0.15s;
+}
+button:disabled { opacity: 0.4; cursor: not-allowed; }
+button:not(:disabled):hover { opacity: 0.85; }
+
+.btn-primary { background: var(--accent-btn); color: #fff; }
+.btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-warning { background: var(--warning); color: var(--bg); }
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translate(-50%, 12px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
