@@ -120,14 +120,10 @@ describe("ChoreForm — prefilled (edit)", () => {
 
   it("pre-checks eligible people buttons", () => {
     render(<ChoreForm initial={existingChore} people={PEOPLE} onSubmit={() => {}} onCancel={() => {}} />);
-    // People are rendered as buttons (person-btn), not checkboxes
-    const aliceBtns = screen.getAllByText("Alice");
-    const bobBtns = screen.getAllByText("Bob");
-    const carolBtns = screen.getAllByText("Carol");
-    // The person buttons in the Rotation section should reflect eligible_people
-    const aliceBtn = aliceBtns[aliceBtns.length - 1].closest("button");
-    const bobBtn = bobBtns[bobBtns.length - 1].closest("button");
-    const carolBtn = carolBtns[carolBtns.length - 1].closest("button");
+    const rotationRow = screen.getByText("Rotation").closest(".form-row");
+    const aliceBtn = Array.from(rotationRow.querySelectorAll("button")).find((button) => button.textContent === "Alice");
+    const bobBtn = Array.from(rotationRow.querySelectorAll("button")).find((button) => button.textContent === "Bob");
+    const carolBtn = Array.from(rotationRow.querySelectorAll("button")).find((button) => button.textContent === "Carol");
     expect(aliceBtn).toHaveClass("active");
     expect(bobBtn).toHaveClass("active");
     expect(carolBtn).not.toHaveClass("active");
@@ -153,7 +149,64 @@ describe("ChoreForm — prefilled (edit)", () => {
     const labels = screen.getAllByText("Bob");
     // One from eligible people checkbox, one from assigned to next display
     expect(labels.length).toBeGreaterThan(1);
-    expect(screen.getByText(/Assigned to Next/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Assigned to Next/i).length).toBeGreaterThan(0);
+  });
+
+  it("shows editable current and next assignee controls for rotating chores", () => {
+    const rotatingChore = {
+      ...existingChore,
+      current_assignee: "Alice",
+      next_assignee: "Bob",
+    };
+    render(<ChoreForm initial={rotatingChore} people={PEOPLE} onSubmit={() => {}} onCancel={() => {}} />);
+    expect(screen.getAllByText(/Current assignee/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Assigned to next/i).length).toBeGreaterThan(0);
+  });
+
+  it("submits rotating assignee edits in the update payload", async () => {
+    const onSubmit = vi.fn().mockResolvedValue();
+    const rotatingChore = {
+      ...existingChore,
+      eligible_people: ["Alice", "Bob", "Carol"],
+      current_assignee: "Alice",
+      next_assignee: "Bob",
+    };
+    render(<ChoreForm initial={rotatingChore} people={PEOPLE} onSubmit={onSubmit} onCancel={() => {}} />);
+
+    const currentRow = screen.getByText("Current assignee", { selector: "label" }).closest(".form-row");
+    const nextRow = screen.getByText("Assigned to next", { selector: "label" }).closest(".form-row");
+    const currentBobButton = Array.from(currentRow.querySelectorAll("button")).find((button) => button.textContent === "Bob");
+    const nextCarolButton = Array.from(nextRow.querySelectorAll("button")).find((button) => button.textContent === "Carol");
+
+    fireEvent.click(currentBobButton);
+    fireEvent.click(nextCarolButton);
+    fireEvent.click(screen.getByText("Save"));
+
+    await waitFor(() => expect(onSubmit).toHaveBeenCalled());
+    expect(onSubmit.mock.calls[0][0].current_assignee).toBe("Bob");
+    expect(onSubmit.mock.calls[0][0].next_assignee).toBe("Carol");
+  });
+
+  it("submits fixed assignee edits with matching current assignee", async () => {
+    const onSubmit = vi.fn().mockResolvedValue();
+    const fixedChore = {
+      name: "Trash",
+      schedule_type: "weekly",
+      schedule_config: { days: [0] },
+      assignment_type: "fixed",
+      assignee: "Alice",
+      current_assignee: "Alice",
+      eligible_people: [],
+      points: 1,
+    };
+    render(<ChoreForm initial={fixedChore} people={PEOPLE} onSubmit={onSubmit} onCancel={() => {}} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Bob" }));
+    fireEvent.click(screen.getByText("Save"));
+
+    await waitFor(() => expect(onSubmit).toHaveBeenCalled());
+    expect(onSubmit.mock.calls[0][0].assignee).toBe("Bob");
+    expect(onSubmit.mock.calls[0][0].current_assignee).toBe("Bob");
   });
 
   it("does not display metadata when creating new chore", () => {

@@ -30,6 +30,8 @@ function emptyState() {
     assignment_type: "open",
     eligible_people: [],
     assignee: "",
+    current_assignee: "",
+    next_assignee: "",
     points: "0",
     disabled: false,
     // dates
@@ -44,6 +46,8 @@ function choreToState(chore) {
   s.assignment_type = chore.assignment_type;
   s.eligible_people = chore.eligible_people ?? [];
   s.assignee = chore.assignee ?? "";
+  s.current_assignee = chore.current_assignee ?? "";
+  s.next_assignee = chore.next_assignee ?? "";
   s.points = String(chore.points ?? 0);
   s.disabled = chore.disabled ?? false;
   s.next_due = chore.next_due ?? null;
@@ -81,7 +85,7 @@ function choreToState(chore) {
   return s;
 }
 
-function stateToPayload(s) {
+function stateToPayload(s, { isEditing = false } = {}) {
   let schedule_config = {};
   if (s.schedule_type === "weekly") {
     schedule_config = {
@@ -124,6 +128,17 @@ function stateToPayload(s) {
     disabled: s.disabled,
   };
 
+  if (isEditing) {
+    if (s.assignment_type === "rotating") {
+      payload.current_assignee = s.current_assignee || null;
+      payload.next_assignee = s.next_assignee || null;
+    } else if (s.assignment_type === "open") {
+      payload.current_assignee = s.current_assignee || null;
+    } else if (s.assignment_type === "fixed") {
+      payload.current_assignee = s.assignee || null;
+    }
+  }
+
   if (s.next_due) {
     payload.next_due = s.next_due;
   }
@@ -143,6 +158,10 @@ function validate(s) {
     return "Fixed assignment requires an assignee.";
   if (s.assignment_type === "rotating" && s.eligible_people.length < 2)
     return "Rotating assignment needs at least 2 people.";
+  if (s.assignment_type === "rotating" && s.current_assignee && !s.eligible_people.includes(s.current_assignee))
+    return "Current assignee must be part of the rotation.";
+  if (s.assignment_type === "rotating" && s.next_assignee && !s.eligible_people.includes(s.next_assignee))
+    return "Next assignee must be part of the rotation.";
   return null;
 }
 
@@ -185,7 +204,7 @@ export default function ChoreForm({ initial, people, onSubmit, onCancel, submitL
     setBusy(true);
     setError(null);
     try {
-      await onSubmit(stateToPayload(s));
+      await onSubmit(stateToPayload(s, { isEditing: Boolean(initial) }));
     } catch (ex) {
       setError(ex.message);
       setBusy(false);
@@ -241,7 +260,7 @@ export default function ChoreForm({ initial, people, onSubmit, onCancel, submitL
         {initial && initial.next_assignee && (
           <div className="form-row">
             <label>Assigned to Next</label>
-            <div className="form-display">{initial.next_assignee}</div>
+            <div className="form-display">{s.next_assignee || initial.next_assignee}</div>
           </div>
         )}
       </div>
@@ -317,6 +336,31 @@ export default function ChoreForm({ initial, people, onSubmit, onCancel, submitL
         </div>
       )}
 
+      {initial && s.assignment_type === "open" && people.length > 0 && (
+        <div className="form-row">
+          <label>Current assignee</label>
+          <div className="people-picker">
+            <button
+              type="button"
+              className={!s.current_assignee ? "person-btn active" : "person-btn"}
+              onClick={() => set("current_assignee", "")}
+            >
+              Unassigned
+            </button>
+            {people.map((p) => (
+              <button
+                type="button"
+                key={p.name}
+                className={s.current_assignee === p.name ? "person-btn active" : "person-btn"}
+                onClick={() => set("current_assignee", s.current_assignee === p.name ? "" : p.name)}
+              >
+                {p.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Eligible people (rotating or open with suggestions) */}
       {(s.assignment_type === "rotating" || s.assignment_type === "open") && people.length > 0 && (
         <div className="form-row">
@@ -334,6 +378,45 @@ export default function ChoreForm({ initial, people, onSubmit, onCancel, submitL
             ))}
           </div>
         </div>
+      )}
+
+      {initial && s.assignment_type === "rotating" && s.eligible_people.length > 0 && (
+        <>
+          <div className="form-row">
+            <label>Current assignee</label>
+            <div className="people-picker">
+              {s.eligible_people.map((name) => (
+                <button
+                  type="button"
+                  key={name}
+                  className={s.current_assignee === name ? "person-btn active" : "person-btn"}
+                  onClick={() => set("current_assignee", name)}
+                >
+                  {name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="form-row">
+            <label>Assigned to next</label>
+            <div className="people-picker">
+              {s.eligible_people.map((name) => (
+                <button
+                  type="button"
+                  key={name}
+                  className={s.next_assignee === name ? "person-btn active" : "person-btn"}
+                  onClick={() => set("next_assignee", name)}
+                >
+                  {name}
+                </button>
+              ))}
+            </div>
+            <div className="form-hint">
+              Pick the person who should be next in the rotation after the current assignee.
+            </div>
+          </div>
+        </>
       )}
       </div>
 
