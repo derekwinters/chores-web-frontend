@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { getChores, getPeople } from "../api/client";
 import { MdSchedule, MdPerson, MdStar, MdEdit, MdDelete, MdAccessTime } from "react-icons/md";
+import { compareChoresByNextDue } from "../utils/choreSort";
 import "./ChoreList.css";
 
 const STATE_LABELS = { due: "Due", complete: "Done" };
@@ -33,7 +34,7 @@ export default function ChoreList({ onEdit, onDelete, chores: externalChores, pe
 
   if (choresLoading && !externalChores) return <div className="loading">Loading chores…</div>;
 
-  const sorted = [...chores].sort((a, b) => a.name.localeCompare(b.name));
+  const sorted = [...chores].sort(compareChoresByNextDue);
 
   if (sorted.length === 0) {
     return <div className="empty">No chores yet. Add one to get started.</div>;

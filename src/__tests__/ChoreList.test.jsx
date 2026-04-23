@@ -22,6 +22,18 @@ const CHORES = [
     next_due: "2026-05-01",
   },
   {
+    id: "bathroom",
+    unique_id: "bathroom",
+    name: "Bathroom",
+    points: 2,
+    state: "due",
+    disabled: false,
+    current_assignee: null,
+    schedule_summary: "Weekly on Tue",
+    assignment_type: "open",
+    next_due: "2026-05-01",
+  },
+  {
     id: "dishes",
     unique_id: "dishes",
     name: "Dishes",
@@ -32,6 +44,18 @@ const CHORES = [
     schedule_summary: "Every day",
     assignment_type: "rotating",
     next_due: "2026-05-02",
+  },
+  {
+    id: "laundry",
+    unique_id: "laundry",
+    name: "Laundry",
+    points: 1,
+    state: "due",
+    disabled: false,
+    current_assignee: "Alice",
+    schedule_summary: "Every week",
+    assignment_type: "fixed",
+    next_due: null,
   },
 ];
 
@@ -74,7 +98,7 @@ describe("ChoreList", () => {
     await waitFor(() => {
       expect(screen.getByText("Vacuum")).toBeInTheDocument();
       expect(screen.getByText("5")).toBeInTheDocument();
-      expect(screen.getByText("Alice")).toBeInTheDocument();
+      expect(screen.getAllByText("Alice").length).toBeGreaterThan(0);
     });
   });
 
@@ -91,7 +115,7 @@ describe("ChoreList", () => {
     wrap(<ChoreList />);
     await waitFor(() => {
       // current_assignee names appear in the assignment info
-      expect(screen.getByText("Alice")).toBeInTheDocument();
+      expect(screen.getAllByText("Alice").length).toBeGreaterThan(0);
     });
   });
 
@@ -147,5 +171,17 @@ describe("ChoreList", () => {
     await waitFor(() => {
       expect(screen.getByTestId("location")).toHaveTextContent("/log?chore_id=vacuum");
     });
+  });
+
+  it("sorts chores by next due date with tied dates by name and no-date chores last", async () => {
+    wrap(<ChoreList />);
+
+    await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
+
+    const choreNames = screen
+      .getAllByRole("heading", { level: 3 })
+      .map((heading) => heading.textContent);
+
+    expect(choreNames).toEqual(["Bathroom", "Vacuum", "Dishes", "Laundry"]);
   });
 });

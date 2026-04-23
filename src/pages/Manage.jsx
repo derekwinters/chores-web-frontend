@@ -6,6 +6,7 @@ import { getChores, getPeople, createChore, updateChore, deleteChore } from "../
 import ChoreForm from "../components/ChoreForm";
 import ChoreList from "../components/ChoreList";
 import Modal from "../components/Modal";
+import { compareChoresByNextDue } from "../utils/choreSort";
 import "./Manage.css";
 
 function getFiltersFromSearchParams(searchParams) {
@@ -88,7 +89,7 @@ export default function Manage() {
     });
   }, [chores, filters]);
 
-  const sorted = [...filtered].sort((a, b) => a.name.localeCompare(b.name));
+  const sorted = [...filtered].sort(compareChoresByNextDue);
 
   const scheduleTypes = [...new Set(chores.map(c => c.schedule_type))].sort();
   const assignmentTypes = [...new Set(chores.map(c => c.assignment_type))].sort();
