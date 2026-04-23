@@ -1,11 +1,13 @@
 import React, { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getChores, getPeople, getPointsSummary, completeChore, skipChore, reassignChore } from "../api/client";
+import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { getChores, getPeople, getPointsSummary } from "../api/client";
 import UserCard from "../components/UserCard";
 import ChoreRowActions from "../components/ChoreRowActions";
 import "./Dashboard.css";
 
-export default function Dashboard({ onSelectUser }) {
+export default function Dashboard() {
+  const navigate = useNavigate();
   const { data: chores = [], isLoading } = useQuery({
     queryKey: ["chores"],
     queryFn: getChores,
@@ -48,7 +50,7 @@ export default function Dashboard({ onSelectUser }) {
         {people.map((person) => (
           <div
             key={person.name}
-            onClick={() => onSelectUser?.(person.name)}
+            onClick={() => navigate(`/users/${encodeURIComponent(person.name)}`)}
             style={{ cursor: "pointer" }}
           >
             <UserCard

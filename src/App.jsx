@@ -29,7 +29,6 @@ function AppContent() {
     const saved = localStorage.getItem("sidebarOpen");
     return saved === null ? true : saved === "true";
   });
-  const [selectedUser, setSelectedUser] = useState(null);
   const [appTitle, setAppTitle] = useState("Family Chores");
   const [navVisible, setNavVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -137,22 +136,15 @@ function AppContent() {
       <div className={`sidebar-backdrop ${sidebarOpen ? "open" : ""}`} onClick={() => setSidebarOpen(false)}></div>
       <div className="app-content">
         <main className="app-main">
-          {selectedUser && (
-            <UserDetail
-              userName={selectedUser}
-              onBack={() => setSelectedUser(null)}
-            />
-          )}
-          {!selectedUser && (
-            <Routes>
-              <Route path="/" element={<Dashboard onSelectUser={setSelectedUser} />} />
-              <Route path="/chores" element={<Manage />} />
-              <Route path="/users" element={<UserManagement />} />
-              <Route path="/log" element={<Log />} />
-              <Route path="/settings" element={<Settings onTitleUpdate={(newTitle) => setAppTitle(newTitle)} />} />
-              <Route path="/admin" element={<AdminPanel />} />
-            </Routes>
-          )}
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/chores" element={<Manage />} />
+            <Route path="/users" element={<UserManagement />} />
+            <Route path="/users/:userName" element={<UserDetail />} />
+            <Route path="/log" element={<Log />} />
+            <Route path="/settings" element={<Settings onTitleUpdate={(newTitle) => setAppTitle(newTitle)} />} />
+            <Route path="/admin" element={<AdminPanel />} />
+          </Routes>
         </main>
       </div>
     </div>

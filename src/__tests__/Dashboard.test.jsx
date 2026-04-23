@@ -2,6 +2,7 @@ import React from "react";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { MemoryRouter, Routes, Route, useLocation } from "react-router-dom";
 import Dashboard from "../pages/Dashboard";
 import * as client from "../api/client";
 
@@ -45,7 +46,16 @@ const SUMMARY = [
 
 function wrap(ui) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>);
+  return render(
+    <QueryClientProvider client={qc}>
+      <MemoryRouter initialEntries={["/"]}>{ui}</MemoryRouter>
+    </QueryClientProvider>
+  );
+}
+
+function LocationDisplay() {
+  const location = useLocation();
+  return <div data-testid="location">{location.pathname}</div>;
 }
 
 describe("Dashboard", () => {
@@ -90,14 +100,28 @@ describe("Dashboard", () => {
     );
   });
 
-  it("calls onSelectUser when clicking a user card", async () => {
-    const onSelectUser = vi.fn();
-    wrap(<Dashboard onSelectUser={onSelectUser} />);
+  it("navigates to the user detail route when clicking a user card", async () => {
+    wrap(
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <>
+              <Dashboard />
+              <LocationDisplay />
+            </>
+          }
+        />
+        <Route path="/users/:userName" element={<LocationDisplay />} />
+      </Routes>
+    );
     await waitFor(() => expect(screen.getByText("Alice", { selector: ".uc-name" })).toBeInTheDocument());
 
     const aliceCard = screen.getByText("Alice", { selector: ".uc-name" }).closest(".user-card");
     fireEvent.click(aliceCard);
 
-    expect(onSelectUser).toHaveBeenCalledWith("Alice");
+    await waitFor(() => {
+      expect(screen.getByTestId("location")).toHaveTextContent("/users/Alice");
+    });
   });
 });

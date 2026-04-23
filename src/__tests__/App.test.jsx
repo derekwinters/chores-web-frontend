@@ -52,6 +52,7 @@ describe("App", () => {
   beforeEach(() => {
     vi.resetAllMocks();
     localStorage.clear();
+    window.history.pushState({}, "", "/");
     // Mock API calls
     client.getChores.mockResolvedValue([]);
     client.getPeople.mockResolvedValue([
@@ -147,6 +148,33 @@ describe("App", () => {
     fireEvent.click(usersLink);
     await waitFor(() => {
       expect(screen.getByText("Manage Users")).toBeInTheDocument();
+    });
+  });
+
+  it("renders the user detail route directly", async () => {
+    window.history.pushState({}, "", "/users/Alice");
+    client.getUserStats.mockResolvedValue({
+      name: "Alice",
+      total_points: 10,
+      points_7d: 4,
+      points_30d: 10,
+      completed_count: 2,
+      skipped_count: 1,
+    });
+    client.getLog.mockResolvedValue([
+      {
+        id: 1,
+        chore_id: 1,
+        chore_name: "Vacuum",
+        action: "completed",
+        timestamp: "2026-04-20T10:00:00Z",
+      },
+    ]);
+
+    wrap(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Alice", { selector: "h1" })).toBeInTheDocument();
     });
   });
 

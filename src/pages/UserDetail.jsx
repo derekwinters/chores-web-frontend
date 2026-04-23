@@ -1,24 +1,32 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate, useParams } from "react-router-dom";
 import { getLog, getUserStats } from "../api/client";
 import "./UserDetail.css";
 
-export default function UserDetail({ userName, onBack }) {
+const USER_ACTIVITY_ACTIONS = ["completed", "skipped", "reassigned"];
+
+export default function UserDetail() {
+  const { userName = "" } = useParams();
+  const navigate = useNavigate();
+
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["user-stats", userName],
     queryFn: () => getUserStats(userName),
+    enabled: Boolean(userName),
   });
 
   const { data: history = [], isLoading: historyLoading } = useQuery({
-    queryKey: ["log", { person: userName }],
-    queryFn: () => getLog({ person: userName }),
+    queryKey: ["log", { person: userName, actions: USER_ACTIVITY_ACTIONS }],
+    queryFn: () => getLog({ person: userName, actions: USER_ACTIVITY_ACTIONS }),
+    enabled: Boolean(userName),
   });
 
   if (statsLoading || historyLoading) return <div className="loading">Loading…</div>;
 
   return (
     <div className="user-detail">
-      <button className="back-btn" onClick={onBack} aria-label="Back">
+      <button className="back-btn" onClick={() => navigate(-1)} aria-label="Back">
         ← Back
       </button>
 
