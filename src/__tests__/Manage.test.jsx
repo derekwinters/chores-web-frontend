@@ -44,6 +44,23 @@ const CHORES = [
     age: 0,
   },
   {
+    id: "countertops",
+    unique_id: "countertops",
+    name: "Countertops",
+    state: "due",
+    disabled: false,
+    assignment_type: "fixed",
+    current_assignee: "Bob",
+    schedule_type: "weekly",
+    schedule_config: { days: [3] },
+    schedule_summary: "Weekly on Thu",
+    eligible_people: [],
+    assignee: "Bob",
+    points: 2,
+    next_due: "2024-01-16",
+    age: 0,
+  },
+  {
     id: "dishes",
     unique_id: "dishes",
     name: "Dishes",
@@ -113,6 +130,7 @@ describe("Manage page", () => {
     await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
     expect(screen.getByText("Dishes")).toBeInTheDocument();
     expect(screen.getByText("Bathroom")).toBeInTheDocument();
+    expect(screen.getByText("Countertops")).toBeInTheDocument();
     expect(screen.getByText("Laundry")).toBeInTheDocument();
   });
 
@@ -127,6 +145,8 @@ describe("Manage page", () => {
     await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
     // ChoreList renders assignment_type info for each chore
     expect(screen.getByText("rotating")).toBeInTheDocument();
+    expect(screen.getAllByText("Bob").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Unassigned").length).toBeGreaterThan(0);
   });
 
   it("shows Add Chore button", async () => {
@@ -208,7 +228,7 @@ describe("Manage page", () => {
 
     await waitFor(() => expect(screen.getByText("Dishes")).toBeInTheDocument());
     expect(screen.queryByText("Vacuum")).not.toBeInTheDocument();
-    expect(screen.getByText("Showing 1 of 4 chores")).toBeInTheDocument();
+    expect(screen.getByText("Showing 1 of 5 chores")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /show filters/i }));
     expect(screen.getByLabelText("State")).toHaveValue("complete");
@@ -238,6 +258,47 @@ describe("Manage page", () => {
     expect(screen.getByTestId("location")).toHaveTextContent("/chores");
   });
 
+  it("hydrates assignee filter from URL params on initial render", async () => {
+    wrap(<Manage />, { initialEntries: ["/chores?assignee=Bob"] });
+
+    await waitFor(() => expect(screen.getByText("Countertops")).toBeInTheDocument());
+    expect(screen.queryByText("Vacuum")).not.toBeInTheDocument();
+    expect(screen.queryByText("Bathroom")).not.toBeInTheDocument();
+    expect(screen.queryByText("Dishes")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /show filters/i }));
+    expect(screen.getByLabelText("Assignee")).toHaveValue("Bob");
+    expect(screen.getByTestId("location")).toHaveTextContent("/chores?assignee=Bob");
+  });
+
+  it("updates URL params when assignee filter changes", async () => {
+    wrap(<Manage />);
+
+    await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
+    fireEvent.click(screen.getByRole("button", { name: /show filters/i }));
+    fireEvent.change(screen.getByLabelText("Assignee"), { target: { value: "Alice" } });
+
+    await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
+    expect(screen.queryByText("Bathroom")).not.toBeInTheDocument();
+    expect(screen.queryByText("Countertops")).not.toBeInTheDocument();
+    expect(screen.queryByText("Dishes")).not.toBeInTheDocument();
+    expect(screen.queryByText("Laundry")).not.toBeInTheDocument();
+    expect(screen.getByTestId("location")).toHaveTextContent("/chores?assignee=Alice");
+  });
+
+  it("filters chores by unassigned assignee", async () => {
+    wrap(<Manage />, { initialEntries: ["/chores?assignee=unassigned"] });
+
+    await waitFor(() => expect(screen.getByText("Bathroom")).toBeInTheDocument());
+    expect(screen.getByText("Dishes")).toBeInTheDocument();
+    expect(screen.queryByText("Vacuum")).not.toBeInTheDocument();
+    expect(screen.queryByText("Countertops")).not.toBeInTheDocument();
+    expect(screen.queryByText("Laundry")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /show filters/i }));
+    expect(screen.getByLabelText("Assignee")).toHaveValue("unassigned");
+  });
+
   it("sorts chores by next due date with name tiebreakers and no-date chores last", async () => {
     wrap(<Manage />);
 
@@ -247,7 +308,7 @@ describe("Manage page", () => {
       .getAllByRole("heading", { level: 3 })
       .map((heading) => heading.textContent);
 
-    expect(choreNames).toEqual(["Bathroom", "Vacuum", "Dishes", "Laundry"]);
+    expect(choreNames).toEqual(["Bathroom", "Vacuum", "Countertops", "Dishes", "Laundry"]);
   });
 
   it("preserves due-date ordering after filters are applied", async () => {

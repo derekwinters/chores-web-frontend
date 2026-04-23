@@ -6,6 +6,11 @@ import { getChores, getPeople, createChore, updateChore, deleteChore } from "../
 import ChoreForm from "../components/ChoreForm";
 import ChoreList from "../components/ChoreList";
 import Modal from "../components/Modal";
+import {
+  getChoreAssigneeName,
+  UNASSIGNED_FILTER_VALUE,
+  UNASSIGNED_LABEL,
+} from "../utils/choreAssignee";
 import { compareChoresByNextDue } from "../utils/choreSort";
 import "./Manage.css";
 
@@ -15,12 +20,14 @@ function getFiltersFromSearchParams(searchParams) {
   const assignmentType = searchParams.get("assignment_type");
   const state = searchParams.get("state");
   const disabled = searchParams.get("disabled");
+  const assignee = searchParams.get("assignee");
 
   if (scheduleType) filters.schedule_type = scheduleType;
   if (assignmentType) filters.assignment_type = assignmentType;
   if (state) filters.state = state;
   if (disabled === "true") filters.disabled = true;
   if (disabled === "false") filters.disabled = false;
+  if (assignee) filters.assignee = assignee;
 
   return filters;
 }
@@ -85,6 +92,11 @@ export default function Manage() {
       if (filters.assignment_type && chore.assignment_type !== filters.assignment_type) return false;
       if (filters.state && chore.state !== filters.state) return false;
       if (filters.disabled !== undefined && chore.disabled !== filters.disabled) return false;
+      if (filters.assignee) {
+        const assignee = getChoreAssigneeName(chore);
+        if (filters.assignee === UNASSIGNED_FILTER_VALUE) return assignee === null;
+        if (assignee !== filters.assignee) return false;
+      }
       return true;
     });
   }, [chores, filters]);
@@ -93,6 +105,7 @@ export default function Manage() {
 
   const scheduleTypes = [...new Set(chores.map(c => c.schedule_type))].sort();
   const assignmentTypes = [...new Set(chores.map(c => c.assignment_type))].sort();
+  const assignees = [...new Set(chores.map(getChoreAssigneeName).filter(Boolean))].sort();
   const states = [...new Set(chores.map(c => c.state))].sort();
 
   return (
@@ -154,6 +167,23 @@ export default function Manage() {
                       {type}
                     </option>
                   ))}
+                </select>
+              </div>
+
+              <div className="filter-group">
+                <label htmlFor="filter-assignee">Assignee</label>
+                <select
+                  id="filter-assignee"
+                  value={filters.assignee || ""}
+                  onChange={(e) => handleFilterChange("assignee", e.target.value)}
+                >
+                  <option value="">All assignees</option>
+                  {assignees.map((assignee) => (
+                    <option key={assignee} value={assignee}>
+                      {assignee}
+                    </option>
+                  ))}
+                  <option value={UNASSIGNED_FILTER_VALUE}>{UNASSIGNED_LABEL}</option>
                 </select>
               </div>
 

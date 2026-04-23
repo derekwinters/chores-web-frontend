@@ -202,29 +202,70 @@
   word-break: break-word;
 }
 
-.assignment-info {
+.points-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  width: fit-content;
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(115, 177, 221, 0.12);
+  color: var(--text);
+}
+
+.points-value {
+  font-weight: 600;
+  line-height: 1;
+}
+
+.points-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+.assignment-row {
   display: flex;
   gap: 0.5rem;
   align-items: center;
   flex-wrap: wrap;
 }
 
+.assignment-info {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  width: fit-content;
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+}
+
+.assignment-icon {
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
 .assignment-type {
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: capitalize;
 }
 
-.assignment-type.rotating {
+.assignment-info.rotating {
   background: rgba(115, 177, 221, 0.15);
   color: var(--accent);
 }
 
-.assignment-type.open {
+.assignment-info.open {
   background: rgba(232, 169, 48, 0.15);
   color: var(--warning);
+}
+
+.assignment-info.fixed {
+  background: rgba(61, 184, 122, 0.15);
+  color: var(--success);
 }
 
 .assignee-name {

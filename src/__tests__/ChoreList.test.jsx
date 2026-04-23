@@ -55,6 +55,7 @@ const CHORES = [
     current_assignee: "Alice",
     schedule_summary: "Every week",
     assignment_type: "fixed",
+    assignee: "Alice",
     next_due: null,
   },
 ];
@@ -99,6 +100,7 @@ describe("ChoreList", () => {
       expect(screen.getByText("Vacuum")).toBeInTheDocument();
       expect(screen.getByText("5")).toBeInTheDocument();
       expect(screen.getAllByText("Alice").length).toBeGreaterThan(0);
+      expect(screen.getByText("Unassigned")).toBeInTheDocument();
     });
   });
 
@@ -114,8 +116,10 @@ describe("ChoreList", () => {
   it("shows assignment info for chores", async () => {
     wrap(<ChoreList />);
     await waitFor(() => {
-      // current_assignee names appear in the assignment info
+      // Assignment labels cover fixed, rotating, and open chores
       expect(screen.getAllByText("Alice").length).toBeGreaterThan(0);
+      expect(screen.getByText("Bob")).toBeInTheDocument();
+      expect(screen.getByText("Unassigned")).toBeInTheDocument();
     });
   });
 
