@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { MdFilterList } from "react-icons/md";
 import { getLog, getPeople, getChores } from "../api/client";
@@ -9,9 +10,26 @@ const ACTIONS = ["completed", "skipped", "reassigned", "created", "deleted", "up
 const PAGE_SIZE = 20;
 
 export default function Log() {
-  const [filters, setFilters] = useState({});
+  const [searchParams, setSearchParams] = useSearchParams();
   const [filtersExpanded, setFiltersExpanded] = useState(false);
   const [page, setPage] = useState(0);
+
+  const filters = (() => {
+    const f = {};
+    const person = searchParams.get("person");
+    const chore_id = searchParams.get("chore_id");
+    const action = searchParams.get("action");
+    const start_date = searchParams.get("start_date");
+    const end_date = searchParams.get("end_date");
+
+    if (person) f.person = person;
+    if (chore_id && /^\d+$/.test(chore_id)) f.chore_id = chore_id;
+    if (action) f.action = action;
+    if (start_date && /^\d{4}-\d{2}-\d{2}$/.test(start_date)) f.start_date = start_date;
+    if (end_date && /^\d{4}-\d{2}-\d{2}$/.test(end_date)) f.end_date = end_date;
+
+    return f;
+  })();
 
   const { data: logEntries = [], isLoading: logLoading } = useQuery({
     queryKey: ["log", filters],
@@ -29,15 +47,20 @@ export default function Log() {
   });
 
   const handleFilterChange = useCallback((key, value) => {
-    setFilters((prev) => ({
-      ...prev,
-      [key]: value || undefined,
-    }));
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (value) {
+        next.set(key, value);
+      } else {
+        next.delete(key);
+      }
+      return next;
+    });
     setPage(0);
-  }, []);
+  }, [setSearchParams]);
 
   const handleClearFilters = () => {
-    setFilters({});
+    setSearchParams({});
     setPage(0);
   };
 
@@ -66,7 +89,7 @@ export default function Log() {
           <label htmlFor="filter-person">Filter by person</label>
           <select
             id="filter-person"
-            value={filters.person || ""}
+            value={searchParams.get("person") || ""}
             onChange={(e) => handleFilterChange("person", e.target.value)}
           >
             <option value="">All people</option>
@@ -83,7 +106,7 @@ export default function Log() {
           <label htmlFor="filter-chore">Filter by chore</label>
           <select
             id="filter-chore"
-            value={filters.chore_id || ""}
+            value={searchParams.get("chore_id") || ""}
             onChange={(e) => handleFilterChange("chore_id", e.target.value)}
           >
             <option value="">All chores</option>
@@ -99,7 +122,7 @@ export default function Log() {
           <label htmlFor="filter-action">Filter by action</label>
           <select
             id="filter-action"
-            value={filters.action || ""}
+            value={searchParams.get("action") || ""}
             onChange={(e) => handleFilterChange("action", e.target.value)}
           >
             <option value="">All actions</option>
@@ -116,7 +139,7 @@ export default function Log() {
           <input
             id="filter-start-date"
             type="date"
-            value={filters.start_date || ""}
+            value={searchParams.get("start_date") || ""}
             onChange={(e) => handleFilterChange("start_date", e.target.value)}
           />
         </div>
@@ -126,7 +149,7 @@ export default function Log() {
           <input
             id="filter-end-date"
             type="date"
-            value={filters.end_date || ""}
+            value={searchParams.get("end_date") || ""}
             onChange={(e) => handleFilterChange("end_date", e.target.value)}
           />
         </div>

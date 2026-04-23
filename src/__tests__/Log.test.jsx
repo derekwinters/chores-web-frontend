@@ -2,6 +2,7 @@ import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { MemoryRouter } from "react-router-dom";
 import Log from "../components/Log";
 import * as client from "../api/client";
 
@@ -10,7 +11,7 @@ vi.mock("../api/client");
 const LOG_ENTRIES = [
   {
     id: 1,
-    chore_id: "vacuum",
+    chore_id: "1",
     chore_name: "Vacuum",
     person: "Alice",
     action: "completed",
@@ -18,7 +19,7 @@ const LOG_ENTRIES = [
   },
   {
     id: 2,
-    chore_id: "trash",
+    chore_id: "2",
     chore_name: "Take out trash",
     person: "Bob",
     action: "skipped",
@@ -26,7 +27,7 @@ const LOG_ENTRIES = [
   },
   {
     id: 3,
-    chore_id: "vacuum",
+    chore_id: "1",
     chore_name: "Vacuum",
     person: "Alice",
     action: "reassigned",
@@ -41,13 +42,17 @@ const PEOPLE = [
 ];
 
 const CHORES = [
-  { id: "vacuum", unique_id: "vacuum", name: "Vacuum", disabled: false },
-  { id: "trash", unique_id: "trash", name: "Take out trash", disabled: false },
+  { id: 1, unique_id: "vacuum", name: "Vacuum", disabled: false },
+  { id: 2, unique_id: "trash", name: "Take out trash", disabled: false },
 ];
 
-function wrap(ui) {
+function wrap(ui, { initialEntries = ["/log"] } = {}) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>);
+  return render(
+    <MemoryRouter initialEntries={initialEntries}>
+      <QueryClientProvider client={qc}>{ui}</QueryClientProvider>
+    </MemoryRouter>
+  );
 }
 
 describe("Log", () => {
@@ -101,10 +106,10 @@ describe("Log", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /show filters/i }));
     const choreFilter = screen.getByLabelText(/filter by chore/i);
-    fireEvent.change(choreFilter, { target: { value: "vacuum" } });
+    fireEvent.change(choreFilter, { target: { value: "1" } });
 
     await waitFor(() => {
-      expect(client.getLog).toHaveBeenCalledWith(expect.objectContaining({ chore_id: "vacuum" }));
+      expect(client.getLog).toHaveBeenCalledWith(expect.objectContaining({ chore_id: "1" }));
     });
   });
 
@@ -157,13 +162,13 @@ describe("Log", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /show filters/i }));
     fireEvent.change(screen.getByLabelText(/filter by person/i), { target: { value: "Alice" } });
-    fireEvent.change(screen.getByLabelText(/filter by chore/i), { target: { value: "vacuum" } });
+    fireEvent.change(screen.getByLabelText(/filter by chore/i), { target: { value: "1" } });
 
     await waitFor(() => {
       expect(client.getLog).toHaveBeenCalledWith(
         expect.objectContaining({
           person: "Alice",
-          chore_id: "vacuum",
+          chore_id: "1",
         })
       );
     });
@@ -190,6 +195,73 @@ describe("Log", () => {
     wrap(<Log />);
     await waitFor(() => {
       expect(screen.getByText(/no log entries/i)).toBeInTheDocument();
+    });
+  });
+
+  it("initializes filters from URL params", async () => {
+    wrap(<Log />, { initialEntries: ["/log?person=Alice&action=completed"] });
+    await waitFor(() => {
+      expect(client.getLog).toHaveBeenCalledWith(
+        expect.objectContaining({
+          person: "Alice",
+          action: "completed",
+        })
+      );
+    });
+  });
+
+  it("ignores invalid chore_id (non-numeric)", async () => {
+    wrap(<Log />, { initialEntries: ["/log?chore_id=invalid&person=Alice"] });
+    await waitFor(() => {
+      expect(client.getLog).toHaveBeenCalledWith({
+        person: "Alice",
+      });
+    });
+  });
+
+  it("ignores invalid date format", async () => {
+    wrap(<Log />, { initialEntries: ["/log?start_date=invalid-date&action=completed"] });
+    await waitFor(() => {
+      expect(client.getLog).toHaveBeenCalledWith({
+        action: "completed",
+      });
+    });
+  });
+
+  it("updates URL when filter changes", async () => {
+    wrap(<Log />);
+    await waitFor(() => {
+      const alices = screen.queryAllByText("Alice");
+      expect(alices.length).toBeGreaterThan(0);
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /show filters/i }));
+    const personFilter = screen.getByLabelText(/filter by person/i);
+    fireEvent.change(personFilter, { target: { value: "Alice" } });
+
+    await waitFor(() => {
+      const personSelect = screen.getByLabelText(/filter by person/i);
+      expect(personSelect.value).toBe("Alice");
+      expect(client.getLog).toHaveBeenCalledWith(
+        expect.objectContaining({ person: "Alice" })
+      );
+    });
+  });
+
+  it("clears URL params when clear filters is clicked", async () => {
+    wrap(<Log />, { initialEntries: ["/log?person=Alice&action=completed"] });
+    await waitFor(() => {
+      const alices = screen.queryAllByText("Alice");
+      expect(alices.length).toBeGreaterThan(0);
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /show filters/i }));
+    fireEvent.click(screen.getByRole("button", { name: /clear filters/i }));
+
+    await waitFor(() => {
+      const personSelect = screen.getByLabelText(/filter by person/i);
+      expect(personSelect.value).toBe("");
+      expect(client.getLog).toHaveBeenCalledWith({});
     });
   });
 });
