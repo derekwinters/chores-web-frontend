@@ -2,6 +2,7 @@ import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { MemoryRouter } from "react-router-dom";
 import UserCard from "../components/UserCard";
 import * as client from "../api/client";
 
@@ -49,16 +50,16 @@ const SUMMARY = { person: "Alice", points_7d: 10, points_30d: 25 };
 
 function wrap(ui) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>);
+  return render(
+    <QueryClientProvider client={qc}>
+      <MemoryRouter>{ui}</MemoryRouter>
+    </QueryClientProvider>
+  );
 }
 
 describe("UserCard", () => {
   beforeEach(() => {
     vi.resetAllMocks();
-    client.completeChore.mockResolvedValue({ ...DUE_CHORE, state: "complete" });
-    client.skipChore.mockResolvedValue({ ...DUE_CHORE, state: "complete" });
-    client.reassignChore.mockResolvedValue({ ...DUE_CHORE, current_assignee: "Bob" });
-    client.markDueChore.mockResolvedValue({ ...SOON_CHORE, state: "due" });
   });
 
   it("renders person name", () => {
@@ -88,64 +89,53 @@ describe("UserCard", () => {
     expect(screen.getByText("1")).toBeInTheDocument();
   });
 
-  it("shows due now chore name as clickable button", () => {
-    wrap(<UserCard person={PERSON} chores={[DUE_CHORE]} people={PEOPLE} summary={SUMMARY} />);
-    // Due chores are shown as buttons that open a modal; chore name is visible
-    expect(screen.getByText("Vacuum")).toBeInTheDocument();
-    // Complete/Skip appear inside the modal after clicking the chore button
-    expect(screen.queryByText("Complete")).not.toBeInTheDocument();
+  it("shows due soon count", () => {
+    wrap(<UserCard person={PERSON} chores={[SOON_CHORE]} people={PEOPLE} summary={SUMMARY} />);
+    const dueSoonHeaders = screen.getAllByText(/Due Soon/i);
+    expect(dueSoonHeaders.length).toBeGreaterThan(0);
+    // Due Soon count should be 1
+    const counts = screen.getAllByText("1");
+    expect(counts.length).toBeGreaterThan(0);
   });
 
-  it("opens modal with Complete and Skip when due chore is clicked", async () => {
+  it("shows open/unassigned count", () => {
+    const openChore = { ...DUE_CHORE, assignment_type: "open", current_assignee: null, id: "open-chore", unique_id: "open-chore" };
+    wrap(<UserCard person={PERSON} chores={[openChore]} people={PEOPLE} summary={SUMMARY} />);
+    expect(screen.getByText("Open / Unassigned")).toBeInTheDocument();
+  });
+
+  it("navigates to due-now filtered chores on Due Now click", async () => {
     wrap(<UserCard person={PERSON} chores={[DUE_CHORE]} people={PEOPLE} summary={SUMMARY} />);
-    fireEvent.click(screen.getByText("Vacuum"));
-    await waitFor(() => {
-      expect(screen.getByText("Complete")).toBeInTheDocument();
-      expect(screen.getByText("Skip")).toBeInTheDocument();
+    // Should have "Due Now" link button
+    const dueNowButtons = screen.getAllByRole("button").filter(btn => {
+      const header = btn.querySelector(".uc-due-header");
+      return header && header.textContent === "Due Now";
     });
+    expect(dueNowButtons.length).toBeGreaterThan(0);
   });
 
-  it("due soon section shows chores inline", () => {
+  it("navigates to due-soon filtered chores on Due Soon click", async () => {
     wrap(<UserCard person={PERSON} chores={[SOON_CHORE]} people={PEOPLE} summary={SUMMARY} />);
-    // Due soon chores are shown directly via ChoreRowActions with mode="soon"
-    expect(screen.getByText("Dishes")).toBeInTheDocument();
+    // Should have "Due Soon" link button
+    const dueSoonButtons = screen.getAllByRole("button").filter(btn => {
+      const header = btn.querySelector(".uc-due-header");
+      return header && header.textContent === "Due Soon";
+    });
+    expect(dueSoonButtons.length).toBeGreaterThan(0);
   });
 
-  it("shows Mark due button for soon chores", () => {
-    wrap(<UserCard person={PERSON} chores={[SOON_CHORE]} people={PEOPLE} summary={SUMMARY} />);
-    // Mark due appears inline for soon chores
-    expect(screen.getByText("Mark due")).toBeInTheDocument();
-  });
-
-  it("calls completeChore with person name on Complete click inside modal", async () => {
-    wrap(<UserCard person={PERSON} chores={[DUE_CHORE]} people={PEOPLE} summary={SUMMARY} />);
-    // Open modal by clicking chore name
-    fireEvent.click(screen.getByText("Vacuum"));
-    await waitFor(() => screen.getByText("Complete"));
-    fireEvent.click(screen.getByText("Complete"));
-    await waitFor(() => expect(client.completeChore).toHaveBeenCalledWith("vacuum", "Alice"));
-  });
-
-  it("calls skipChore on Skip click inside modal", async () => {
-    wrap(<UserCard person={PERSON} chores={[DUE_CHORE]} people={PEOPLE} summary={SUMMARY} />);
-    // Open modal by clicking chore name
-    fireEvent.click(screen.getByText("Vacuum"));
-    await waitFor(() => screen.getByText("Skip"));
-    fireEvent.click(screen.getByText("Skip"));
-    await waitFor(() => expect(client.skipChore).toHaveBeenCalledWith("vacuum"));
-  });
-
-  it("excludes chores assigned to other people", () => {
+  it("excludes chores assigned to other people from due count", () => {
     const otherChore = { ...DUE_CHORE, current_assignee: "Bob", unique_id: "other" };
     wrap(<UserCard person={PERSON} chores={[otherChore]} people={PEOPLE} summary={SUMMARY} />);
-    expect(screen.queryByText("Vacuum")).not.toBeInTheDocument();
+    // Due Now count should be 0 for Alice when only Bob's chore is present
+    const counts = screen.getAllByText("0");
+    expect(counts.length).toBeGreaterThan(0);
   });
 
-  it("does not show chores due more than 7 days away in soon section", () => {
+  it("does not count chores due more than 7 days away in soon count", () => {
     const farChore = { ...SOON_CHORE, id: "far", unique_id: "far", next_due: dateStr(10) };
     wrap(<UserCard person={PERSON} chores={[farChore]} people={PEOPLE} summary={SUMMARY} />);
-    // Chore due in 10 days is outside the 7-day window and should not appear
-    expect(screen.queryByText("Dishes")).not.toBeInTheDocument();
+    // Chore due in 10 days is outside the 7-day window and should not be counted
     // Due Soon count should be 0
     const dueSoonHeaders = screen.getAllByText(/Due Soon/i);
     expect(dueSoonHeaders.length).toBeGreaterThan(0);

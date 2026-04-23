@@ -88,6 +88,21 @@
   gap: 0.35rem;
 }
 
+.uc-due-link {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.uc-due-link:hover {
+  background-color: var(--surface2);
+  transform: scale(1.02);
+}
+
 .uc-due-header {
   font-size: 0.7rem;
   font-weight: 600;
@@ -124,6 +139,37 @@
 
 .uc-chore-link:hover {
   background-color: var(--surface2);
+}
+
+.uc-workload {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem;
+  background-color: var(--surface2);
+  border-radius: 4px;
+}
+
+.uc-workload-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+}
+
+.uc-workload-count {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--accent);
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.uc-workload-count:hover {
+  opacity: 0.8;
 }
 
 @media (max-width: 640px) {

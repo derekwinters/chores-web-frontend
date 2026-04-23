@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { getChores, getPeople, getPointsSummary } from "../api/client";
 import UserCard from "../components/UserCard";
-import ChoreRowActions from "../components/ChoreRowActions";
 import "./Dashboard.css";
 
 export default function Dashboard() {
@@ -27,9 +26,9 @@ export default function Dashboard() {
 
   const summaryByPerson = Object.fromEntries(summary.map((s) => [s.person, s]));
 
-  const openDue = chores
-    .filter((c) => c.state === "due" && c.assignment_type === "open" && !c.disabled)
-    .sort((a, b) => (b.age ?? -999) - (a.age ?? -999));
+  const openDueCount = chores.filter(
+    (c) => c.state === "due" && c.assignment_type === "open" && !c.disabled
+  ).length;
 
   if (isLoading) return <div className="loading">Loading…</div>;
 
@@ -63,20 +62,15 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {openDue.length > 0 && (
+      {openDueCount > 0 && (
         <section className="open-section">
-          <h3 className="open-section-title">Open / Unassigned</h3>
-          <div className="open-chore-list">
-            {openDue.map((chore) => (
-              <ChoreRowActions
-                key={chore.id}
-                chore={chore}
-                person={null}
-                people={people}
-                mode="due"
-              />
-            ))}
-          </div>
+          <button
+            className="open-section-link"
+            onClick={() => navigate(`/chores?state=due&assignment_type=open`)}
+          >
+            <h3 className="open-section-title">Open / Unassigned</h3>
+            <div className="open-section-count">{openDueCount}</div>
+          </button>
         </section>
       )}
     </div>

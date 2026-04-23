@@ -1,8 +1,7 @@
 import React from "react";
-import ChoreRowActions from "./ChoreRowActions";
+import { useNavigate } from "react-router-dom";
 import Avatar from "./Avatar";
 import ProgressBar from "./ProgressBar";
-import Modal from "./Modal";
 import { getPersonColor } from "../utils/personColors";
 import { getTrendStatus, getTrendColor } from "../utils/trendStatus";
 import "./UserCard.css";
@@ -17,7 +16,7 @@ function daysUntil(dateStr) {
 }
 
 export default function UserCard({ person, chores, people, summary }) {
-  const [selectedChore, setSelectedChore] = React.useState(null);
+  const navigate = useNavigate();
   const color = person.color || getPersonColor(person.name);
   const goal7d = person.goal_7d ?? 12;
   const goal30d = person.goal_30d ?? 50;
@@ -34,7 +33,7 @@ export default function UserCard({ person, chores, people, summary }) {
       if (c.assignment_type === "fixed") return c.assignee === person.name;
       return c.current_assignee === person.name;
     })
-    .sort((a, b) => (b.age ?? -999) - (a.age ?? -999));
+    .length;
 
   const dueSoon = chores
     .filter((c) => {
@@ -42,7 +41,11 @@ export default function UserCard({ person, chores, people, summary }) {
       const d = daysUntil(c.next_due);
       return d >= 0 && d <= DUE_SOON_DAYS;
     })
-    .sort((a, b) => daysUntil(a.next_due) - daysUntil(b.next_due));
+    .length;
+
+  const openUnassigned = chores
+    .filter((c) => c.state === "due" && c.assignment_type === "open" && !c.disabled)
+    .length;
 
   return (
     <div className="user-card">
@@ -71,52 +74,41 @@ export default function UserCard({ person, chores, people, summary }) {
       <div className="uc-divider" />
 
       <div className="uc-due-grid">
-        <div className="uc-due-col">
+        <button
+          className="uc-due-col uc-due-link"
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/chores?state=due&assignee=${encodeURIComponent(person.name)}`);
+          }}
+        >
           <div className="uc-due-header">Due Now</div>
-          <div className="uc-due-count">{dueNow.length}</div>
-          <div className="uc-due-list">
-            {dueNow.map((chore) => (
-              <button
-                key={chore.id}
-                className="uc-chore-link"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelectedChore(chore);
-                }}
-              >
-                {chore.name}
-              </button>
-            ))}
-          </div>
-        </div>
+          <div className="uc-due-count">{dueNow}</div>
+        </button>
 
-        <div className="uc-due-col">
+        <button
+          className="uc-due-col uc-due-link"
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/chores?state=complete&assignee=${encodeURIComponent(person.name)}`);
+          }}
+        >
           <div className="uc-due-header">Due Soon</div>
-          <div className="uc-due-count">{dueSoon.length}</div>
-          <div className="uc-due-list">
-            {dueSoon.map((chore) => (
-              <ChoreRowActions
-                key={chore.id}
-                chore={chore}
-                person={person.name}
-                people={people}
-                mode="soon"
-              />
-            ))}
-          </div>
-        </div>
+          <div className="uc-due-count">{dueSoon}</div>
+        </button>
       </div>
 
-      {selectedChore && (
-        <Modal title={selectedChore.name} onClose={() => setSelectedChore(null)}>
-          <ChoreRowActions
-            chore={selectedChore}
-            person={person.name}
-            people={people}
-            mode="due"
-          />
-        </Modal>
-      )}
+      <div className="uc-workload">
+        <div className="uc-workload-label">Open / Unassigned</div>
+        <button
+          className="uc-workload-count"
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/chores?state=due&assignment_type=open`);
+          }}
+        >
+          {openUnassigned}
+        </button>
+      </div>
     </div>
   );
 }

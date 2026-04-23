@@ -80,15 +80,17 @@ describe("Dashboard", () => {
 
   it("shows Open section for unassigned due chores", async () => {
     wrap(<Dashboard />);
-    await waitFor(() => expect(screen.getByText("Open / Unassigned")).toBeInTheDocument());
-    expect(screen.getByText("Take out trash")).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText("Alice", { selector: ".uc-name" })).toBeInTheDocument());
+    // Open/Unassigned section shows a count (1 in this case) as a clickable link
+    const openTitle = screen.getByText("Open / Unassigned", { selector: ".open-section-title" });
+    expect(openTitle).toBeInTheDocument();
   });
 
   it("does not show Open section when no open chores", async () => {
     client.getChores.mockResolvedValue([CHORES[0]]);
     wrap(<Dashboard />);
     await waitFor(() => screen.getByText("Alice", { selector: ".uc-name" }));
-    expect(screen.queryByText("Open / Unassigned")).not.toBeInTheDocument();
+    expect(screen.queryByText("Open / Unassigned", { selector: ".open-section-title" })).not.toBeInTheDocument();
   });
 
   it("shows empty state when no people", async () => {
@@ -122,6 +124,34 @@ describe("Dashboard", () => {
 
     await waitFor(() => {
       expect(screen.getByTestId("location")).toHaveTextContent("/users/Alice");
+    });
+  });
+
+  it("navigates to filtered chores view when clicking Open/Unassigned button", async () => {
+    wrap(
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <>
+              <Dashboard />
+              <LocationDisplay />
+            </>
+          }
+        />
+        <Route path="/chores" element={<LocationDisplay />} />
+      </Routes>
+    );
+    await waitFor(() => {
+      const openTitle = screen.getByText("Open / Unassigned", { selector: ".open-section-title" });
+      expect(openTitle).toBeInTheDocument();
+    });
+
+    const openButton = screen.getByText("Open / Unassigned", { selector: ".open-section-title" }).closest("button");
+    fireEvent.click(openButton);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("location")).toHaveTextContent(/\/chores/);
     });
   });
 });
