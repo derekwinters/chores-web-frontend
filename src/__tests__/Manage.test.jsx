@@ -2,6 +2,7 @@ import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { MemoryRouter } from "react-router-dom";
 import Manage from "../pages/Manage";
 import * as client from "../api/client";
 
@@ -48,7 +49,11 @@ const PEOPLE = [{ id: 1, name: "Alice" }, { id: 2, name: "Bob" }];
 
 function wrap(ui) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>);
+  return render(
+    <QueryClientProvider client={qc}>
+      <MemoryRouter initialEntries={["/chores"]}>{ui}</MemoryRouter>
+    </QueryClientProvider>
+  );
 }
 
 describe("Manage page", () => {

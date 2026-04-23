@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { getChores, getPeople } from "../api/client";
 import { MdSchedule, MdPerson, MdStar, MdEdit, MdDelete, MdAccessTime } from "react-icons/md";
 import "./ChoreList.css";
@@ -13,6 +14,7 @@ const ICONS = {
 };
 
 export default function ChoreList({ onEdit, onDelete, chores: externalChores, people: externalPeople }) {
+  const navigate = useNavigate();
   const [expandedChoreId, setExpandedChoreId] = useState(null);
   const { data: queriedChores = [], isLoading: choresLoading } = useQuery({
     queryKey: ["chores"],
@@ -103,6 +105,16 @@ export default function ChoreList({ onEdit, onDelete, chores: externalChores, pe
               aria-label={`Edit ${chore.name}`}
             >
               Edit
+            </button>
+            <button
+              className="chore-action-link"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/log?chore_id=${encodeURIComponent(chore.id)}`);
+              }}
+              aria-label={`History for ${chore.name}`}
+            >
+              History
             </button>
             <button
               className="chore-action-link chore-action-delete"

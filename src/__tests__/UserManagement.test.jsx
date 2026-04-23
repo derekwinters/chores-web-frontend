@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { MemoryRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "../contexts/AuthContext";
 import UserManagement from "../components/UserManagement";
 import * as client from "../api/client";
@@ -15,14 +16,21 @@ vi.mock("../contexts/AuthContext", () => ({
 
 const PEOPLE = [
   { id: 1, name: "Alice", color: "#3B6EA0", goal_7d: 20, goal_30d: 80, is_admin: true },
-  { id: 2, name: "Bob", color: "#8B5E8A", goal_7d: 15, goal_30d: 60, is_admin: false },
+  { id: 2, name: "Bob Smith", color: "#8B5E8A", goal_7d: 15, goal_30d: 60, is_admin: false },
 ];
 
 function wrap(ui) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
-    <QueryClientProvider client={qc}>{ui}</QueryClientProvider>
+    <QueryClientProvider client={qc}>
+      <MemoryRouter initialEntries={["/"]}>{ui}</MemoryRouter>
+    </QueryClientProvider>
   );
+}
+
+function LocationDisplay() {
+  const location = useLocation();
+  return <div data-testid="location">{`${location.pathname}${location.search}`}</div>;
 }
 
 describe("UserManagement", () => {
@@ -35,7 +43,7 @@ describe("UserManagement", () => {
     wrap(<UserManagement />);
     await waitFor(() => {
       expect(screen.getByText("Alice")).toBeInTheDocument();
-      expect(screen.getByText("Bob")).toBeInTheDocument();
+      expect(screen.getByText("Bob Smith")).toBeInTheDocument();
     });
   });
 
@@ -80,6 +88,31 @@ describe("UserManagement", () => {
 
     await waitFor(() => {
       expect(client.deletePerson).toHaveBeenCalledWith(1);
+    });
+  });
+
+  it("navigates to filtered log history for a user", async () => {
+    wrap(
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <>
+              <UserManagement />
+              <LocationDisplay />
+            </>
+          }
+        />
+        <Route path="/log" element={<LocationDisplay />} />
+      </Routes>
+    );
+
+    await waitFor(() => screen.getByText("Bob Smith"));
+    const historyButtons = screen.getAllByRole("button", { name: "History" });
+    fireEvent.click(historyButtons[1]);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("location")).toHaveTextContent("/log?person=Bob%20Smith");
     });
   });
 

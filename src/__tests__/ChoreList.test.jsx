@@ -2,6 +2,7 @@ import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { MemoryRouter, Routes, Route, useLocation } from "react-router-dom";
 import ChoreList from "../components/ChoreList";
 import * as client from "../api/client";
 
@@ -41,7 +42,16 @@ const PEOPLE = [
 
 function wrap(ui) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>);
+  return render(
+    <QueryClientProvider client={qc}>
+      <MemoryRouter initialEntries={["/"]}>{ui}</MemoryRouter>
+    </QueryClientProvider>
+  );
+}
+
+function LocationDisplay() {
+  const location = useLocation();
+  return <div data-testid="location">{`${location.pathname}${location.search}`}</div>;
 }
 
 describe("ChoreList", () => {
@@ -112,5 +122,30 @@ describe("ChoreList", () => {
     const choreCard = screen.getByText("Vacuum").closest("article");
     expect(choreCard).toHaveClass("chore-card");
     expect(choreCard.querySelectorAll("button").length).toBeGreaterThan(0);
+  });
+
+  it("navigates to filtered log history for a chore", async () => {
+    wrap(
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <>
+              <ChoreList />
+              <LocationDisplay />
+            </>
+          }
+        />
+        <Route path="/log" element={<LocationDisplay />} />
+      </Routes>
+    );
+    await waitFor(() => screen.getByText("Vacuum"));
+
+    fireEvent.click(screen.getByText("Vacuum"));
+    fireEvent.click(screen.getByRole("button", { name: /history for vacuum/i }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("location")).toHaveTextContent("/log?chore_id=vacuum");
+    });
   });
 });

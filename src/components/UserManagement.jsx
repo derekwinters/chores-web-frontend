@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { MdAdd } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { getPeople, createPerson, updatePerson, deletePerson } from "../api/client";
 import "./UserManagement.css";
 
 export default function UserManagement() {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user: authUser } = useAuth();
   const { data: people = [], isLoading } = useQuery({
@@ -175,6 +177,12 @@ export default function UserManagement() {
                   onClick={() => handleOpenEditDialog(person)}
                 >
                   Edit
+                </button>
+                <button
+                  className="user-action-link"
+                  onClick={() => navigate(`/log?person=${encodeURIComponent(person.name)}`)}
+                >
+                  History
                 </button>
                 <button
                   className="user-action-link user-action-delete"
