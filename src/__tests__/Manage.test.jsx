@@ -2,7 +2,7 @@ import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, useLocation } from "react-router-dom";
 import Manage from "../pages/Manage";
 import * as client from "../api/client";
 
@@ -47,11 +47,19 @@ const CHORES = [
 
 const PEOPLE = [{ id: 1, name: "Alice" }, { id: 2, name: "Bob" }];
 
-function wrap(ui) {
+function LocationDisplay() {
+  const location = useLocation();
+  return <div data-testid="location">{location.pathname}{location.search}</div>;
+}
+
+function wrap(ui, { initialEntries = ["/chores"] } = {}) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={qc}>
-      <MemoryRouter initialEntries={["/chores"]}>{ui}</MemoryRouter>
+      <MemoryRouter initialEntries={initialEntries}>
+        {ui}
+        <LocationDisplay />
+      </MemoryRouter>
     </QueryClientProvider>
   );
 }
@@ -157,5 +165,40 @@ describe("Manage page", () => {
     await waitFor(() =>
       expect(screen.getByText(/No chores yet/i)).toBeInTheDocument()
     );
+  });
+
+  it("hydrates filters from URL params on initial render", async () => {
+    wrap(<Manage />, { initialEntries: ["/chores?state=complete"] });
+
+    await waitFor(() => expect(screen.getByText("Dishes")).toBeInTheDocument());
+    expect(screen.queryByText("Vacuum")).not.toBeInTheDocument();
+    expect(screen.getByText("Showing 1 of 2 chores")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /show filters/i }));
+    expect(screen.getByLabelText("State")).toHaveValue("complete");
+    expect(screen.getByTestId("location")).toHaveTextContent("/chores?state=complete");
+  });
+
+  it("updates URL params when filters change", async () => {
+    wrap(<Manage />);
+
+    await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
+    fireEvent.click(screen.getByRole("button", { name: /show filters/i }));
+    fireEvent.change(screen.getByLabelText("State"), { target: { value: "complete" } });
+
+    await waitFor(() => expect(screen.getByText("Dishes")).toBeInTheDocument());
+    expect(screen.queryByText("Vacuum")).not.toBeInTheDocument();
+    expect(screen.getByTestId("location")).toHaveTextContent("/chores?state=complete");
+  });
+
+  it("clears URL params when filters are reset", async () => {
+    wrap(<Manage />, { initialEntries: ["/chores?assignment_type=open&disabled=false"] });
+
+    await waitFor(() => expect(screen.getByText("Dishes")).toBeInTheDocument());
+    fireEvent.click(screen.getByRole("button", { name: /clear filters/i }));
+
+    await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
+    expect(screen.getByText("Dishes")).toBeInTheDocument();
+    expect(screen.getByTestId("location")).toHaveTextContent("/chores");
   });
 });

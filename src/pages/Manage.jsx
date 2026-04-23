@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSearchParams } from "react-router-dom";
 import { MdFilterList, MdAdd } from "react-icons/md";
 import { getChores, getPeople, createChore, updateChore, deleteChore } from "../api/client";
 import ChoreForm from "../components/ChoreForm";
@@ -7,12 +8,30 @@ import ChoreList from "../components/ChoreList";
 import Modal from "../components/Modal";
 import "./Manage.css";
 
+function getFiltersFromSearchParams(searchParams) {
+  const filters = {};
+  const scheduleType = searchParams.get("schedule_type");
+  const assignmentType = searchParams.get("assignment_type");
+  const state = searchParams.get("state");
+  const disabled = searchParams.get("disabled");
+
+  if (scheduleType) filters.schedule_type = scheduleType;
+  if (assignmentType) filters.assignment_type = assignmentType;
+  if (state) filters.state = state;
+  if (disabled === "true") filters.disabled = true;
+  if (disabled === "false") filters.disabled = false;
+
+  return filters;
+}
+
 export default function Manage() {
   const qc = useQueryClient();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [modal, setModal] = useState(null); // null | { mode: "create" } | { mode: "edit", chore }
   const [deleteTarget, setDeleteTarget] = useState(null); // chore to confirm-delete
-  const [filters, setFilters] = useState({});
   const [filtersExpanded, setFiltersExpanded] = useState(false);
+
+  const filters = useMemo(() => getFiltersFromSearchParams(searchParams), [searchParams]);
 
   const { data: chores = [], isLoading } = useQuery({
     queryKey: ["chores"],
@@ -42,14 +61,21 @@ export default function Manage() {
   });
 
   const handleFilterChange = useCallback((key, value) => {
-    setFilters((prev) => ({
-      ...prev,
-      [key]: value || undefined,
-    }));
-  }, []);
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+
+      if (value === undefined || value === "") {
+        next.delete(key);
+      } else {
+        next.set(key, value);
+      }
+
+      return next;
+    });
+  }, [setSearchParams]);
 
   const handleClearFilters = () => {
-    setFilters({});
+    setSearchParams({});
   };
 
   const filtered = useMemo(() => {
@@ -150,18 +176,14 @@ export default function Manage() {
                 <label htmlFor="filter-disabled">Status</label>
                 <select
                   id="filter-disabled"
-                  value={filters.disabled === undefined ? "" : filters.disabled ? "disabled" : "enabled"}
+                  value={filters.disabled === undefined ? "" : String(filters.disabled)}
                   onChange={(e) => {
-                    if (e.target.value === "") {
-                      handleFilterChange("disabled", undefined);
-                    } else {
-                      handleFilterChange("disabled", e.target.value === "disabled");
-                    }
+                    handleFilterChange("disabled", e.target.value || undefined);
                   }}
                 >
                   <option value="">All chores</option>
-                  <option value="enabled">Enabled only</option>
-                  <option value="disabled">Disabled only</option>
+                  <option value="false">Enabled only</option>
+                  <option value="true">Disabled only</option>
                 </select>
               </div>
             </div>
