@@ -24,6 +24,30 @@ function wrap(ui) {
   return render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>);
 }
 
+function deferred() {
+  let resolve;
+  let reject;
+  const promise = new Promise((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  return { promise, resolve, reject };
+}
+
+const DARK_THEME = {
+  id: "dark",
+  name: "Dark",
+  colors: {
+    bg: "#080c14",
+    surface: "#16202e",
+    surface2: "#1e2d40",
+    accent: "#73B1DD",
+    success: "#3db87a",
+    warning: "#e8a930",
+    danger: "#e05c6a",
+  },
+};
+
 describe("App", () => {
   beforeEach(() => {
     vi.resetAllMocks();
@@ -38,6 +62,37 @@ describe("App", () => {
     client.getLog.mockResolvedValue([]);
     client.getSetupStatus.mockResolvedValue({ setup_needed: false });
     client.getConfig.mockResolvedValue({ title: "Family Chores" });
+    client.getCurrentTheme.mockResolvedValue(DARK_THEME);
+  });
+
+  it("waits for the saved theme before rendering the authenticated app shell", async () => {
+    const themeRequest = deferred();
+    client.getCurrentTheme.mockReturnValue(themeRequest.promise);
+
+    wrap(<App />);
+
+    expect(screen.getByText("Loading...")).toBeInTheDocument();
+    expect(screen.queryByText("Board")).not.toBeInTheDocument();
+
+    themeRequest.resolve(DARK_THEME);
+
+    await waitFor(() => {
+      expect(screen.getAllByText("Board").length).toBeGreaterThan(0);
+    });
+
+    expect(document.documentElement.style.getPropertyValue("--bg")).toBe("#080c14");
+  });
+
+  it("falls back to the default theme when loading the saved theme fails", async () => {
+    client.getCurrentTheme.mockRejectedValue(new Error("theme lookup failed"));
+
+    wrap(<App />);
+
+    await waitFor(() => {
+      expect(screen.getAllByText("Board").length).toBeGreaterThan(0);
+    });
+
+    expect(document.documentElement.style.getPropertyValue("--bg")).toBe("#080c14");
   });
 
   it("renders the app title", async () => {

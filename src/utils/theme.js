@@ -1,3 +1,13 @@
+export const DEFAULT_THEME_COLORS = {
+  bg: "#080c14",
+  surface: "#16202e",
+  surface2: "#1e2d40",
+  accent: "#73B1DD",
+  success: "#3db87a",
+  warning: "#e8a930",
+  danger: "#e05c6a",
+};
+
 function getBrightness(hex) {
   const r = parseInt(hex.slice(1, 3), 16);
   const g = parseInt(hex.slice(3, 5), 16);

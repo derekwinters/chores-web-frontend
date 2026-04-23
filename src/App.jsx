@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useLayoutEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "./contexts/AuthContext";
 import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation } from "react-router-dom";
@@ -12,8 +12,9 @@ import Settings from "./pages/Settings";
 import AdminPanel from "./pages/AdminPanel";
 import UserDetail from "./pages/UserDetail";
 import UserAvatarMenu from "./components/UserAvatarMenu";
-import { getConfig, getPeople } from "./api/client";
+import { getConfig, getCurrentTheme, getPeople } from "./api/client";
 import { MdDashboard, MdCheckCircle, MdPeople, MdHistory, MdSettings, MdMenu } from "react-icons/md";
+import { applyTheme, DEFAULT_THEME_COLORS } from "./utils/theme";
 import "./App.css";
 
 const PAGES = [
@@ -158,6 +159,38 @@ function AppContent() {
   );
 }
 
+function AuthenticatedApp() {
+  const [themeApplied, setThemeApplied] = useState(false);
+  const { data: currentTheme, isLoading, isError } = useQuery({
+    queryKey: ["current-theme"],
+    queryFn: getCurrentTheme,
+    staleTime: 60_000,
+  });
+
+  useLayoutEffect(() => {
+    if (currentTheme?.colors) {
+      applyTheme(currentTheme.colors);
+      setThemeApplied(true);
+      return;
+    }
+
+    if (isError) {
+      applyTheme(DEFAULT_THEME_COLORS);
+      setThemeApplied(true);
+    }
+  }, [currentTheme, isError]);
+
+  if (isLoading || !themeApplied) {
+    return <div className="app-loading">Loading...</div>;
+  }
+
+  return (
+    <BrowserRouter>
+      <AppContent />
+    </BrowserRouter>
+  );
+}
+
 export default function App() {
   const { isAuthenticated, setupNeeded, loading } = useAuth();
 
@@ -172,9 +205,5 @@ export default function App() {
     return <Login onLoginSuccess={() => window.location.reload()} />;
   }
 
-  return (
-    <BrowserRouter>
-      <AppContent />
-    </BrowserRouter>
-  );
+  return <AuthenticatedApp />;
 }
