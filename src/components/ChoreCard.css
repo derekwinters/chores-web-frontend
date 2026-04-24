@@ -5,12 +5,16 @@
   border: 1px solid var(--border);
   background: var(--surface);
   cursor: pointer;
-  transition: background 0.1s, border-color 0.1s, max-height 0.3s ease;
+  transition: background 0.1s, border-color 0.1s, max-height 0.3s ease, filter 0.2s ease;
   user-select: none;
   overflow: hidden;
 }
 
-.chore-card:hover { background: var(--surface2); }
+.chore-card:hover {
+  background: var(--surface2);
+  filter: brightness(1.05) saturate(1.1);
+}
+
 .chore-card.selected { border-color: var(--accent); background: var(--surface2); }
 
 .accent-bar {

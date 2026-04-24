@@ -201,7 +201,7 @@
   text-align: center;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .page-header button {
     padding: 0.5rem;
     min-width: 2.5rem;
