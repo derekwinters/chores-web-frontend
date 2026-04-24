@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import CalendarPicker from "./CalendarPicker";
+import MUIDatePicker from "./MUIDatePicker";
 import "./ChoreForm.css";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -169,7 +169,6 @@ export default function ChoreForm({ initial, people, onSubmit, onCancel, submitL
   const [s, setS] = useState(initial ? choreToState(initial) : emptyState());
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
-  const [showCalendar, setShowCalendar] = useState(false);
 
   const initialState = initial ? choreToState(initial) : emptyState();
   const hasInitialConstraints = initialState.cond_even || initialState.cond_odd || initialState.cond_weekdays.length > 0;
@@ -229,30 +228,11 @@ export default function ChoreForm({ initial, people, onSubmit, onCancel, submitL
         {initial && (
           <div className="form-row">
             <label>Next Due</label>
-            <div className="next-due-controls">
-              <div className="next-due-display">
-                {s.next_due
-                  ? new Date(s.next_due + "T00:00:00").toLocaleDateString(undefined, {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })
-                  : initial.next_due
-                  ? new Date(initial.next_due + "T00:00:00").toLocaleDateString(undefined, {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })
-                  : "Not set"}
-              </div>
-              <button
-                type="button"
-                className="btn-secondary"
-                onClick={() => setShowCalendar(true)}
-              >
-                Edit
-              </button>
-            </div>
+            <MUIDatePicker
+              initialDate={s.next_due || initial.next_due}
+              onSelect={(date) => set("next_due", date)}
+              onCancel={() => {}}
+            />
           </div>
         )}
 
@@ -616,33 +596,6 @@ export default function ChoreForm({ initial, people, onSubmit, onCancel, submitL
 
       {error && <div className="form-error">{error}</div>}
 
-      {showCalendar && (
-        <div className="modal-overlay" onClick={() => setShowCalendar(false)}>
-          <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>Select Due Date</h3>
-              <button
-                type="button"
-                className="modal-close"
-                onClick={() => setShowCalendar(false)}
-                aria-label="Close"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="modal-body">
-              <CalendarPicker
-                initialDate={s.next_due || initial.next_due}
-                onSelect={(date) => {
-                  set("next_due", date);
-                  setShowCalendar(false);
-                }}
-                onCancel={() => setShowCalendar(false)}
-              />
-            </div>
-          </div>
-        </div>
-      )}
 
       <div className="form-actions">
         <button type="button" className="btn-secondary" onClick={onCancel} disabled={busy}>
