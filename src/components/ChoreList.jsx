@@ -2,21 +2,24 @@ import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { getChores, getPeople } from "../api/client";
-import { MdSchedule, MdPerson, MdEdit, MdDelete, MdAccessTime } from "react-icons/md";
 import { getChoreAssigneeLabel } from "../utils/choreAssignee";
 import { compareChoresByNextDue } from "../utils/choreSort";
+import ChoreCard from "./ChoreCard";
 import "./ChoreList.css";
+
+function calculateAge(nextDue) {
+  if (!nextDue) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const due = new Date(nextDue + "T00:00:00");
+  const diff = Math.floor((due - today) / (1000 * 60 * 60 * 24));
+  return diff;
+}
 
 const STATE_LABELS = { due: "Due", complete: "Done" };
 
-const ICONS = {
-  schedule: MdSchedule,
-  assignee: MdPerson,
-};
-
 export default function ChoreList({ onEdit, onDelete, chores: externalChores, people: externalPeople }) {
   const navigate = useNavigate();
-  const [expandedChoreId, setExpandedChoreId] = useState(null);
   const { data: queriedChores = [], isLoading: choresLoading } = useQuery({
     queryKey: ["chores"],
     queryFn: getChores,
@@ -46,87 +49,18 @@ export default function ChoreList({ onEdit, onDelete, chores: externalChores, pe
         const assigneeLabel = getChoreAssigneeLabel(chore);
 
         return (
-          <article key={chore.id} className="chore-card" onClick={() => setExpandedChoreId(expandedChoreId === chore.id ? null : chore.id)}>
-            <div className="chore-content">
-              <div className="chore-left">
-                <div className="chore-header">
-                  <h3 className="chore-name">{chore.name}</h3>
-                </div>
-
-                <div className="chore-details">
-                  <div className="chore-detail-item icon-only">
-                    <div className="detail-content">
-                      <div className="points-info">
-                        <span className="points-value">{chore.points ?? 0}</span>
-                        <span className="points-label">pts</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="chore-detail-item icon-only">
-                    <div className="detail-content">
-                      <div className="assignment-row">
-                        <div className={`assignment-info ${chore.assignment_type}`}>
-                          <ICONS.assignee className="assignment-icon" />
-                          <span className="assignment-type">
-                            {chore.assignment_type}
-                          </span>
-                        </div>
-                        <span className="assignee-name">{assigneeLabel}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              {chore.next_due && (
-                <div className="chore-right">
-                  <div className="due-content">
-                    <div className="due-value">
-                      {new Date(chore.next_due + "T00:00:00").toLocaleDateString(undefined, {
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    </div>
-                    <div className="due-label">{chore.schedule_summary}</div>
-                  </div>
-                  <MdAccessTime className="due-icon" />
-                </div>
-              )}
-            </div>
-
-            <div className={`chore-actions ${expandedChoreId === chore.id ? "expanded" : ""}`}>
-              <button
-                className="chore-action-link"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onEdit?.(chore);
-                }}
-                aria-label={`Edit ${chore.name}`}
-              >
-                Edit
-              </button>
-              <button
-                className="chore-action-link"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigate(`/log?chore_id=${encodeURIComponent(chore.id)}`);
-                }}
-                aria-label={`History for ${chore.name}`}
-              >
-                History
-              </button>
-              <button
-                className="chore-action-link chore-action-delete"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete?.(chore);
-                }}
-                aria-label={`Delete ${chore.name}`}
-              >
-                Delete
-              </button>
-            </div>
-          </article>
+          <ChoreCard
+            key={chore.id}
+            chore={{ ...chore, age: calculateAge(chore.next_due) }}
+            choreState={chore.state}
+            status={STATE_LABELS[chore.state] || chore.state}
+            frequency={chore.schedule_summary}
+            assignee={assigneeLabel}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            onHistory={(c) => navigate(`/log?chore_id=${encodeURIComponent(c.id)}`)}
+            onClick={() => {}}
+          />
         );
       })}
     </div>

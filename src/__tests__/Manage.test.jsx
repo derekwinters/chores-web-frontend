@@ -136,17 +136,40 @@ describe("Manage page", () => {
 
   it("shows schedule summaries", async () => {
     wrap(<Manage />);
-    await waitFor(() => expect(screen.getByText("Weekly on Mon")).toBeInTheDocument());
-    expect(screen.getByText("Every 1 day")).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
+
+    // Expand Vacuum card to see "Weekly on Mon"
+    const vacuumCard = screen.getByText("Vacuum").closest("article");
+    fireEvent.click(vacuumCard);
+
+    await waitFor(() => {
+      expect(screen.getByText("Weekly on Mon")).toBeInTheDocument();
+    });
+
+    // Expand Dishes card to see "Every 1 day"
+    const dishesCard = screen.getByText("Dishes").closest("article");
+    fireEvent.click(dishesCard);
+
+    await waitFor(() => {
+      expect(screen.getByText("Every 1 day")).toBeInTheDocument();
+    });
   });
 
   it("shows assignment type info for chores", async () => {
     wrap(<Manage />);
     await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
-    // ChoreList renders assignment_type info for each chore
-    expect(screen.getByText("rotating")).toBeInTheDocument();
-    expect(screen.getAllByText("Bob").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Unassigned").length).toBeGreaterThan(0);
+
+    // Expand all cards to see assignee and other metadata
+    const cards = screen.getAllByRole("article");
+    cards.forEach((card) => fireEvent.click(card));
+
+    await waitFor(() => {
+      // Check for assignee names (expanded view shows assignees)
+      expect(screen.getAllByText("Bob").length).toBeGreaterThan(0);
+      expect(screen.getAllByText("Unassigned").length).toBeGreaterThan(0);
+      // Also check for Alice who is assigned to multiple chores
+      expect(screen.getAllByText("Alice").length).toBeGreaterThan(0);
+    });
   });
 
   it("shows Add Chore button", async () => {
@@ -183,6 +206,15 @@ describe("Manage page", () => {
   it("opens edit modal with chore data pre-filled", async () => {
     wrap(<Manage />);
     await waitFor(() => screen.getByText("Vacuum"));
+
+    // Expand Vacuum card to show edit button
+    const vacuumCard = screen.getByText("Vacuum").closest("article");
+    fireEvent.click(vacuumCard);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Edit Vacuum")).toBeInTheDocument();
+    });
+
     fireEvent.click(screen.getByLabelText("Edit Vacuum"));
     await waitFor(() => expect(screen.getByDisplayValue("Vacuum")).toBeInTheDocument());
   });
@@ -190,6 +222,15 @@ describe("Manage page", () => {
   it("calls updateChore on edit submit", async () => {
     wrap(<Manage />);
     await waitFor(() => screen.getByText("Vacuum"));
+
+    // Expand Vacuum card to show edit button
+    const vacuumCard = screen.getByText("Vacuum").closest("article");
+    fireEvent.click(vacuumCard);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Edit Vacuum")).toBeInTheDocument();
+    });
+
     fireEvent.click(screen.getByLabelText("Edit Vacuum"));
     await waitFor(() => screen.getByDisplayValue("Vacuum"));
     fireEvent.click(screen.getByText("Save changes"));
@@ -199,6 +240,15 @@ describe("Manage page", () => {
   it("shows delete confirmation modal", async () => {
     wrap(<Manage />);
     await waitFor(() => screen.getByText("Vacuum"));
+
+    // Expand Vacuum card to show delete button
+    const vacuumCard = screen.getByText("Vacuum").closest("article");
+    fireEvent.click(vacuumCard);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Delete Vacuum")).toBeInTheDocument();
+    });
+
     fireEvent.click(screen.getByLabelText("Delete Vacuum"));
     expect(screen.getByText("Delete chore?")).toBeInTheDocument();
     expect(screen.getByText(/cannot be undone/i)).toBeInTheDocument();
@@ -207,6 +257,15 @@ describe("Manage page", () => {
   it("calls deleteChore on confirm delete", async () => {
     wrap(<Manage />);
     await waitFor(() => screen.getByText("Vacuum"));
+
+    // Expand Vacuum card to show delete button
+    const vacuumCard = screen.getByText("Vacuum").closest("article");
+    fireEvent.click(vacuumCard);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Delete Vacuum")).toBeInTheDocument();
+    });
+
     fireEvent.click(screen.getByLabelText("Delete Vacuum"));
     const confirmBtn = screen.getAllByText("Delete").find(
       (el) => el.tagName === "BUTTON" && el.closest(".confirm-actions")
@@ -304,9 +363,11 @@ describe("Manage page", () => {
 
     await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
 
-    const choreNames = screen
-      .getAllByRole("heading", { level: 3 })
-      .map((heading) => heading.textContent);
+    const articles = screen.getAllByRole("article");
+    const choreNames = articles.map((article) => {
+      const nameElement = article.querySelector(".chore-name");
+      return nameElement?.textContent || "";
+    });
 
     expect(choreNames).toEqual(["Bathroom", "Vacuum", "Countertops", "Dishes", "Laundry"]);
   });
@@ -316,9 +377,11 @@ describe("Manage page", () => {
 
     await waitFor(() => expect(screen.getByText("Bathroom")).toBeInTheDocument());
 
-    const choreNames = screen
-      .getAllByRole("heading", { level: 3 })
-      .map((heading) => heading.textContent);
+    const articles = screen.getAllByRole("article");
+    const choreNames = articles.map((article) => {
+      const nameElement = article.querySelector(".chore-name");
+      return nameElement?.textContent || "";
+    });
 
     expect(choreNames).toEqual(["Bathroom", "Dishes"]);
   });

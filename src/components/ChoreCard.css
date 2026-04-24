@@ -1,22 +1,148 @@
 .chore-card {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem 1rem;
+  position: relative;
   border-radius: var(--radius);
   border: 1px solid var(--border);
   background: var(--surface);
   cursor: pointer;
-  transition: background 0.1s, border-color 0.1s;
+  transition: background 0.1s, border-color 0.1s, max-height 0.3s ease;
   user-select: none;
+  overflow: hidden;
 }
+
 .chore-card:hover { background: var(--surface2); }
 .chore-card.selected { border-color: var(--accent); background: var(--surface2); }
 
-.chore-card.today .chore-age { color: var(--warning); }
-.chore-card.warn .chore-age { color: var(--warning); }
-.chore-card.overdue .chore-age { color: var(--danger); }
-.chore-card.future .chore-age { color: var(--text-muted); }
+.accent-bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  transition: background 0.2s;
+}
 
-.chore-name { font-weight: 500; }
-.chore-age { font-size: 0.8rem; color: var(--text-muted); white-space: nowrap; }
+.chore-card.due .accent-bar { background: var(--danger); }
+.chore-card.done .accent-bar { background: var(--text-muted); }
+
+.card-content {
+  flex: 1;
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 1rem;
+}
+
+.collapsed-view {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.chore-name {
+  font-weight: 500;
+  grid-column: 1 / 9;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chore-assignee {
+  font-size: 0.9rem;
+  grid-column: 9 / 11;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text);
+}
+
+.chore-due-date {
+  font-size: 0.9rem;
+  grid-column: 11 / 13;
+  text-align: right;
+  white-space: nowrap;
+  transition: color 0.2s;
+}
+
+.chore-card.due .chore-due-date { color: var(--danger); }
+.chore-card.done .chore-due-date { color: var(--text-muted); }
+
+.expanded-view {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.expanded-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.expanded-header .chore-name {
+  flex: 1;
+}
+
+.expanded-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.meta-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.meta-value {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.expanded-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  background: transparent;
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.action-btn:hover {
+  background: var(--surface2);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.action-btn.danger {
+  color: var(--danger);
+}
+
+.action-btn.danger:hover {
+  background: rgba(var(--danger-rgb), 0.1);
+  border-color: var(--danger);
+}

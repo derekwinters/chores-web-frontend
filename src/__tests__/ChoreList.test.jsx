@@ -94,21 +94,52 @@ describe("ChoreList", () => {
     });
   });
 
-  it("shows chore name, points, and assignee", async () => {
+  it("shows chore name, points, and assignee when expanded", async () => {
     wrap(<ChoreList />);
     await waitFor(() => {
       expect(screen.getByText("Vacuum")).toBeInTheDocument();
-      expect(screen.getByText("5")).toBeInTheDocument();
-      expect(screen.getAllByText("Alice").length).toBeGreaterThan(0);
-      expect(screen.getByText("Unassigned")).toBeInTheDocument();
     });
+
+    // Expand Vacuum card by clicking the article itself
+    const vacuumCard = screen.getByText("Vacuum").closest("article");
+    fireEvent.click(vacuumCard);
+
+    // Wait for expanded view to appear
+    await waitFor(() => {
+      expect(vacuumCard).toHaveClass("expanded");
+    });
+
+    // Now check for expanded content - Vacuum has 5 points and Alice as assignee
+    expect(screen.getByText("5")).toBeInTheDocument();
+    expect(screen.getAllByText("Alice").length).toBeGreaterThan(0);
+
+    // Expand Bathroom card to check Unassigned
+    const bathroomCard = screen.getByText("Bathroom").closest("article");
+    fireEvent.click(bathroomCard);
+    await waitFor(() => {
+      expect(bathroomCard).toHaveClass("expanded");
+    });
+    expect(screen.getByText("Unassigned")).toBeInTheDocument();
   });
 
   it("displays schedule info with icon", async () => {
     wrap(<ChoreList />);
     await waitFor(() => {
-      // schedule_summary appears in the due-label when next_due is set
+      expect(screen.getByText("Vacuum")).toBeInTheDocument();
+    });
+
+    // Click Vacuum card to expand and see schedule
+    const vacuumCard = screen.getByText("Vacuum").closest("article");
+    fireEvent.click(vacuumCard);
+
+    await waitFor(() => {
       expect(screen.getByText("Weekly on Mon")).toBeInTheDocument();
+    });
+
+    // Click Dishes card to see "Every day" schedule
+    const dishesCard = screen.getByText("Dishes").closest("article");
+    fireEvent.click(dishesCard);
+    await waitFor(() => {
       expect(screen.getByText("Every day")).toBeInTheDocument();
     });
   });
@@ -116,7 +147,14 @@ describe("ChoreList", () => {
   it("shows assignment info for chores", async () => {
     wrap(<ChoreList />);
     await waitFor(() => {
-      // Assignment labels cover fixed, rotating, and open chores
+      expect(screen.getByText("Vacuum")).toBeInTheDocument();
+    });
+
+    // Expand cards to see assignment info
+    const cards = screen.getAllByRole("article");
+    cards.forEach((card) => fireEvent.click(card));
+
+    await waitFor(() => {
       expect(screen.getAllByText("Alice").length).toBeGreaterThan(0);
       expect(screen.getByText("Bob")).toBeInTheDocument();
       expect(screen.getByText("Unassigned")).toBeInTheDocument();
@@ -138,8 +176,9 @@ describe("ChoreList", () => {
     const cards = screen.getAllByRole("article");
     expect(cards.length).toBeGreaterThan(0);
     cards.forEach((card) => {
-      const icons = card.querySelectorAll("svg, [class*='icon']");
-      expect(icons.length).toBeGreaterThan(0);
+      // Cards have accent bar indicator for visual hierarchy
+      const accentBar = card.querySelector(".accent-bar");
+      expect(accentBar).toBeInTheDocument();
     });
   });
 
@@ -149,6 +188,9 @@ describe("ChoreList", () => {
 
     const choreCard = screen.getByText("Vacuum").closest("article");
     expect(choreCard).toHaveClass("chore-card");
+
+    // Buttons only visible when card is expanded
+    fireEvent.click(choreCard);
     expect(choreCard.querySelectorAll("button").length).toBeGreaterThan(0);
   });
 
@@ -182,9 +224,11 @@ describe("ChoreList", () => {
 
     await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
 
-    const choreNames = screen
-      .getAllByRole("heading", { level: 3 })
-      .map((heading) => heading.textContent);
+    const articles = screen.getAllByRole("article");
+    const choreNames = articles.map((article) => {
+      const nameElement = article.querySelector(".chore-name");
+      return nameElement?.textContent || "";
+    });
 
     expect(choreNames).toEqual(["Bathroom", "Vacuum", "Dishes", "Laundry"]);
   });
