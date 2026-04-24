@@ -2,6 +2,7 @@ import React, { useState, useCallback, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { MdFilterList, MdAdd } from "react-icons/md";
+import { Select, MenuItem, Chip, Box } from "@mui/material";
 import { useAuth } from "../contexts/AuthContext";
 import { getChores, getPeople, createChore, updateChore, deleteChore, completeChore, skipChore, markDueChore } from "../api/client";
 import ChoreForm from "../components/ChoreForm";
@@ -15,20 +16,57 @@ import {
 import { compareChoresByNextDue } from "../utils/choreSort";
 import "./Manage.css";
 
+const SELECT_CONFIG = {
+  sx: {
+    color: "var(--text)",
+    backgroundColor: "var(--surface)",
+    "& .MuiOutlinedInput-notchedOutline": {
+      borderColor: "var(--border)",
+    },
+    "&:hover .MuiOutlinedInput-notchedOutline": {
+      borderColor: "var(--text-muted)",
+    },
+    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+      borderColor: "var(--accent)",
+    },
+  },
+  MenuProps: {
+    PaperProps: {
+      sx: {
+        backgroundColor: "var(--surface) !important",
+        color: "var(--text) !important",
+        "& .MuiMenuItem-root": {
+          color: "var(--text) !important",
+          "&:hover": {
+            backgroundColor: "var(--surface2) !important",
+          },
+          "&.Mui-selected": {
+            backgroundColor: "var(--accent-bg) !important",
+            color: "var(--text) !important",
+            "&:hover": {
+              backgroundColor: "var(--accent-bg) !important",
+            },
+          },
+        },
+      },
+    },
+  },
+};
+
 function getFiltersFromSearchParams(searchParams) {
   const filters = {};
   const scheduleType = searchParams.get("schedule_type");
   const assignmentType = searchParams.get("assignment_type");
   const state = searchParams.get("state");
   const disabled = searchParams.get("disabled");
-  const assignee = searchParams.get("assignee");
+  const assignees = searchParams.getAll("assignee");
 
   if (scheduleType) filters.schedule_type = scheduleType;
   if (assignmentType) filters.assignment_type = assignmentType;
   if (state) filters.state = state;
   if (disabled === "true") filters.disabled = true;
   if (disabled === "false") filters.disabled = false;
-  if (assignee) filters.assignee = assignee;
+  if (assignees.length > 0) filters.assignees = assignees;
 
   return filters;
 }
@@ -90,7 +128,14 @@ export default function Manage() {
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev);
 
-      if (value === undefined || value === "") {
+      if (key === "assignees") {
+        next.delete("assignee");
+        if (value && value.length > 0) {
+          value.forEach((assignee) => {
+            next.append("assignee", assignee);
+          });
+        }
+      } else if (value === undefined || value === "") {
         next.delete(key);
       } else {
         next.set(key, value);
@@ -110,10 +155,14 @@ export default function Manage() {
       if (filters.assignment_type && chore.assignment_type !== filters.assignment_type) return false;
       if (filters.state && chore.state !== filters.state) return false;
       if (filters.disabled !== undefined && chore.disabled !== filters.disabled) return false;
-      if (filters.assignee) {
+      if (filters.assignees && filters.assignees.length > 0) {
         const assignee = getChoreAssigneeName(chore);
-        if (filters.assignee === UNASSIGNED_FILTER_VALUE) return assignee === null;
-        if (assignee !== filters.assignee) return false;
+        const isUnassignedSelected = filters.assignees.includes(UNASSIGNED_FILTER_VALUE);
+        const isAssigneeSelected = filters.assignees.includes(assignee);
+
+        if (assignee === null && isUnassignedSelected) return true;
+        if (assignee !== null && isAssigneeSelected) return true;
+        return false;
       }
       return true;
     });
@@ -158,82 +207,105 @@ export default function Manage() {
             <div className="chore-filters">
               <div className="filter-group">
                 <label htmlFor="filter-schedule">Schedule type</label>
-                <select
+                <Select
                   id="filter-schedule"
                   value={filters.schedule_type || ""}
                   onChange={(e) => handleFilterChange("schedule_type", e.target.value)}
+                  {...SELECT_CONFIG}
                 >
-                  <option value="">All types</option>
+                  <MenuItem value="">All types</MenuItem>
                   {scheduleTypes.map((type) => (
-                    <option key={type} value={type}>
+                    <MenuItem key={type} value={type}>
                       {type}
-                    </option>
+                    </MenuItem>
                   ))}
-                </select>
+                </Select>
               </div>
 
               <div className="filter-group">
                 <label htmlFor="filter-assignment">Assignment type</label>
-                <select
+                <Select
                   id="filter-assignment"
                   value={filters.assignment_type || ""}
                   onChange={(e) => handleFilterChange("assignment_type", e.target.value)}
+                  {...SELECT_CONFIG}
                 >
-                  <option value="">All types</option>
+                  <MenuItem value="">All types</MenuItem>
                   {assignmentTypes.map((type) => (
-                    <option key={type} value={type}>
+                    <MenuItem key={type} value={type}>
                       {type}
-                    </option>
+                    </MenuItem>
                   ))}
-                </select>
+                </Select>
               </div>
 
               <div className="filter-group">
                 <label htmlFor="filter-assignee">Assignee</label>
-                <select
+                <Select
                   id="filter-assignee"
-                  value={filters.assignee || ""}
-                  onChange={(e) => handleFilterChange("assignee", e.target.value)}
+                  multiple
+                  value={filters.assignees || []}
+                  onChange={(e) => handleFilterChange("assignees", e.target.value)}
+                  {...SELECT_CONFIG}
+                  sx={{
+                    ...SELECT_CONFIG.sx,
+                    "& .MuiChip-root": {
+                      backgroundColor: "var(--accent-bg)",
+                      color: "var(--text)",
+                      borderColor: "var(--accent)",
+                    },
+                  }}
+                  renderValue={(selected) => (
+                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                      {selected.map((value) => (
+                        <Chip
+                          key={value}
+                          label={value === UNASSIGNED_FILTER_VALUE ? UNASSIGNED_LABEL : value}
+                        />
+                      ))}
+                    </Box>
+                  )}
                 >
-                  <option value="">All assignees</option>
                   {assignees.map((assignee) => (
-                    <option key={assignee} value={assignee}>
+                    <MenuItem key={assignee} value={assignee}>
                       {assignee}
-                    </option>
+                    </MenuItem>
                   ))}
-                  <option value={UNASSIGNED_FILTER_VALUE}>{UNASSIGNED_LABEL}</option>
-                </select>
+                  <MenuItem value={UNASSIGNED_FILTER_VALUE}>{UNASSIGNED_LABEL}</MenuItem>
+                </Select>
               </div>
 
               <div className="filter-group">
                 <label htmlFor="filter-state">State</label>
-                <select
+                <Select
                   id="filter-state"
                   value={filters.state || ""}
                   onChange={(e) => handleFilterChange("state", e.target.value)}
+                  {...SELECT_CONFIG}
                 >
-                  <option value="">All states</option>
+                  <MenuItem value="">All states</MenuItem>
                   {states.map((state) => (
-                    <option key={state} value={state}>
+                    <MenuItem key={state} value={state}>
                       {state}
-                    </option>
+                    </MenuItem>
                   ))}
-                </select>
+                </Select>
               </div>
 
               <div className="filter-group">
                 <label htmlFor="filter-disabled">Status</label>
-                <select
+                <Select
                   id="filter-disabled"
                   value={filters.disabled === undefined ? "" : String(filters.disabled)}
                   onChange={(e) => {
                     handleFilterChange("disabled", e.target.value || undefined);
                   }}
+                  {...SELECT_CONFIG}
                 >
-                  <option value="">All chores</option>
-                  <option value="false">Enabled only</option>
-                  <option value="true">Disabled only</option>
-                </select>
+                  <MenuItem value="">All chores</MenuItem>
+                  <MenuItem value="false">Enabled only</MenuItem>
+                  <MenuItem value="true">Disabled only</MenuItem>
+                </Select>
               </div>
             </div>
           )}

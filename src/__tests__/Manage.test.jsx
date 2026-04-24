@@ -1,5 +1,6 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter, useLocation } from "react-router-dom";
@@ -296,16 +297,25 @@ describe("Manage page", () => {
     expect(screen.getByText("Showing 1 of 5 chores")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /show filters/i }));
-    expect(screen.getByLabelText("State")).toHaveValue("complete");
+    await waitFor(() => {
+      const stateSelect = document.getElementById("filter-state");
+      expect(stateSelect).toHaveTextContent("complete");
+    });
     expect(screen.getByTestId("location")).toHaveTextContent("/chores?state=complete");
   });
 
   it("updates URL params when filters change", async () => {
     wrap(<Manage />);
+    const user = userEvent.setup();
 
     await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
     fireEvent.click(screen.getByRole("button", { name: /show filters/i }));
-    fireEvent.change(screen.getByLabelText("State"), { target: { value: "complete" } });
+
+    const stateSelect = document.getElementById("filter-state");
+    await user.click(stateSelect);
+
+    const completeOption = await screen.findByRole("option", { name: /complete/i });
+    await user.click(completeOption);
 
     await waitFor(() => expect(screen.getByText("Dishes")).toBeInTheDocument());
     expect(screen.queryByText("Vacuum")).not.toBeInTheDocument();
@@ -332,16 +342,25 @@ describe("Manage page", () => {
     expect(screen.queryByText("Dishes")).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /show filters/i }));
-    expect(screen.getByLabelText("Assignee")).toHaveValue("Bob");
+    await waitFor(() => {
+      const selectElement = document.getElementById("filter-assignee");
+      expect(selectElement).toHaveTextContent("Bob");
+    }, { timeout: 3000 });
     expect(screen.getByTestId("location")).toHaveTextContent("/chores?assignee=Bob");
   });
 
   it("updates URL params when assignee filter changes", async () => {
     wrap(<Manage />);
+    const user = userEvent.setup();
 
     await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
     fireEvent.click(screen.getByRole("button", { name: /show filters/i }));
-    fireEvent.change(screen.getByLabelText("Assignee"), { target: { value: "Alice" } });
+
+    const assigneeSelect = document.getElementById("filter-assignee");
+    await user.click(assigneeSelect);
+
+    const aliceOption = await screen.findByRole("option", { name: /Alice/i });
+    await user.click(aliceOption);
 
     await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
     expect(screen.queryByText("Bathroom")).not.toBeInTheDocument();
@@ -361,7 +380,7 @@ describe("Manage page", () => {
     expect(screen.queryByText("Laundry")).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /show filters/i }));
-    expect(screen.getByLabelText("Assignee")).toHaveValue("unassigned");
+    await waitFor(() => expect(screen.getByText("Unassigned")).toBeInTheDocument());
   });
 
   it("sorts chores by next due date with name tiebreakers and no-date chores last", async () => {
@@ -440,4 +459,5 @@ describe("Manage page", () => {
       expect(client.skipChore).toHaveBeenCalled();
     });
   });
+
 });

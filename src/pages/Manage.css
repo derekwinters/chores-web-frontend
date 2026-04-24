@@ -244,3 +244,32 @@
   outline: none;
   border-color: var(--accent);
 }
+
+/* Select dropdown styling */
+.MuiSelect-icon {
+  color: var(--text) !important;
+}
+
+/* Assignee filter Select menu styling */
+.MuiPopover-paper.MuiMenu-paper {
+  background-color: var(--surface) !important;
+  color: var(--text) !important;
+  background: var(--surface) !important;
+}
+
+.MuiPopover-paper.MuiMenu-paper .MuiMenuItem-root {
+  color: var(--text) !important;
+}
+
+.MuiPopover-paper.MuiMenu-paper .MuiMenuItem-root:hover {
+  background-color: var(--surface2) !important;
+}
+
+.MuiPopover-paper.MuiMenu-paper .MuiMenuItem-root.Mui-selected {
+  background-color: var(--accent-bg) !important;
+  color: var(--text) !important;
+}
+
+.MuiPopover-paper.MuiMenu-paper .MuiMenuItem-root.Mui-selected:hover {
+  background-color: var(--accent-bg) !important;
+}
