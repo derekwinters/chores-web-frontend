@@ -4,6 +4,7 @@ import Avatar from "./Avatar";
 import ProgressBar from "./ProgressBar";
 import { getPersonColor } from "../utils/personColors";
 import { getTrendStatus, getTrendColor } from "../utils/trendStatus";
+import { UNASSIGNED_FILTER_VALUE } from "../utils/choreAssignee";
 import "./UserCard.css";
 
 const DUE_SOON_DAYS = 7;
@@ -31,20 +32,20 @@ export default function UserCard({ person, chores, people, summary }) {
     .filter((c) => {
       if (c.state !== "due" || c.disabled) return false;
       if (c.assignment_type === "fixed") return c.assignee === person.name;
+      if (c.assignment_type === "open") return c.current_assignee === null || c.current_assignee === person.name;
       return c.current_assignee === person.name;
     })
     .length;
 
   const dueSoon = chores
     .filter((c) => {
-      if (c.current_assignee !== person.name || c.state !== "complete" || !c.next_due || c.disabled) return false;
+      if (c.state !== "complete" || !c.next_due || c.disabled) return false;
       const d = daysUntil(c.next_due);
-      return d >= 0 && d <= DUE_SOON_DAYS;
+      if (d < 0 || d > DUE_SOON_DAYS) return false;
+      if (c.assignment_type === "fixed") return c.assignee === person.name;
+      if (c.assignment_type === "open") return c.current_assignee === null || c.current_assignee === person.name;
+      return c.current_assignee === person.name;
     })
-    .length;
-
-  const openUnassigned = chores
-    .filter((c) => c.state === "due" && c.assignment_type === "open" && !c.disabled)
     .length;
 
   return (
@@ -78,35 +79,29 @@ export default function UserCard({ person, chores, people, summary }) {
           className="uc-due-col uc-due-link"
           onClick={(e) => {
             e.stopPropagation();
-            navigate(`/chores?state=due&assignee=${encodeURIComponent(person.name)}`);
+            const params = new URLSearchParams();
+            params.append("state", "due");
+            params.append("assignee", person.name);
+            params.append("assignee", UNASSIGNED_FILTER_VALUE);
+            navigate(`/chores?${params.toString()}`);
           }}
         >
           <div className="uc-due-header">Due Now</div>
-          <div className="uc-due-count">{dueNow}</div>
+          <div className="uc-due-count" style={dueNow === 0 ? { color: "var(--text)" } : {}}>{dueNow}</div>
         </button>
 
         <button
           className="uc-due-col uc-due-link"
           onClick={(e) => {
             e.stopPropagation();
-            navigate(`/chores?state=complete&assignee=${encodeURIComponent(person.name)}`);
+            const params = new URLSearchParams();
+            params.append("assignee", person.name);
+            params.append("assignee", UNASSIGNED_FILTER_VALUE);
+            navigate(`/chores?${params.toString()}`);
           }}
         >
           <div className="uc-due-header">Due Soon</div>
-          <div className="uc-due-count">{dueSoon}</div>
-        </button>
-      </div>
-
-      <div className="uc-workload">
-        <div className="uc-workload-label">Open / Unassigned</div>
-        <button
-          className="uc-workload-count"
-          onClick={(e) => {
-            e.stopPropagation();
-            navigate(`/chores?state=due&assignment_type=open`);
-          }}
-        >
-          {openUnassigned}
+          <div className="uc-due-count" style={dueSoon === 0 ? { color: "var(--text)" } : {}}>{dueSoon}</div>
         </button>
       </div>
     </div>

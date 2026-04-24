@@ -26,10 +26,6 @@ export default function Dashboard() {
 
   const summaryByPerson = Object.fromEntries(summary.map((s) => [s.person, s]));
 
-  const openDueCount = chores.filter(
-    (c) => c.state === "due" && c.assignment_type === "open" && !c.disabled
-  ).length;
-
   if (isLoading) return <div className="loading">Loading…</div>;
 
   if (people.length === 0) {
@@ -61,18 +57,6 @@ export default function Dashboard() {
           </div>
         ))}
       </div>
-
-      {openDueCount > 0 && (
-        <section className="open-section">
-          <button
-            className="open-section-link"
-            onClick={() => navigate(`/chores?state=due&assignment_type=open`)}
-          >
-            <h3 className="open-section-title">Open / Unassigned</h3>
-            <div className="open-section-count">{openDueCount}</div>
-          </button>
-        </section>
-      )}
     </div>
   );
 }

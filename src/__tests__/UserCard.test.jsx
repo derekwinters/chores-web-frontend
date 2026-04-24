@@ -98,12 +98,6 @@ describe("UserCard", () => {
     expect(counts.length).toBeGreaterThan(0);
   });
 
-  it("shows open/unassigned count", () => {
-    const openChore = { ...DUE_CHORE, assignment_type: "open", current_assignee: null, id: "open-chore", unique_id: "open-chore" };
-    wrap(<UserCard person={PERSON} chores={[openChore]} people={PEOPLE} summary={SUMMARY} />);
-    expect(screen.getByText("Open / Unassigned")).toBeInTheDocument();
-  });
-
   it("navigates to due-now filtered chores on Due Now click", async () => {
     wrap(<UserCard person={PERSON} chores={[DUE_CHORE]} people={PEOPLE} summary={SUMMARY} />);
     // Should have "Due Now" link button
