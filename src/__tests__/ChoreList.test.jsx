@@ -232,4 +232,41 @@ describe("ChoreList", () => {
 
     expect(choreNames).toEqual(["Bathroom", "Vacuum", "Dishes", "Laundry"]);
   });
+
+  it("shows complete and skip buttons when handlers provided", async () => {
+    const onComplete = vi.fn();
+    const onSkip = vi.fn();
+    wrap(<ChoreList onComplete={onComplete} onSkip={onSkip} />);
+    await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
+
+    const vacuumCard = screen.getByText("Vacuum").closest("article");
+    fireEvent.click(vacuumCard);
+
+    expect(screen.getByText("Complete")).toBeInTheDocument();
+    expect(screen.getByText("Skip")).toBeInTheDocument();
+  });
+
+  it("calls onComplete when Complete button clicked", async () => {
+    const onComplete = vi.fn();
+    wrap(<ChoreList onComplete={onComplete} />);
+    await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
+
+    const vacuumCard = screen.getByText("Vacuum").closest("article");
+    fireEvent.click(vacuumCard);
+    fireEvent.click(screen.getByText("Complete"));
+
+    expect(onComplete).toHaveBeenCalledWith(expect.objectContaining({ name: "Vacuum" }));
+  });
+
+  it("calls onSkip when Skip button clicked", async () => {
+    const onSkip = vi.fn();
+    wrap(<ChoreList onSkip={onSkip} />);
+    await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
+
+    const vacuumCard = screen.getByText("Vacuum").closest("article");
+    fireEvent.click(vacuumCard);
+    fireEvent.click(screen.getByText("Skip"));
+
+    expect(onSkip).toHaveBeenCalledWith(expect.objectContaining({ name: "Vacuum" }));
+  });
 });

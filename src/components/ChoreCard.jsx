@@ -14,7 +14,7 @@ function ageSeverity(age, state) {
   return "future";
 }
 
-export default function ChoreCard({ chore, selected, onClick, onEdit, onDelete, onHistory, status, frequency, assignee, choreState }) {
+export default function ChoreCard({ chore, selected, onClick, onEdit, onDelete, onHistory, onComplete, onSkip, onMarkDue, status, frequency, assignee, choreState }) {
   const [expanded, setExpanded] = useState(false);
   const severity = ageSeverity(chore.age, choreState);
 
@@ -29,6 +29,9 @@ export default function ChoreCard({ chore, selected, onClick, onEdit, onDelete, 
     if (action === "edit") onEdit?.(chore);
     if (action === "delete") onDelete?.(chore);
     if (action === "history") onHistory?.(chore);
+    if (action === "complete") onComplete?.(chore);
+    if (action === "skip") onSkip?.(chore);
+    if (action === "mark-due") onMarkDue?.(chore);
   };
 
   const cls = [
@@ -87,8 +90,28 @@ export default function ChoreCard({ chore, selected, onClick, onEdit, onDelete, 
               )}
             </div>
 
-            {(onEdit || onHistory || onDelete) && (
+            {(onComplete || onMarkDue || onSkip || onEdit || onHistory || onDelete) && (
               <div className="expanded-actions">
+                {choreState === "due" ? (
+                  <>
+                    {onComplete && (
+                      <button className="action-btn success" onClick={(e) => handleAction("complete", e)} aria-label={`Mark ${chore.name} complete`}>
+                        Complete
+                      </button>
+                    )}
+                    {onSkip && (
+                      <button className="action-btn" onClick={(e) => handleAction("skip", e)} aria-label={`Skip ${chore.name}`}>
+                        Skip
+                      </button>
+                    )}
+                  </>
+                ) : (
+                  onMarkDue && (
+                    <button className="action-btn" onClick={(e) => handleAction("mark-due", e)} aria-label={`Mark ${chore.name} due now`}>
+                      Mark Due Now
+                    </button>
+                  )
+                )}
                 {onEdit && (
                   <button className="action-btn" onClick={(e) => handleAction("edit", e)} aria-label={`Edit ${chore.name}`}>
                     Edit

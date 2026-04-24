@@ -146,3 +146,12 @@
   background: rgba(var(--danger-rgb), 0.1);
   border-color: var(--danger);
 }
+
+.action-btn.success {
+  color: var(--success);
+}
+
+.action-btn.success:hover {
+  background: rgba(var(--success-rgb), 0.1);
+  border-color: var(--success);
+}

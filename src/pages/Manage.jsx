@@ -2,7 +2,8 @@ import React, { useState, useCallback, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { MdFilterList, MdAdd } from "react-icons/md";
-import { getChores, getPeople, createChore, updateChore, deleteChore } from "../api/client";
+import { useAuth } from "../contexts/AuthContext";
+import { getChores, getPeople, createChore, updateChore, deleteChore, completeChore, skipChore, markDueChore } from "../api/client";
 import ChoreForm from "../components/ChoreForm";
 import ChoreList from "../components/ChoreList";
 import Modal from "../components/Modal";
@@ -34,9 +35,11 @@ function getFiltersFromSearchParams(searchParams) {
 
 export default function Manage() {
   const qc = useQueryClient();
+  const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [modal, setModal] = useState(null); // null | { mode: "create" } | { mode: "edit", chore }
   const [deleteTarget, setDeleteTarget] = useState(null); // chore to confirm-delete
+  const [completeTarget, setCompleteTarget] = useState(null); // chore waiting for completion user selection
   const [filtersExpanded, setFiltersExpanded] = useState(false);
 
   const filters = useMemo(() => getFiltersFromSearchParams(searchParams), [searchParams]);
@@ -66,6 +69,21 @@ export default function Manage() {
   const deleteMut = useMutation({
     mutationFn: (id) => deleteChore(id),
     onSuccess: () => { invalidate(); setDeleteTarget(null); },
+  });
+
+  const completeMut = useMutation({
+    mutationFn: ({ id, completedBy }) => completeChore(id, completedBy),
+    onSuccess: () => { invalidate(); setCompleteTarget(null); },
+  });
+
+  const skipMut = useMutation({
+    mutationFn: (id) => skipChore(id),
+    onSuccess: () => { invalidate(); },
+  });
+
+  const markDueMut = useMutation({
+    mutationFn: (id) => markDueChore(id),
+    onSuccess: () => { invalidate(); },
   });
 
   const handleFilterChange = useCallback((key, value) => {
@@ -229,6 +247,16 @@ export default function Manage() {
             people={people}
             onEdit={(chore) => setModal({ mode: "edit", chore })}
             onDelete={(chore) => setDeleteTarget(chore)}
+            onComplete={(chore) => {
+              const assignee = chore.assignment_type === "fixed" ? chore.assignee : chore.current_assignee;
+              if (assignee) {
+                completeMut.mutate({ id: chore.id, completedBy: assignee });
+              } else {
+                setCompleteTarget(chore);
+              }
+            }}
+            onSkip={(chore) => skipMut.mutate(chore.id)}
+            onMarkDue={(chore) => markDueMut.mutate(chore.id)}
           />
         </>
       )}
@@ -273,6 +301,43 @@ export default function Manage() {
                 onClick={() => deleteMut.mutate(deleteTarget.unique_id)}
               >
                 {deleteMut.isPending ? "Deleting…" : "Delete"}
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* Complete chore modal (for unassigned chores) */}
+      {completeTarget && (
+        <Modal title={`Who completed ${completeTarget.name}?`} onClose={() => setCompleteTarget(null)}>
+          <div className="complete-form">
+            <div className="form-group">
+              <label htmlFor="complete-by">Person</label>
+              <select id="complete-by" defaultValue="">
+                <option value="">Select someone</option>
+                {people.map((person) => (
+                  <option key={person.id} value={person.name}>
+                    {person.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="confirm-actions">
+              <button className="btn-secondary" onClick={() => setCompleteTarget(null)}>
+                Cancel
+              </button>
+              <button
+                className="btn-primary"
+                disabled={completeMut.isPending}
+                onClick={() => {
+                  const select = document.getElementById("complete-by");
+                  const person = select.value;
+                  if (person) {
+                    completeMut.mutate({ id: completeTarget.id, completedBy: person });
+                  }
+                }}
+              >
+                {completeMut.isPending ? "Completing…" : "Complete"}
               </button>
             </div>
           </div>
