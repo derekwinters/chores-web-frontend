@@ -56,9 +56,42 @@
   border-color: var(--accent);
 }
 
+.users-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.section-header {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--accent);
+}
+
 .users-list {
   display: grid;
+  grid-template-columns: 1fr;
   gap: 1rem;
+}
+
+@media (min-width: 1200px) {
+  .users-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.empty-section {
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-muted);
+  background: var(--surface2);
+  border-radius: 8px;
+  border: 1px solid var(--border);
 }
 
 .user-card {
@@ -192,6 +225,10 @@
 
   .user-actions {
     gap: 0.75rem;
+  }
+
+  .section-header {
+    font-size: 1rem;
   }
 }
 

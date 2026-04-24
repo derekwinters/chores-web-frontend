@@ -138,21 +138,12 @@ export default function UserManagement() {
   if (isLoading) return <div className="loading">Loading users…</div>;
 
   const uniquePeople = Array.from(new Map(people.map(p => [p.name, p])).values());
+  const admins = uniquePeople.filter(p => p.is_admin);
+  const regularUsers = uniquePeople.filter(p => !p.is_admin);
 
-  return (
-    <div className="user-management">
-      <div className="page-header">
-        <h2>Manage Users</h2>
-        {isAdmin && (
-          <button className="btn-primary" onClick={handleOpenCreateDialog} title="Add user">
-            <MdAdd className="action-icon" />
-            <span className="action-text">Add User</span>
-          </button>
-        )}
-      </div>
-
-      <div className="users-list">
-        {uniquePeople.map((person) => (
+  const renderUserCards = (users) => (
+    <>
+      {users.map((person) => (
           <div key={person.name} className="user-card">
             <div className="user-header">
               <div className="user-info">
@@ -195,17 +186,56 @@ export default function UserManagement() {
             )}
           </div>
         ))}
+      </>
+    );
+
+  return (
+    <div className="user-management">
+      <div className="page-header">
+        <h2>Manage Users</h2>
+        {isAdmin && (
+          <button className="btn-primary" onClick={handleOpenCreateDialog} title="Add user">
+            <MdAdd className="action-icon" />
+            <span className="action-text">Add User</span>
+          </button>
+        )}
       </div>
 
-      {people.length === 0 && !showAddForm && (
+      {uniquePeople.length === 0 && !modal && (
         <div className="empty-state">
           <p>No users yet. Add one to get started!</p>
         </div>
       )}
 
-      {uniquePeople.length === 0 && !modal && (
-        <div className="empty-state">
-          <p>No users yet. Add one to get started!</p>
+      {admins.length > 0 && (
+        <div className="users-section">
+          <h3 className="section-header">Administrators</h3>
+          <div className="users-list">
+            {renderUserCards(admins)}
+          </div>
+        </div>
+      )}
+
+      {admins.length === 0 && regularUsers.length > 0 && (
+        <div className="users-section">
+          <h3 className="section-header">Administrators</h3>
+          <div className="empty-section">No administrators</div>
+        </div>
+      )}
+
+      {regularUsers.length > 0 && (
+        <div className="users-section">
+          <h3 className="section-header">Members</h3>
+          <div className="users-list">
+            {renderUserCards(regularUsers)}
+          </div>
+        </div>
+      )}
+
+      {regularUsers.length === 0 && admins.length > 0 && (
+        <div className="users-section">
+          <h3 className="section-header">Members</h3>
+          <div className="empty-section">No members</div>
         </div>
       )}
 
