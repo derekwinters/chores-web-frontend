@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { MdFilterList, MdAdd } from "react-icons/md";
@@ -73,12 +73,14 @@ function getFiltersFromSearchParams(searchParams) {
 
 export default function Manage() {
   const qc = useQueryClient();
-  const { user } = useAuth();
+  const { user, loading: authLoading, isAuthenticated } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
+
   const [modal, setModal] = useState(null); // null | { mode: "create" } | { mode: "edit", chore }
   const [deleteTarget, setDeleteTarget] = useState(null); // chore to confirm-delete
   const [completeTarget, setCompleteTarget] = useState(null); // chore waiting for completion user selection
   const [filtersExpanded, setFiltersExpanded] = useState(false);
+  const defaultFilterAppliedRef = useRef(false);
 
   const filters = useMemo(() => getFiltersFromSearchParams(searchParams), [searchParams]);
 
@@ -91,6 +93,25 @@ export default function Manage() {
     queryKey: ["people"],
     queryFn: getPeople,
   });
+
+  useEffect(() => {
+    if (defaultFilterAppliedRef.current) return;
+    if (authLoading) return;
+    if (!user) return;
+    if (!people || people.length === 0) return;
+
+    const initialParams = Object.fromEntries(new URLSearchParams(searchParams));
+    if (Object.keys(initialParams).length > 0) return;
+
+    const currentPerson = people.find(p => p.name.toLowerCase() === user.username.toLowerCase());
+    if (!currentPerson) return;
+
+    defaultFilterAppliedRef.current = true;
+    const params = new URLSearchParams();
+    params.append("assignee", currentPerson.name);
+    params.append("assignee", UNASSIGNED_FILTER_VALUE);
+    setSearchParams(params);
+  }, [authLoading, user, people, searchParams, setSearchParams]);
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["chores"] });
 
@@ -197,6 +218,9 @@ export default function Manage() {
         <>
           {Object.keys(filters).length > 0 && (
             <div className="filter-bar">
+              {user && filters.assignees?.length === 2 && Object.keys(filters).length === 1 && (
+                <span className="filter-hint">Showing chores assigned to you and unassigned</span>
+              )}
               <button className="btn-secondary" onClick={handleClearFilters}>
                 Clear filters
               </button>

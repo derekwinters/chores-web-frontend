@@ -157,6 +157,12 @@
   align-items: center;
 }
 
+.filter-hint {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
 .chore-filters {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
