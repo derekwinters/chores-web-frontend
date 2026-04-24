@@ -32,7 +32,7 @@ function emptyState() {
     assignee: "",
     current_assignee: "",
     next_assignee: "",
-    points: "0",
+    points: "1",
     disabled: false,
     // dates
     next_due: null,
