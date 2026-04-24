@@ -15,7 +15,7 @@ export default function Login({ onLoginSuccess }) {
     setLoading(true);
 
     try {
-      const response = await login(username, password);
+      const response = await login(username.toLowerCase(), password);
       setToken(response.access_token);
       // Only reload on success
       setTimeout(() => {
@@ -46,6 +46,9 @@ export default function Login({ onLoginSuccess }) {
               placeholder="Enter your username"
               disabled={loading}
               required
+              inputMode="text"
+              autoCapitalize="off"
+              autoCorrect="off"
             />
           </div>
 

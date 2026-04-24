@@ -20,13 +20,11 @@ async function request(method, path, body) {
     body: body ? JSON.stringify(body) : undefined,
   });
 
-  if (res.status === 401) {
-    clearToken();
-    window.location.href = "/";
-  }
-
   if (!res.ok) {
     const detail = await res.json().catch(() => ({}));
+    if (res.status === 401) {
+      clearToken();
+    }
     throw new Error(detail.detail ?? `HTTP ${res.status}`);
   }
   if (res.status === 204) return null;
