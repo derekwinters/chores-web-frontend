@@ -108,3 +108,8 @@ export const logout = () =>
 
 export const changePassword = (oldPassword, newPassword) =>
   request("PUT", "/auth/password", { old_password: oldPassword, new_password: newPassword });
+
+// Export/Import
+export const exportConfig = () => request("GET", "/export/config");
+
+export const importConfig = (data) => request("POST", "/import/config", data);

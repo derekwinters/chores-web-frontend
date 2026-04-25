@@ -1,0 +1,126 @@
+.export-import {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.export-section,
+.import-section {
+  padding: 1.25rem;
+  background: var(--surface);
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+
+.export-section h4,
+.import-section h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  color: var(--text);
+}
+
+.section-description {
+  margin: 0.5rem 0 1rem 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.divider {
+  height: 1px;
+  background: var(--border);
+}
+
+.file-input-label {
+  display: block;
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.file-input-label input[type="file"] {
+  display: none;
+}
+
+.file-input-button {
+  display: inline-block;
+  padding: 0.625rem 1rem;
+  background: var(--surface2);
+  border: 1px dashed var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--text);
+  transition: background-color 0.2s;
+}
+
+.file-input-label:hover .file-input-button {
+  background: var(--accent);
+  color: white;
+}
+
+.file-input-label input[type="file"]:disabled + .file-input-button {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.import-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.confirm-warning {
+  padding: 1rem;
+  background: var(--surface2);
+  border-left: 4px solid var(--danger);
+  border-radius: 4px;
+}
+
+.confirm-warning strong {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--danger);
+}
+
+.confirm-warning p {
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.confirm-warning ul {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.confirm-warning li {
+  margin: 0.25rem 0;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.error-message,
+.success-message {
+  padding: 0.875rem 1rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.error-message {
+  background: rgba(224, 92, 106, 0.1);
+  color: var(--danger);
+  border: 1px solid var(--danger);
+}
+
+.success-message {
+  background: rgba(61, 184, 122, 0.1);
+  color: var(--success);
+  border: 1px solid var(--success);
+}

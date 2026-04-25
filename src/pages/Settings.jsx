@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { getConfig, updateConfig } from "../api/client";
 import ThemeSettings from "../components/ThemeSettings";
+import ExportImport from "../components/ExportImport";
 import "./Settings.css";
 
 const COMMON_TIMEZONES = [
@@ -160,6 +161,11 @@ export default function Settings({ onTitleUpdate }) {
       <section className="settings-section">
         <h3>Theme</h3>
         <ThemeSettings />
+      </section>
+
+      <section className="settings-section">
+        <h3>Data Management</h3>
+        <ExportImport />
       </section>
     </div>
   );
