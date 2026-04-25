@@ -25,6 +25,34 @@ function wrap(ui) {
   return render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>);
 }
 
+const DARK_THEME = {
+  id: "dark",
+  name: "Dark",
+  colors: {
+    bg: "#080c14",
+    surface: "#16202e",
+    surface2: "#1e2d40",
+    accent: "#73B1DD",
+    success: "#3db87a",
+    warning: "#e8a930",
+    danger: "#e05c6a",
+  },
+};
+
+const LIGHT_THEME = {
+  id: "light",
+  name: "Light",
+  colors: {
+    bg: "#ffffff",
+    surface: "#f5f5f5",
+    surface2: "#eeeeee",
+    accent: "#0066cc",
+    success: "#28a745",
+    warning: "#ffc107",
+    danger: "#dc3545",
+  },
+};
+
 describe("App Title", () => {
   beforeEach(() => {
     vi.resetAllMocks();
@@ -35,6 +63,10 @@ describe("App Title", () => {
     client.getPointsSummary.mockResolvedValue([]);
     client.getConfig.mockResolvedValue({ title: "Family Chores" });
     client.getSetupStatus.mockResolvedValue({ setup_needed: false });
+    client.getCurrentTheme.mockResolvedValue(DARK_THEME);
+    client.getThemes.mockResolvedValue([DARK_THEME, LIGHT_THEME]);
+    client.setTheme.mockResolvedValue(DARK_THEME);
+    client.getLog.mockResolvedValue([]);
     localStorage.clear();
   });
 
@@ -56,9 +88,15 @@ describe("App Title", () => {
 
   it("shows title edit field in settings", async () => {
     wrap(<App />);
-    // Settings is accessed via the /settings route - navigate there via the topnav Settings button
-    await waitFor(() => screen.getByRole("button", { name: /settings/i }));
-    fireEvent.click(screen.getByRole("button", { name: /settings/i }));
+    // Open avatar menu first
+    const avatarButtons = await waitFor(() => screen.getAllByRole("button", { name: /user menu/i }));
+    fireEvent.click(avatarButtons[0]);
+    // Click Settings option
+    await waitFor(() => {
+      const settingsBtn = screen.getByRole("button", { name: /Settings/i });
+      fireEvent.click(settingsBtn);
+    });
+    // Should navigate to settings page with title input
     await waitFor(() => {
       expect(screen.getByLabelText(/app title/i)).toBeInTheDocument();
     });
@@ -69,8 +107,14 @@ describe("App Title", () => {
     client.updateConfig.mockResolvedValue({ title: "My Chores" });
     wrap(<App />);
 
-    await waitFor(() => screen.getByRole("button", { name: /settings/i }));
-    fireEvent.click(screen.getByRole("button", { name: /settings/i }));
+    // Open avatar menu
+    const avatarButtons = await waitFor(() => screen.getAllByRole("button", { name: /user menu/i }));
+    fireEvent.click(avatarButtons[0]);
+    // Click Settings
+    await waitFor(() => {
+      const settingsBtn = screen.getByRole("button", { name: /Settings/i });
+      fireEvent.click(settingsBtn);
+    });
     await waitFor(() => screen.getByLabelText(/app title/i));
 
     const input = screen.getByLabelText(/app title/i);
@@ -90,8 +134,14 @@ describe("App Title", () => {
     client.updateConfig.mockResolvedValue({ title: "My Chores" });
     wrap(<App />);
 
-    await waitFor(() => screen.getByRole("button", { name: /settings/i }));
-    fireEvent.click(screen.getByRole("button", { name: /settings/i }));
+    // Open avatar menu
+    const avatarButtons = await waitFor(() => screen.getAllByRole("button", { name: /user menu/i }));
+    fireEvent.click(avatarButtons[0]);
+    // Click Settings
+    await waitFor(() => {
+      const settingsBtn = screen.getByRole("button", { name: /Settings/i });
+      fireEvent.click(settingsBtn);
+    });
     await waitFor(() => screen.getByLabelText(/app title/i));
 
     const input = screen.getByLabelText(/app title/i);

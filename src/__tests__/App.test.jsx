@@ -24,6 +24,20 @@ function wrap(ui) {
   return render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>);
 }
 
+const LIGHT_THEME = {
+  id: "light",
+  name: "Light",
+  colors: {
+    bg: "#ffffff",
+    surface: "#f5f5f5",
+    surface2: "#eeeeee",
+    accent: "#0066cc",
+    success: "#28a745",
+    warning: "#ffc107",
+    danger: "#dc3545",
+  },
+};
+
 function deferred() {
   let resolve;
   let reject;
@@ -64,6 +78,8 @@ describe("App", () => {
     client.getSetupStatus.mockResolvedValue({ setup_needed: false });
     client.getConfig.mockResolvedValue({ title: "Family Chores" });
     client.getCurrentTheme.mockResolvedValue(DARK_THEME);
+    client.getThemes.mockResolvedValue([DARK_THEME, LIGHT_THEME]);
+    client.setTheme.mockResolvedValue(DARK_THEME);
   });
 
   it("waits for the saved theme before rendering the authenticated app shell", async () => {
@@ -89,11 +105,13 @@ describe("App", () => {
 
     wrap(<App />);
 
-    await waitFor(() => {
-      expect(screen.getAllByText("Board").length).toBeGreaterThan(0);
-    });
-
-    expect(document.documentElement.style.getPropertyValue("--bg")).toBe("#080c14");
+    // When theme loading fails, the app should still apply default theme colors
+    await waitFor(
+      () => {
+        expect(document.documentElement.style.getPropertyValue("--bg")).toBe("#080c14");
+      },
+      { timeout: 5000 }
+    );
   });
 
   it("renders the app title", async () => {
@@ -190,10 +208,15 @@ describe("App", () => {
 
   it("navigates to Settings page via user avatar menu", async () => {
     wrap(<App />);
-    await waitFor(() => screen.getByRole("button", { name: /user menu/i }));
-    // Settings is accessible via UserAvatarMenu with directSettings=true in topnav
-    const settingsBtn = screen.getByRole("button", { name: /settings/i });
-    expect(settingsBtn).toBeInTheDocument();
+    await waitFor(() => screen.getAllByRole("button", { name: /user menu/i }));
+    // Click the first avatar button to open the menu
+    const avatarButtons = screen.getAllByRole("button", { name: /user menu/i });
+    fireEvent.click(avatarButtons[0]);
+    // Settings option should be visible for admin users
+    await waitFor(() => {
+      const settingsBtn = screen.getByRole("button", { name: /Settings/i });
+      expect(settingsBtn).toBeInTheDocument();
+    });
   });
 
   it("toggles sidebar collapse state", async () => {

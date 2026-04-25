@@ -99,7 +99,7 @@ function AppContent() {
             user={displayUser}
             onLogout={logout}
             onSettings={() => navigate("/settings")}
-            directSettings={true}
+            isAdmin={loggedInUser?.is_admin}
           />
         </div>
       </nav>
@@ -131,6 +131,7 @@ function AppContent() {
           user={displayUser}
           onLogout={logout}
           onSettings={() => navigate("/settings")}
+          isAdmin={loggedInUser?.is_admin}
         />
       </aside>
       <div className={`sidebar-backdrop ${sidebarOpen ? "open" : ""}`} onClick={() => setSidebarOpen(false)}></div>
