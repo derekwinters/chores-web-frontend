@@ -77,7 +77,8 @@ describe("App Title", () => {
     await user.clear(input);
     await user.type(input, "My Chores");
 
-    fireEvent.click(screen.getByRole("button", { name: /save/i }));
+    const buttons = screen.getAllByRole("button", { name: /save/i });
+    fireEvent.click(buttons[0]);
 
     await waitFor(() => {
       expect(client.updateConfig).toHaveBeenCalledWith(expect.objectContaining({ title: "My Chores" }));
@@ -97,7 +98,8 @@ describe("App Title", () => {
     await user.clear(input);
     await user.type(input, "My Chores");
 
-    fireEvent.click(screen.getByRole("button", { name: /save/i }));
+    const buttons = screen.getAllByRole("button", { name: /save/i });
+    fireEvent.click(buttons[0]);
 
     await waitFor(() => {
       const titles = screen.getAllByText("My Chores");

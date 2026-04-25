@@ -66,7 +66,9 @@ describe("Settings", () => {
       const input = screen.getByLabelText(/app title/i);
       expect(input.value).not.toBe("");
     });
-    fireEvent.click(screen.getByRole("button", { name: /save/i }));
+    // Click the Save button in the input-group (first one)
+    const buttons = screen.getAllByRole("button", { name: /save/i });
+    fireEvent.click(buttons[0]);
     await waitFor(() => {
       expect(client.updateConfig).toHaveBeenCalled();
     });

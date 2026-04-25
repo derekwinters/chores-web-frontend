@@ -5,10 +5,25 @@ import { getConfig, updateConfig } from "../api/client";
 import ThemeSettings from "../components/ThemeSettings";
 import "./Settings.css";
 
+const COMMON_TIMEZONES = [
+  "UTC",
+  "America/New_York",
+  "America/Chicago",
+  "America/Denver",
+  "America/Los_Angeles",
+  "Europe/London",
+  "Europe/Paris",
+  "Europe/Berlin",
+  "Asia/Tokyo",
+  "Asia/Shanghai",
+  "Australia/Sydney",
+];
+
 export default function Settings({ onTitleUpdate }) {
   const queryClient = useQueryClient();
   const [title, setTitle] = useState("");
   const [authEnabled, setAuthEnabled] = useState(true);
+  const [timezone, setTimezone] = useState("UTC");
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
 
@@ -23,6 +38,9 @@ export default function Settings({ onTitleUpdate }) {
     }
     if (config?.auth_enabled !== undefined) {
       setAuthEnabled(config.auth_enabled);
+    }
+    if (config?.timezone) {
+      setTimezone(config.timezone);
     }
   }, [config]);
 
@@ -46,7 +64,7 @@ export default function Settings({ onTitleUpdate }) {
       setError("Title cannot be empty");
       return;
     }
-    updateMutation.mutate({ title, auth_enabled: authEnabled });
+    updateMutation.mutate({ title, auth_enabled: authEnabled, timezone });
   };
 
   if (isLoading) return <div className="loading">Loading settings…</div>;
@@ -107,6 +125,36 @@ export default function Settings({ onTitleUpdate }) {
             </Link>
           </div>
         )}
+      </section>
+
+      <section className="settings-section">
+        <h3>Date & Time</h3>
+        <div className="setting-group">
+          <label htmlFor="timezone">Timezone</label>
+          <select
+            id="timezone"
+            value={timezone}
+            onChange={(e) => setTimezone(e.target.value)}
+            disabled={updateMutation.isPending}
+          >
+            {COMMON_TIMEZONES.map((tz) => {
+              const offset = new Date().toLocaleString('en-US', { timeZone: tz, timeZoneName: 'shortOffset' }).split(' ').pop();
+              return (
+                <option key={tz} value={tz}>
+                  {tz} ({offset})
+                </option>
+              );
+            })}
+          </select>
+          <button
+            className="btn-primary"
+            onClick={handleSave}
+            disabled={updateMutation.isPending || !title.trim()}
+            style={{ marginTop: "0.5rem", width: "fit-content" }}
+          >
+            {updateMutation.isPending ? "Saving…" : "Save"}
+          </button>
+        </div>
       </section>
 
       <section className="settings-section">
