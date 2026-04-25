@@ -5,7 +5,7 @@ import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation } from "re
 import Setup from "./pages/Setup";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
-import Manage from "./pages/Manage";
+import Chores from "./pages/Chores";
 import UserManagement from "./components/UserManagement";
 import Log from "./components/Log";
 import Settings from "./pages/Settings";
@@ -138,7 +138,7 @@ function AppContent() {
         <main className="app-main">
           <Routes>
             <Route path="/" element={<Dashboard />} />
-            <Route path="/chores" element={<Manage />} />
+            <Route path="/chores" element={<Chores />} />
             <Route path="/users" element={<UserManagement />} />
             <Route path="/users/:userName" element={<UserDetail />} />
             <Route path="/log" element={<Log />} />

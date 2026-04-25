@@ -5,7 +5,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter, useLocation } from "react-router-dom";
 import { AuthProvider } from "../contexts/AuthContext";
-import Manage from "../pages/Manage";
+import Chores from "../pages/Chores";
 import * as client from "../api/client";
 
 vi.mock("../api/client");
@@ -133,7 +133,7 @@ describe("Manage page", () => {
   });
 
   it("renders chore table with all chores", async () => {
-    wrap(<Manage />);
+    wrap(<Chores />);
     await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
     expect(screen.getByText("Dishes")).toBeInTheDocument();
     expect(screen.getByText("Bathroom")).toBeInTheDocument();
@@ -142,7 +142,7 @@ describe("Manage page", () => {
   });
 
   it("shows schedule summaries", async () => {
-    wrap(<Manage />);
+    wrap(<Chores />);
     await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
 
     // Expand Vacuum card to see "Weekly on Mon"
@@ -163,7 +163,7 @@ describe("Manage page", () => {
   });
 
   it("shows assignment type info for chores", async () => {
-    wrap(<Manage />);
+    wrap(<Chores />);
     await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
 
     // Expand all cards to see assignee and other metadata
@@ -180,13 +180,13 @@ describe("Manage page", () => {
   });
 
   it("shows Add Chore button", async () => {
-    wrap(<Manage />);
+    wrap(<Chores />);
     // Button has an MdAdd SVG icon + "Add Chore" text (no literal "+")
     await waitFor(() => expect(screen.getByRole("button", { name: /add chore/i })).toBeInTheDocument());
   });
 
   it("opens create modal on Add Chore click", async () => {
-    wrap(<Manage />);
+    wrap(<Chores />);
     await waitFor(() => screen.getByRole("button", { name: /add chore/i }));
     fireEvent.click(screen.getByRole("button", { name: /add chore/i }));
     // "Add Chore" now appears in both button text and modal title; use getAllByText
@@ -195,7 +195,7 @@ describe("Manage page", () => {
   });
 
   it("closes modal on Cancel", async () => {
-    wrap(<Manage />);
+    wrap(<Chores />);
     await waitFor(() => screen.getByRole("button", { name: /add chore/i }));
     fireEvent.click(screen.getByRole("button", { name: /add chore/i }));
     fireEvent.click(screen.getByText("Cancel"));
@@ -203,7 +203,7 @@ describe("Manage page", () => {
   });
 
   it("closes modal on Escape key", async () => {
-    wrap(<Manage />);
+    wrap(<Chores />);
     await waitFor(() => screen.getByRole("button", { name: /add chore/i }));
     fireEvent.click(screen.getByRole("button", { name: /add chore/i }));
     fireEvent.keyDown(document, { key: "Escape" });
@@ -211,7 +211,7 @@ describe("Manage page", () => {
   });
 
   it("opens edit modal with chore data pre-filled", async () => {
-    wrap(<Manage />);
+    wrap(<Chores />);
     await waitFor(() => screen.getByText("Vacuum"));
 
     // Expand Vacuum card to show edit button
@@ -227,7 +227,7 @@ describe("Manage page", () => {
   });
 
   it("calls updateChore on edit submit", async () => {
-    wrap(<Manage />);
+    wrap(<Chores />);
     await waitFor(() => screen.getByText("Vacuum"));
 
     // Expand Vacuum card to show edit button
@@ -245,7 +245,7 @@ describe("Manage page", () => {
   });
 
   it("shows delete confirmation modal", async () => {
-    wrap(<Manage />);
+    wrap(<Chores />);
     await waitFor(() => screen.getByText("Vacuum"));
 
     // Expand Vacuum card to show delete button
@@ -262,7 +262,7 @@ describe("Manage page", () => {
   });
 
   it("calls deleteChore on confirm delete", async () => {
-    wrap(<Manage />);
+    wrap(<Chores />);
     await waitFor(() => screen.getByText("Vacuum"));
 
     // Expand Vacuum card to show delete button
@@ -283,14 +283,14 @@ describe("Manage page", () => {
 
   it("shows empty state when no chores", async () => {
     client.getChores.mockResolvedValue([]);
-    wrap(<Manage />);
+    wrap(<Chores />);
     await waitFor(() =>
       expect(screen.getByText(/No chores yet/i)).toBeInTheDocument()
     );
   });
 
   it("hydrates filters from URL params on initial render", async () => {
-    wrap(<Manage />, { initialEntries: ["/chores?state=complete"] });
+    wrap(<Chores />, { initialEntries: ["/chores?state=complete"] });
 
     await waitFor(() => expect(screen.getByText("Dishes")).toBeInTheDocument());
     expect(screen.queryByText("Vacuum")).not.toBeInTheDocument();
@@ -305,7 +305,7 @@ describe("Manage page", () => {
   });
 
   it("updates URL params when filters change", async () => {
-    wrap(<Manage />);
+    wrap(<Chores />);
     const user = userEvent.setup();
 
     await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
@@ -323,7 +323,7 @@ describe("Manage page", () => {
   });
 
   it("clears URL params when filters are reset", async () => {
-    wrap(<Manage />, { initialEntries: ["/chores?assignment_type=open&disabled=false"] });
+    wrap(<Chores />, { initialEntries: ["/chores?assignment_type=open&disabled=false"] });
 
     await waitFor(() => expect(screen.getByText("Dishes")).toBeInTheDocument());
     fireEvent.click(screen.getByRole("button", { name: /clear filters/i }));
@@ -334,7 +334,7 @@ describe("Manage page", () => {
   });
 
   it("hydrates assignee filter from URL params on initial render", async () => {
-    wrap(<Manage />, { initialEntries: ["/chores?assignee=Bob"] });
+    wrap(<Chores />, { initialEntries: ["/chores?assignee=Bob"] });
 
     await waitFor(() => expect(screen.getByText("Countertops")).toBeInTheDocument());
     expect(screen.queryByText("Vacuum")).not.toBeInTheDocument();
@@ -350,7 +350,7 @@ describe("Manage page", () => {
   });
 
   it("updates URL params when assignee filter changes", async () => {
-    wrap(<Manage />);
+    wrap(<Chores />);
     const user = userEvent.setup();
 
     await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
@@ -371,7 +371,7 @@ describe("Manage page", () => {
   });
 
   it("filters chores by unassigned assignee", async () => {
-    wrap(<Manage />, { initialEntries: ["/chores?assignee=unassigned"] });
+    wrap(<Chores />, { initialEntries: ["/chores?assignee=unassigned"] });
 
     await waitFor(() => expect(screen.getByText("Bathroom")).toBeInTheDocument());
     expect(screen.getByText("Dishes")).toBeInTheDocument();
@@ -384,7 +384,7 @@ describe("Manage page", () => {
   });
 
   it("sorts chores by next due date with name tiebreakers and no-date chores last", async () => {
-    wrap(<Manage />);
+    wrap(<Chores />);
 
     await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
 
@@ -398,7 +398,7 @@ describe("Manage page", () => {
   });
 
   it("preserves due-date ordering after filters are applied", async () => {
-    wrap(<Manage />, { initialEntries: ["/chores?assignment_type=open"] });
+    wrap(<Chores />, { initialEntries: ["/chores?assignment_type=open"] });
 
     await waitFor(() => expect(screen.getByText("Bathroom")).toBeInTheDocument());
 
@@ -412,7 +412,7 @@ describe("Manage page", () => {
   });
 
   it("shows complete and skip buttons when card is expanded", async () => {
-    wrap(<Manage />);
+    wrap(<Chores />);
     await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
 
     const vacuumCard = screen.getByText("Vacuum").closest("article");
@@ -425,7 +425,7 @@ describe("Manage page", () => {
   });
 
   it("calls completeChore on Complete button click", async () => {
-    wrap(<Manage />);
+    wrap(<Chores />);
     await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
 
     const vacuumCard = screen.getByText("Vacuum").closest("article");
@@ -443,7 +443,7 @@ describe("Manage page", () => {
   });
 
   it("calls skipChore on Skip button click", async () => {
-    wrap(<Manage />);
+    wrap(<Chores />);
     await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
 
     const vacuumCard = screen.getByText("Vacuum").closest("article");

@@ -14,7 +14,7 @@ import {
   UNASSIGNED_LABEL,
 } from "../utils/choreAssignee";
 import { compareChoresByNextDue } from "../utils/choreSort";
-import "./Manage.css";
+import "./Chores.css";
 
 const SELECT_CONFIG = {
   sx: {
@@ -166,10 +166,8 @@ export default function Manage() {
         const assignee = getChoreAssigneeName(chore);
         const isUnassignedSelected = filters.assignees.includes(UNASSIGNED_FILTER_VALUE);
         const isAssigneeSelected = filters.assignees.includes(assignee);
-
-        if (assignee === null && isUnassignedSelected) return true;
-        if (assignee !== null && isAssigneeSelected) return true;
-        return false;
+        const matchesAssignee = (assignee === null && isUnassignedSelected) || (assignee !== null && isAssigneeSelected);
+        if (!matchesAssignee) return false;
       }
       if (filters.daysFromNow !== undefined) {
         if (chore.next_due === null) return false;

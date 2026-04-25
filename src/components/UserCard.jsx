@@ -95,6 +95,7 @@ export default function UserCard({ person, chores, people, summary }) {
           onClick={(e) => {
             e.stopPropagation();
             const params = new URLSearchParams();
+            params.append("daysFromNow", DUE_SOON_DAYS);
             params.append("assignee", person.name);
             params.append("assignee", UNASSIGNED_FILTER_VALUE);
             navigate(`/chores?${params.toString()}`);
