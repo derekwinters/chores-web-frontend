@@ -60,6 +60,7 @@ function getFiltersFromSearchParams(searchParams) {
   const state = searchParams.get("state");
   const disabled = searchParams.get("disabled");
   const assignees = searchParams.getAll("assignee");
+  const daysFromNow = searchParams.get("daysFromNow");
 
   if (scheduleType) filters.schedule_type = scheduleType;
   if (assignmentType) filters.assignment_type = assignmentType;
@@ -67,6 +68,7 @@ function getFiltersFromSearchParams(searchParams) {
   if (disabled === "true") filters.disabled = true;
   if (disabled === "false") filters.disabled = false;
   if (assignees.length > 0) filters.assignees = assignees;
+  if (daysFromNow) filters.daysFromNow = parseInt(daysFromNow, 10);
 
   return filters;
 }
@@ -80,7 +82,6 @@ export default function Manage() {
   const [deleteTarget, setDeleteTarget] = useState(null); // chore to confirm-delete
   const [completeTarget, setCompleteTarget] = useState(null); // chore waiting for completion user selection
   const [filtersExpanded, setFiltersExpanded] = useState(false);
-  const defaultFilterAppliedRef = useRef(false);
 
   const filters = useMemo(() => getFiltersFromSearchParams(searchParams), [searchParams]);
 
@@ -94,24 +95,6 @@ export default function Manage() {
     queryFn: getPeople,
   });
 
-  useEffect(() => {
-    if (defaultFilterAppliedRef.current) return;
-    if (authLoading) return;
-    if (!user) return;
-    if (!people || people.length === 0) return;
-
-    const initialParams = Object.fromEntries(new URLSearchParams(searchParams));
-    if (Object.keys(initialParams).length > 0) return;
-
-    const currentPerson = people.find(p => p.name.toLowerCase() === user.username.toLowerCase());
-    if (!currentPerson) return;
-
-    defaultFilterAppliedRef.current = true;
-    const params = new URLSearchParams();
-    params.append("assignee", currentPerson.name);
-    params.append("assignee", UNASSIGNED_FILTER_VALUE);
-    setSearchParams(params);
-  }, [authLoading, user, people, searchParams, setSearchParams]);
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["chores"] });
 
@@ -171,6 +154,9 @@ export default function Manage() {
   };
 
   const filtered = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
     return chores.filter((chore) => {
       if (filters.schedule_type && chore.schedule_type !== filters.schedule_type) return false;
       if (filters.assignment_type && chore.assignment_type !== filters.assignment_type) return false;
@@ -184,6 +170,13 @@ export default function Manage() {
         if (assignee === null && isUnassignedSelected) return true;
         if (assignee !== null && isAssigneeSelected) return true;
         return false;
+      }
+      if (filters.daysFromNow !== undefined) {
+        if (chore.next_due === null) return false;
+        const dueDate = new Date(chore.next_due);
+        dueDate.setHours(0, 0, 0, 0);
+        const daysUntilDue = Math.floor((dueDate - today) / (1000 * 60 * 60 * 24));
+        if (daysUntilDue > filters.daysFromNow) return false;
       }
       return true;
     });
@@ -313,6 +306,23 @@ export default function Manage() {
                       {state}
                     </MenuItem>
                   ))}
+                </Select>
+              </div>
+
+              <div className="filter-group">
+                <label htmlFor="filter-days">Due within</label>
+                <Select
+                  id="filter-days"
+                  value={filters.daysFromNow !== undefined ? String(filters.daysFromNow) : ""}
+                  onChange={(e) => {
+                    handleFilterChange("daysFromNow", e.target.value ? parseInt(e.target.value, 10) : undefined);
+                  }}
+                  {...SELECT_CONFIG}
+                >
+                  <MenuItem value="">All chores</MenuItem>
+                  <MenuItem value="0">Today</MenuItem>
+                  <MenuItem value="7">Next 7 days</MenuItem>
+                  <MenuItem value="30">Next 30 days</MenuItem>
                 </Select>
               </div>
 
