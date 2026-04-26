@@ -110,6 +110,10 @@ export const logout = () =>
 export const changePassword = (oldPassword, newPassword) =>
   request("PUT", "/auth/password", { old_password: oldPassword, new_password: newPassword });
 
+// Redemptions
+export const redeemPoints = (personId, amount) =>
+  request("POST", `/people/${personId}/redeem`, { amount });
+
 // Export/Import
 export const exportConfig = () => request("GET", "/export/config");
 

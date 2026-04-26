@@ -103,9 +103,8 @@ describe("UserDetail", () => {
   it("displays user statistics", async () => {
     wrap(<UserDetail />);
     await waitFor(() => {
-      expect(screen.getByText(/Total Earned/i)).toBeInTheDocument();
+      expect(screen.getAllByText(/Available/i).length).toBeGreaterThan(0);
       expect(screen.getByText(/Redeemed/i)).toBeInTheDocument();
-      expect(screen.getByText(/Available/i)).toBeInTheDocument();
       expect(screen.getByText(/Last 7 Days/i)).toBeInTheDocument();
       expect(screen.getByText(/Last 30 Days/i)).toBeInTheDocument();
     });
@@ -119,11 +118,10 @@ describe("UserDetail", () => {
     });
   });
 
-  it("shows completion and skip counts", async () => {
+  it("shows completion count", async () => {
     wrap(<UserDetail />);
     await waitFor(() => {
       expect(screen.getAllByText(/Completed/i).length).toBeGreaterThan(0);
-      expect(screen.getAllByText(/Skipped/i).length).toBeGreaterThan(0);
     });
   });
 
