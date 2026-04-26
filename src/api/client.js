@@ -54,6 +54,7 @@ export const createPerson = (name, password, color) => {
 };
 export const updatePerson = (id, data) => request("PUT", `/people/${id}`, data);
 export const deletePerson = (id) => request("DELETE", `/people/${id}`);
+export const getRedemptionHistory = (personId) => request("GET", `/people/${personId}/redemptions`);
 
 // Points
 export const getLeaderboard = () => request("GET", "/points");

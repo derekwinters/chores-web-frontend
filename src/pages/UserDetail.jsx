@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
-import { getLog, getUserStats } from "../api/client";
+import { getLog, getUserStats, getPeople, getRedemptionHistory } from "../api/client";
 import "./UserDetail.css";
 
 const USER_ACTIVITY_ACTIONS = ["completed", "skipped", "reassigned"];
@@ -22,7 +22,23 @@ export default function UserDetail() {
     enabled: Boolean(userName),
   });
 
-  if (statsLoading || historyLoading) return <div className="loading">Loading…</div>;
+  const { data: people = [] } = useQuery({
+    queryKey: ["people"],
+    queryFn: getPeople,
+  });
+
+  const personId = useMemo(() => {
+    const person = people.find((p) => p.name === userName);
+    return person?.id;
+  }, [people, userName]);
+
+  const { data: redemptions = [], isLoading: redemptionsLoading } = useQuery({
+    queryKey: ["redemptions", personId],
+    queryFn: () => getRedemptionHistory(personId),
+    enabled: Boolean(personId),
+  });
+
+  if (statsLoading || historyLoading || redemptionsLoading) return <div className="loading">Loading…</div>;
 
   return (
     <div className="user-detail">
@@ -37,8 +53,18 @@ export default function UserDetail() {
       {stats && (
         <div className="stats-grid">
           <div className="stat-card">
-            <div className="stat-label">Total Points</div>
+            <div className="stat-label">Total Earned</div>
             <div className="stat-value">{stats.total_points}</div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-label">Redeemed</div>
+            <div className="stat-value">{stats.points_redeemed ?? 0}</div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-label">Available</div>
+            <div className="stat-value">{stats.display_points ?? stats.total_points}</div>
           </div>
 
           <div className="stat-card">
@@ -64,9 +90,9 @@ export default function UserDetail() {
       )}
 
       <div className="history-section">
-        <h2>History</h2>
+        <h2>Chore Activity</h2>
         {history.length === 0 ? (
-          <p className="empty-history">No history yet</p>
+          <p className="empty-history">No activity yet</p>
         ) : (
           <div className="history-list">
             {history.map((entry) => (
@@ -74,6 +100,25 @@ export default function UserDetail() {
                 <div className="entry-chore">{entry.chore_name}</div>
                 <div className="entry-action">{entry.action}</div>
                 <div className="entry-time">
+                  {new Date(entry.timestamp).toLocaleDateString()}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="redemption-section">
+        <h2>Redemption History</h2>
+        {redemptions.length === 0 ? (
+          <p className="empty-history">No redemptions yet</p>
+        ) : (
+          <div className="redemption-list">
+            {redemptions.map((entry) => (
+              <div key={entry.id} className="redemption-entry">
+                <div className="redemption-amount">{entry.amount} points</div>
+                <div className="redemption-redeemed-by">by {entry.redeemed_by}</div>
+                <div className="redemption-time">
                   {new Date(entry.timestamp).toLocaleDateString()}
                 </div>
               </div>

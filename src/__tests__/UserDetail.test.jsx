@@ -31,11 +31,27 @@ const USER_HISTORY = [
 const USER_STATS = {
   name: "Alice",
   total_points: 45,
+  points_redeemed: 10,
+  display_points: 35,
   points_7d: 15,
   points_30d: 45,
   completed_count: 9,
   skipped_count: 1,
 };
+
+const PEOPLE = [
+  { id: 1, name: "Alice", username: "alice" },
+];
+
+const REDEMPTIONS = [
+  {
+    id: 1,
+    person_id: 1,
+    amount: 10,
+    redeemed_by: "admin",
+    timestamp: "2026-04-20T10:00:00Z",
+  },
+];
 
 function wrap(ui) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -56,6 +72,8 @@ describe("UserDetail", () => {
     vi.resetAllMocks();
     client.getLog.mockResolvedValue(USER_HISTORY);
     client.getUserStats.mockResolvedValue(USER_STATS);
+    client.getPeople.mockResolvedValue(PEOPLE);
+    client.getRedemptionHistory.mockResolvedValue(REDEMPTIONS);
   });
 
   it("renders user name", async () => {
@@ -85,7 +103,9 @@ describe("UserDetail", () => {
   it("displays user statistics", async () => {
     wrap(<UserDetail />);
     await waitFor(() => {
-      expect(screen.getByText(/Total Points/i)).toBeInTheDocument();
+      expect(screen.getByText(/Total Earned/i)).toBeInTheDocument();
+      expect(screen.getByText(/Redeemed/i)).toBeInTheDocument();
+      expect(screen.getByText(/Available/i)).toBeInTheDocument();
       expect(screen.getByText(/Last 7 Days/i)).toBeInTheDocument();
       expect(screen.getByText(/Last 30 Days/i)).toBeInTheDocument();
     });

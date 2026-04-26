@@ -112,6 +112,50 @@
   padding: 2rem;
 }
 
+.redemption-section {
+  border-top: 1px solid var(--border);
+  padding-top: 1.5rem;
+}
+
+.redemption-section h2 {
+  margin: 0 0 1rem 0;
+  font-size: 1.2rem;
+  color: var(--text);
+}
+
+.redemption-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.redemption-entry {
+  display: grid;
+  grid-template-columns: 120px 1fr 120px;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.75rem;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.redemption-amount {
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.redemption-redeemed-by {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.redemption-time {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-align: right;
+}
+
 .loading {
   text-align: center;
   padding: 2rem;
@@ -134,6 +178,15 @@
 
   .entry-action,
   .entry-time {
+    text-align: left;
+  }
+
+  .redemption-entry {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .redemption-time {
     text-align: left;
   }
 }
