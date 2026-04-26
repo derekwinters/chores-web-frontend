@@ -25,7 +25,7 @@
   flex-direction: column;
   transition: width 0.3s ease;
   width: 240px;
-  height: 100vh;
+  height: 100dvh;
   position: fixed;
   left: 0;
   top: 0;
@@ -257,7 +257,7 @@
   .app-sidebar {
     position: fixed;
     width: 240px;
-    height: calc(100vh - 56px);
+    height: calc(100dvh - 56px);
     top: 56px;
     left: 0;
     transform: translateX(-100%);
