@@ -88,6 +88,12 @@ describe("App", () => {
 
     wrap(<App />);
 
+    // First waits for DB to be ready (mocked to resolve immediately)
+    await waitFor(() => {
+      expect(screen.queryByText("Database initializing...")).not.toBeInTheDocument();
+    });
+
+    // Then shows theme loading
     expect(screen.getByText("Loading...")).toBeInTheDocument();
     expect(screen.queryByText("Board")).not.toBeInTheDocument();
 

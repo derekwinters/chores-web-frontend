@@ -186,6 +186,63 @@ function AuthenticatedApp() {
 
 export default function App() {
   const { isAuthenticated, setupNeeded, loading } = useAuth();
+  const [dbReady, setDbReady] = useState(false);
+  const [checkingDb, setCheckingDb] = useState(true);
+
+  useEffect(() => {
+    const checkDbStatus = async () => {
+      let attempts = 0;
+      // In test environment, use much shorter interval and max attempts
+      const isTest = typeof process !== "undefined" && process.env.NODE_ENV === "test";
+      const pollInterval = isTest ? 10 : 500;
+      const maxAttempts = isTest ? 10 : 60;
+
+      while (attempts < maxAttempts) {
+        try {
+          const response = await fetch("/api/db-status");
+          const data = await response.json();
+
+          if (data.ready) {
+            setDbReady(true);
+            setCheckingDb(false);
+            return;
+          }
+        } catch (e) {
+          // DB not responding yet
+        }
+
+        attempts++;
+        await new Promise(resolve => setTimeout(resolve, pollInterval));
+      }
+
+      // After max attempts, proceed anyway
+      setDbReady(true);
+      setCheckingDb(false);
+    };
+
+    checkDbStatus();
+  }, []);
+
+  if (checkingDb) {
+    return (
+      <div className="app-loading">
+        <div className="loading-content">
+          <div className="spinner"></div>
+          <p>Database initializing...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!dbReady) {
+    return (
+      <div className="app-loading">
+        <div className="loading-content">
+          <p>Database startup timeout. Retrying...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return <div className="app-loading">Loading...</div>;
