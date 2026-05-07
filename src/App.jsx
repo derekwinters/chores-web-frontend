@@ -199,10 +199,10 @@ export default function App() {
 
       while (attempts < maxAttempts) {
         try {
-          const response = await fetch("/api/db-status");
+          const response = await fetch("/status/db-status");
           const data = await response.json();
 
-          if (data.ready) {
+          if (data.status === "ready") {
             setDbReady(true);
             setCheckingDb(false);
             return;

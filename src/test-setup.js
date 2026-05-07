@@ -1,13 +1,13 @@
 import "@testing-library/jest-dom";
 import { vi, afterEach } from "vitest";
 
-// Mock fetch for /api/db-status to simulate ready database
+// Mock fetch for /status/db-status to simulate ready database
 const mockFetch = vi.fn((url) => {
-  if (typeof url === "string" && url.includes("/api/db-status")) {
+  if (typeof url === "string" && url.includes("/status/db-status")) {
     return Promise.resolve({
       ok: true,
       status: 200,
-      json: async () => ({ ready: true }),
+      json: async () => ({ status: "ready", migrations_in_progress: false }),
     });
   }
   // For other requests, return a rejected promise (tests will handle actual API mocking via mocked client)
