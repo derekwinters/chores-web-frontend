@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { MdFilterList } from "react-icons/md";
@@ -9,10 +9,32 @@ const ACTIONS = ["completed", "skipped", "reassigned", "created", "deleted", "up
 
 const PAGE_SIZE = 20;
 
+// Breakpoint detection (log table needs 850px to comfortably show 5 columns)
+const BREAKPOINT_MOBILE = 850;
+
+function useBreakpoint() {
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.innerWidth < BREAKPOINT_MOBILE;
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < BREAKPOINT_MOBILE);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  return isMobile;
+}
+
 export default function Log() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [filtersExpanded, setFiltersExpanded] = useState(false);
   const [page, setPage] = useState(0);
+  const isMobile = useBreakpoint();
 
   const filters = (() => {
     const f = {};
@@ -66,6 +88,10 @@ export default function Log() {
 
   const formatTimestamp = (timestamp) => {
     const date = new Date(timestamp);
+    // On mobile, show time-only; on tablet/desktop, show full date and time
+    if (isMobile) {
+      return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
     return date.toLocaleString();
   };
 
@@ -172,22 +198,15 @@ export default function Log() {
                 <tr>
                   <th>Timestamp</th>
                   <th>Action</th>
-                  <th>Target Type</th>
-                  <th>Actor</th>
+                  {!isMobile && <th>Target Type</th>}
+                  {!isMobile && <th>Actor</th>}
                   <th>Target</th>
-                  <th>Content</th>
                 </tr>
               </thead>
               <tbody>
                 {logEntries.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE).map((entry) => {
                   const targetType = entry.chore_name.startsWith("Person:") ? "user" : "chore";
                   const targetName = entry.chore_name.replace("Person: ", "");
-                  let content = "—";
-                  if (entry.field_name) {
-                    content = `${entry.field_name}: ${entry.old_value} → ${entry.new_value}`;
-                  } else if (entry.reassigned_to) {
-                    content = `Reassigned to ${entry.reassigned_to}`;
-                  }
 
                   return (
                     <tr key={entry.id} className="log-table-row">
@@ -197,12 +216,15 @@ export default function Log() {
                           {entry.action}
                         </span>
                       </td>
-                      <td className="log-target-type">
-                        <span className="target-badge">{targetType}</span>
-                      </td>
-                      <td className="log-actor">{entry.person}</td>
+                      {!isMobile && (
+                        <td className="log-target-type">
+                          <span className="target-badge">{targetType}</span>
+                        </td>
+                      )}
+                      {!isMobile && (
+                        <td className="log-actor">{entry.person}</td>
+                      )}
                       <td className="log-target">{targetName}</td>
-                      <td className="log-content">{content}</td>
                     </tr>
                   );
                 })}

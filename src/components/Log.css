@@ -168,9 +168,7 @@
 }
 
 .log-content {
-  font-family: monospace;
-  font-size: 0.85rem;
-  color: var(--text-muted);
+  display: none;
 }
 
 .empty-state {
@@ -225,5 +223,45 @@
 
   .filter-group {
     width: 100%;
+  }
+}
+
+/* Mobile/Tablet breakpoint: 850px minimum for comfortable 5-column display */
+@media (max-width: 849px) {
+  .log-table {
+    font-size: 0.85rem;
+  }
+
+  .log-table th,
+  .log-table td {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .log-timestamp {
+    width: 100px;
+    font-size: 0.8rem;
+  }
+
+  .log-action {
+    width: 80px;
+  }
+
+  .log-target-type {
+    width: 100px;
+  }
+
+  .log-actor {
+    width: 150px;
+  }
+
+  .action-badge {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.65rem;
+  }
+
+  .log-target {
+    flex: 1;
+    min-width: 100px;
+    overflow-wrap: break-word;
   }
 }
