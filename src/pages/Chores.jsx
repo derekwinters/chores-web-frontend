@@ -319,6 +319,7 @@ export default function Manage() {
                 >
                   <MenuItem value="">All chores</MenuItem>
                   <MenuItem value="0">Today</MenuItem>
+                  <MenuItem value="3">Next 3 days</MenuItem>
                   <MenuItem value="7">Next 7 days</MenuItem>
                   <MenuItem value="30">Next 30 days</MenuItem>
                 </Select>

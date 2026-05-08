@@ -2,13 +2,14 @@ import React, { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { getLogRetention, setLogRetention } from "../api/client";
+import { getLogRetention, setLogRetention, getConfig, updateConfig } from "../api/client";
 import "./AdminPanel.css";
 
 export default function AdminPanel() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [retentionInput, setRetentionInput] = useState("");
+  const [dueSoonDaysInput, setDueSoonDaysInput] = useState("");
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
 
@@ -17,6 +18,14 @@ export default function AdminPanel() {
     queryFn: getLogRetention,
     onSuccess: (data) => {
       setRetentionInput(String(data.retention_days));
+    },
+  });
+
+  const { data: configData, isLoading: configLoading } = useQuery({
+    queryKey: ["config"],
+    queryFn: getConfig,
+    onSuccess: (data) => {
+      setDueSoonDaysInput(String(data.due_soon_days));
     },
   });
 
@@ -33,6 +42,19 @@ export default function AdminPanel() {
     },
   });
 
+  const dueSoonDaysMutation = useMutation({
+    mutationFn: (days) => updateConfig({ due_soon_days: parseInt(days) }),
+    onSuccess: (data) => {
+      setDueSoonDaysInput(String(data.due_soon_days));
+      setSuccess(true);
+      setError(null);
+      setTimeout(() => setSuccess(false), 2000);
+    },
+    onError: (err) => {
+      setError(err.message || "Failed to update due soon threshold");
+    },
+  });
+
   const handleSaveRetention = () => {
     const days = parseInt(retentionInput);
     if (isNaN(days) || days < 1) {
@@ -40,6 +62,15 @@ export default function AdminPanel() {
       return;
     }
     retentionMutation.mutate(days);
+  };
+
+  const handleSaveDueSoonDays = () => {
+    const days = parseInt(dueSoonDaysInput);
+    if (isNaN(days) || days < 1 || days > 365) {
+      setError("Due soon threshold must be between 1 and 365 days");
+      return;
+    }
+    dueSoonDaysMutation.mutate(days);
   };
 
   if (!user?.is_admin) {
@@ -96,6 +127,37 @@ export default function AdminPanel() {
               disabled={retentionMutation.isPending}
             >
               {retentionMutation.isPending ? "Saving…" : "Save"}
+            </button>
+          </div>
+        )}
+      </section>
+
+      <section className="admin-section">
+        <h3>Due Soon Threshold</h3>
+        <p>Set the number of days in advance to mark chores as "due soon".</p>
+        {configLoading ? (
+          <div className="loading">Loading…</div>
+        ) : (
+          <div className="retention-control">
+            <label htmlFor="due-soon-days">Notify when due in</label>
+            <div className="retention-input-group">
+              <input
+                id="due-soon-days"
+                type="number"
+                min="1"
+                max="365"
+                value={dueSoonDaysInput}
+                onChange={(e) => setDueSoonDaysInput(e.target.value)}
+                disabled={dueSoonDaysMutation.isPending}
+              />
+              <span>days</span>
+            </div>
+            <button
+              className="btn-primary"
+              onClick={handleSaveDueSoonDays}
+              disabled={dueSoonDaysMutation.isPending}
+            >
+              {dueSoonDaysMutation.isPending ? "Saving…" : "Save"}
             </button>
           </div>
         )}

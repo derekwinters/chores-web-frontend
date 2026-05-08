@@ -1,13 +1,12 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Avatar from "./Avatar";
 import ProgressBar from "./ProgressBar";
 import { getPersonColor } from "../utils/personColors";
 import { getTrendStatus, getTrendColor } from "../utils/trendStatus";
 import { UNASSIGNED_FILTER_VALUE } from "../utils/choreAssignee";
+import { getConfig } from "../api/client";
 import "./UserCard.css";
-
-const DUE_SOON_DAYS = 7;
 
 function daysUntil(dateStr) {
   const due = new Date(dateStr + "T00:00:00");
@@ -18,6 +17,19 @@ function daysUntil(dateStr) {
 
 export default function UserCard({ person, chores, people, summary }) {
   const navigate = useNavigate();
+  const [dueSoonDays, setDueSoonDays] = useState(3);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const config = await getConfig();
+        setDueSoonDays(config.due_soon_days ?? 3);
+      } catch {
+        setDueSoonDays(3);
+      }
+    })();
+  }, []);
+
   const color = person.color || getPersonColor(person.name);
   const goal7d = person.goal_7d ?? 12;
   const goal30d = person.goal_30d ?? 50;
@@ -41,7 +53,7 @@ export default function UserCard({ person, chores, people, summary }) {
     .filter((c) => {
       if (c.state !== "complete" || !c.next_due || c.disabled) return false;
       const d = daysUntil(c.next_due);
-      if (d < 0 || d > DUE_SOON_DAYS) return false;
+      if (d < 0 || d > dueSoonDays) return false;
       if (c.assignment_type === "fixed") return c.assignee === person.name;
       if (c.assignment_type === "open") return c.current_assignee === null || c.current_assignee === person.name;
       return c.current_assignee === person.name;
@@ -95,7 +107,7 @@ export default function UserCard({ person, chores, people, summary }) {
           onClick={(e) => {
             e.stopPropagation();
             const params = new URLSearchParams();
-            params.append("daysFromNow", DUE_SOON_DAYS);
+            params.append("daysFromNow", dueSoonDays);
             params.append("assignee", person.name);
             params.append("assignee", UNASSIGNED_FILTER_VALUE);
             navigate(`/chores?${params.toString()}`);
