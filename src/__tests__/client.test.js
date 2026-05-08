@@ -38,15 +38,15 @@ describe("API client", () => {
     );
   });
 
-  it("completeChore calls POST /chores/:id/complete with body", async () => {
+  it("completeChore calls POST /chores/:id/complete", async () => {
     mockOk({ state: "complete" });
     const { completeChore } = await import("../api/client");
-    await completeChore("vacuum", "Alice");
+    await completeChore("vacuum");
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining("/chores/vacuum/complete"),
       expect.objectContaining({
         method: "POST",
-        body: JSON.stringify({ completed_by: "Alice" }),
+        body: JSON.stringify({}),
       })
     );
   });

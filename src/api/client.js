@@ -37,8 +37,8 @@ export const createChore = (data) => request("POST", "/chores", data);
 export const updateChore = (id, data) => request("PUT", `/chores/${id}`, data);
 export const deleteChore = (id) => request("DELETE", `/chores/${id}`);
 
-export const completeChore = (id, completedBy) =>
-  request("POST", `/chores/${id}/complete`, { completed_by: completedBy ?? null });
+export const completeChore = (id) =>
+  request("POST", `/chores/${id}/complete`, {});
 export const skipChore = (id) => request("POST", `/chores/${id}/skip`);
 export const skipReassignChore = (id, assignee) =>
   request("POST", `/chores/${id}/skip-reassign`, { assignee: assignee ?? null });

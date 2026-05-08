@@ -5,7 +5,7 @@ import { MdFilterList } from "react-icons/md";
 import { getLog, getPeople, getChores } from "../api/client";
 import "./Log.css";
 
-const ACTIONS = ["completed", "skipped", "reassigned", "created", "deleted", "updated"];
+const ACTIONS = ["completed", "skipped", "reassigned", "created", "deleted", "updated", "marked_due"];
 
 const PAGE_SIZE = 20;
 
@@ -120,6 +120,7 @@ export default function Log() {
           >
             <option value="">All people</option>
             <option value="system">System</option>
+            <option value="schedule">Schedule</option>
             {people.map((p) => (
               <option key={p.id} value={p.name}>
                 {p.name}

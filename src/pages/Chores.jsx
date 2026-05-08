@@ -80,7 +80,6 @@ export default function Manage() {
 
   const [modal, setModal] = useState(null); // null | { mode: "create" } | { mode: "edit", chore }
   const [deleteTarget, setDeleteTarget] = useState(null); // chore to confirm-delete
-  const [completeTarget, setCompleteTarget] = useState(null); // chore waiting for completion user selection
   const [filtersExpanded, setFiltersExpanded] = useState(false);
 
   const filters = useMemo(() => getFiltersFromSearchParams(searchParams), [searchParams]);
@@ -114,7 +113,7 @@ export default function Manage() {
   });
 
   const completeMut = useMutation({
-    mutationFn: ({ id, completedBy }) => completeChore(id, completedBy),
+    mutationFn: (id) => completeChore(id),
     onSuccess: () => { invalidate(); setCompleteTarget(null); },
   });
 
@@ -353,12 +352,7 @@ export default function Manage() {
             onEdit={(chore) => setModal({ mode: "edit", chore })}
             onDelete={(chore) => setDeleteTarget(chore)}
             onComplete={(chore) => {
-              const assignee = chore.assignment_type === "fixed" ? chore.assignee : chore.current_assignee;
-              if (assignee) {
-                completeMut.mutate({ id: chore.id, completedBy: assignee });
-              } else {
-                setCompleteTarget(chore);
-              }
+              completeMut.mutate(chore.id);
             }}
             onSkip={(chore) => skipMut.mutate(chore.id)}
             onMarkDue={(chore) => markDueMut.mutate(chore.id)}
@@ -412,42 +406,6 @@ export default function Manage() {
         </Modal>
       )}
 
-      {/* Complete chore modal (for unassigned chores) */}
-      {completeTarget && (
-        <Modal title={`Who completed ${completeTarget.name}?`} onClose={() => setCompleteTarget(null)}>
-          <div className="complete-form">
-            <div className="form-group">
-              <label htmlFor="complete-by">Person</label>
-              <select id="complete-by" defaultValue="">
-                <option value="">Select someone</option>
-                {people.map((person) => (
-                  <option key={person.id} value={person.name}>
-                    {person.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="confirm-actions">
-              <button className="btn-secondary" onClick={() => setCompleteTarget(null)}>
-                Cancel
-              </button>
-              <button
-                className="btn-primary"
-                disabled={completeMut.isPending}
-                onClick={() => {
-                  const select = document.getElementById("complete-by");
-                  const person = select.value;
-                  if (person) {
-                    completeMut.mutate({ id: completeTarget.id, completedBy: person });
-                  }
-                }}
-              >
-                {completeMut.isPending ? "Completing…" : "Complete"}
-              </button>
-            </div>
-          </div>
-        </Modal>
-      )}
     </div>
   );
 }
