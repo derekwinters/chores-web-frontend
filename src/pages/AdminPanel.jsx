@@ -2,7 +2,15 @@ import React, { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { getLogRetention, setLogRetention, getConfig, updateConfig } from "../api/client";
+import {
+  getLogRetention,
+  setLogRetention,
+  getConfig,
+  updateConfig,
+  getUpdateCheckStatus,
+  triggerUpdateCheck,
+  configureUpdateChecking,
+} from "../api/client";
 import "./AdminPanel.css";
 
 export default function AdminPanel() {
@@ -10,6 +18,8 @@ export default function AdminPanel() {
   const navigate = useNavigate();
   const [retentionInput, setRetentionInput] = useState("");
   const [dueSoonDaysInput, setDueSoonDaysInput] = useState("");
+  const [updateCheckEnabledInput, setUpdateCheckEnabledInput] = useState(true);
+  const [updateCheckIntervalInput, setUpdateCheckIntervalInput] = useState(24);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
 
@@ -26,7 +36,14 @@ export default function AdminPanel() {
     queryFn: getConfig,
     onSuccess: (data) => {
       setDueSoonDaysInput(String(data.due_soon_days));
+      setUpdateCheckEnabledInput(data.update_check_enabled);
+      setUpdateCheckIntervalInput(data.update_check_interval);
     },
+  });
+
+  const { data: updateCheckStatus, isLoading: updateCheckLoading, refetch: refetchUpdateCheck } = useQuery({
+    queryKey: ["update-check-status"],
+    queryFn: getUpdateCheckStatus,
   });
 
   const retentionMutation = useMutation({
@@ -55,6 +72,34 @@ export default function AdminPanel() {
     },
   });
 
+  const updateCheckConfigMutation = useMutation({
+    mutationFn: () =>
+      configureUpdateChecking(updateCheckEnabledInput, parseInt(updateCheckIntervalInput)),
+    onSuccess: (data) => {
+      setUpdateCheckEnabledInput(data.check_enabled);
+      setUpdateCheckIntervalInput(data.check_interval_hours);
+      setSuccess(true);
+      setError(null);
+      setTimeout(() => setSuccess(false), 2000);
+    },
+    onError: (err) => {
+      setError(err.message || "Failed to update update check settings");
+    },
+  });
+
+  const triggerUpdateCheckMutation = useMutation({
+    mutationFn: triggerUpdateCheck,
+    onSuccess: () => {
+      refetchUpdateCheck();
+      setSuccess(true);
+      setError(null);
+      setTimeout(() => setSuccess(false), 2000);
+    },
+    onError: (err) => {
+      setError(err.message || "Failed to check for updates");
+    },
+  });
+
   const handleSaveRetention = () => {
     const days = parseInt(retentionInput);
     if (isNaN(days) || days < 1) {
@@ -71,6 +116,19 @@ export default function AdminPanel() {
       return;
     }
     dueSoonDaysMutation.mutate(days);
+  };
+
+  const handleSaveUpdateCheckConfig = () => {
+    const interval = parseInt(updateCheckIntervalInput);
+    if (isNaN(interval) || interval < 1) {
+      setError("Update check interval must be at least 1 hour");
+      return;
+    }
+    updateCheckConfigMutation.mutate();
+  };
+
+  const handleTriggerUpdateCheck = () => {
+    triggerUpdateCheckMutation.mutate();
   };
 
   if (!user?.is_admin) {
@@ -160,6 +218,68 @@ export default function AdminPanel() {
               {dueSoonDaysMutation.isPending ? "Saving…" : "Save"}
             </button>
           </div>
+        )}
+      </section>
+
+      <section className="admin-section">
+        <h3>Update Checker</h3>
+        <p>Periodically check for new application versions on GitHub.</p>
+        {updateCheckLoading ? (
+          <div className="loading">Loading…</div>
+        ) : (
+          <>
+            {updateCheckStatus?.update_available && (
+              <div className="update-available-banner">
+                <strong>Update Available:</strong> Version {updateCheckStatus.latest_version} is available!
+              </div>
+            )}
+            <div className="update-check-control">
+              <div className="control-row">
+                <label htmlFor="update-check-enabled">Enable Update Checking</label>
+                <input
+                  id="update-check-enabled"
+                  type="checkbox"
+                  checked={updateCheckEnabledInput}
+                  onChange={(e) => setUpdateCheckEnabledInput(e.target.checked)}
+                  disabled={updateCheckConfigMutation.isPending}
+                />
+              </div>
+              <div className="control-row">
+                <label htmlFor="update-check-interval">Check Interval (hours)</label>
+                <input
+                  id="update-check-interval"
+                  type="number"
+                  min="1"
+                  value={updateCheckIntervalInput}
+                  onChange={(e) => setUpdateCheckIntervalInput(e.target.value)}
+                  disabled={!updateCheckEnabledInput || updateCheckConfigMutation.isPending}
+                />
+              </div>
+              <div className="status-info">
+                <p>Current Version: <strong>{updateCheckStatus?.current_version}</strong></p>
+                <p>Latest Version: <strong>{updateCheckStatus?.latest_version || "Unknown"}</strong></p>
+                {updateCheckStatus?.last_checked_at && (
+                  <p>Last Checked: <strong>{new Date(updateCheckStatus.last_checked_at).toLocaleString()}</strong></p>
+                )}
+              </div>
+              <div className="button-group">
+                <button
+                  className="btn-primary"
+                  onClick={handleSaveUpdateCheckConfig}
+                  disabled={updateCheckConfigMutation.isPending}
+                >
+                  {updateCheckConfigMutation.isPending ? "Saving…" : "Save Settings"}
+                </button>
+                <button
+                  className="btn-secondary"
+                  onClick={handleTriggerUpdateCheck}
+                  disabled={triggerUpdateCheckMutation.isPending}
+                >
+                  {triggerUpdateCheckMutation.isPending ? "Checking…" : "Check Now"}
+                </button>
+              </div>
+            </div>
+          </>
         )}
       </section>
     </div>

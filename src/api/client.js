@@ -87,6 +87,12 @@ export const getUserStats = (person) => request("GET", `/points/stats/${person}`
 export const getConfig = () => request("GET", "/config");
 export const updateConfig = (data) => request("PUT", "/config", data);
 
+// Update Check
+export const getUpdateCheckStatus = () => request("GET", "/config/updates/status");
+export const triggerUpdateCheck = () => request("POST", "/config/updates/check");
+export const configureUpdateChecking = (enabled, intervalHours) =>
+  request("PUT", "/config/updates/config", { enabled, interval_hours: intervalHours });
+
 // Theme
 export const getThemes = () => request("GET", "/theme/list");
 export const getCurrentTheme = () => request("GET", "/theme/current");

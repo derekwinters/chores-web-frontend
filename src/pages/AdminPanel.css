@@ -76,3 +76,98 @@
   outline: none;
   border-color: var(--accent);
 }
+
+.update-available-banner {
+  padding: 1rem;
+  background: var(--warning);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  margin-bottom: 1rem;
+}
+
+.update-check-control {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.control-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.control-row label {
+  font-weight: 500;
+  flex: 1;
+}
+
+.control-row input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.control-row input[type="number"] {
+  width: 100px;
+  padding: 0.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  font-family: inherit;
+}
+
+.control-row input[type="number"]:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.control-row input[type="number"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.status-info {
+  padding: 1rem;
+  background: var(--surface);
+  border-radius: 4px;
+}
+
+.status-info p {
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+}
+
+.status-info p strong {
+  color: var(--accent);
+}
+
+.button-group {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.btn-secondary {
+  padding: 0.5rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background: var(--surface2);
+  border-color: var(--accent);
+}
+
+.btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
