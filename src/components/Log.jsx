@@ -30,6 +30,119 @@ function useBreakpoint() {
   return isMobile;
 }
 
+function LogRow({ entry, isMobile, formatTimestamp, colSpan }) {
+  const [expanded, setExpanded] = useState(false);
+
+  const targetType = entry.chore_name.startsWith("Person:") ? "user" : "chore";
+  const targetName = entry.chore_name.replace("Person: ", "");
+  const fullTimestamp = new Date(entry.timestamp).toLocaleString();
+
+  const handleClick = () => {
+    setExpanded((prev) => !prev);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      setExpanded((prev) => !prev);
+    }
+  };
+
+  return (
+    <>
+      <tr
+        className={`log-table-row${expanded ? " expanded" : ""}`}
+        onClick={handleClick}
+        onKeyDown={handleKeyDown}
+        tabIndex={0}
+        aria-expanded={expanded}
+        style={expanded ? { display: "none" } : undefined}
+      >
+        <td className="log-timestamp">{formatTimestamp(entry.timestamp)}</td>
+        <td className="log-action">
+          <span className="action-badge">{entry.action}</span>
+        </td>
+        {!isMobile && (
+          <td className="log-target-type">
+            <span className="target-badge">{targetType}</span>
+          </td>
+        )}
+        {!isMobile && (
+          <td className="log-actor">{entry.person}</td>
+        )}
+        <td className="log-target">{targetName}</td>
+      </tr>
+
+      {expanded && (
+        <tr
+          className="log-detail-row"
+          onClick={handleClick}
+          onKeyDown={handleKeyDown}
+          tabIndex={0}
+          aria-expanded={expanded}
+        >
+          <td colSpan={colSpan} className="log-detail-cell">
+            <div className="log-detail-content">
+              <div className="detail-item">
+                <span className="detail-label">Timestamp</span>
+                <span className="detail-value">{fullTimestamp}</span>
+              </div>
+
+              <div className="detail-item">
+                <span className="detail-label">Action</span>
+                <span className="detail-value">{entry.action}</span>
+              </div>
+
+              <div className="detail-item">
+                <span className="detail-label">Target Type</span>
+                <span className="detail-value">{targetType}</span>
+              </div>
+
+              <div className="detail-item">
+                <span className="detail-label">Actor</span>
+                <span className="detail-value">{entry.person}</span>
+              </div>
+
+              <div className="detail-item">
+                <span className="detail-label">Target</span>
+                <span className="detail-value">{targetName}</span>
+              </div>
+
+              {entry.reassigned_to && (
+                <div className="detail-item">
+                  <span className="detail-label">Reassigned To</span>
+                  <span className="detail-value">{entry.reassigned_to}</span>
+                </div>
+              )}
+
+              {entry.field_name && (
+                <div className="detail-item">
+                  <span className="detail-label">Field</span>
+                  <span className="detail-value">{entry.field_name}</span>
+                </div>
+              )}
+
+              {entry.old_value !== undefined && entry.old_value !== null && (
+                <div className="detail-item">
+                  <span className="detail-label">Old Value</span>
+                  <span className="detail-value">{entry.old_value}</span>
+                </div>
+              )}
+
+              {entry.new_value !== undefined && entry.new_value !== null && (
+                <div className="detail-item">
+                  <span className="detail-label">New Value</span>
+                  <span className="detail-value">{entry.new_value}</span>
+                </div>
+              )}
+            </div>
+          </td>
+        </tr>
+      )}
+    </>
+  );
+}
+
 export default function Log() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [filtersExpanded, setFiltersExpanded] = useState(false);
@@ -94,6 +207,9 @@ export default function Log() {
     }
     return date.toLocaleString();
   };
+
+  // Number of visible columns (for colSpan on detail rows)
+  const colSpan = isMobile ? 3 : 5;
 
   return (
     <div className="log">
@@ -205,30 +321,15 @@ export default function Log() {
                 </tr>
               </thead>
               <tbody>
-                {logEntries.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE).map((entry) => {
-                  const targetType = entry.chore_name.startsWith("Person:") ? "user" : "chore";
-                  const targetName = entry.chore_name.replace("Person: ", "");
-
-                  return (
-                    <tr key={entry.id} className="log-table-row">
-                      <td className="log-timestamp">{formatTimestamp(entry.timestamp)}</td>
-                      <td className="log-action">
-                        <span className="action-badge">
-                          {entry.action}
-                        </span>
-                      </td>
-                      {!isMobile && (
-                        <td className="log-target-type">
-                          <span className="target-badge">{targetType}</span>
-                        </td>
-                      )}
-                      {!isMobile && (
-                        <td className="log-actor">{entry.person}</td>
-                      )}
-                      <td className="log-target">{targetName}</td>
-                    </tr>
-                  );
-                })}
+                {logEntries.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE).map((entry) => (
+                  <LogRow
+                    key={entry.id}
+                    entry={entry}
+                    isMobile={isMobile}
+                    formatTimestamp={formatTimestamp}
+                    colSpan={colSpan}
+                  />
+                ))}
               </tbody>
             </table>
 
