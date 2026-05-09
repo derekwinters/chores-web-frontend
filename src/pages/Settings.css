@@ -9,17 +9,19 @@
 .settings-section {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  padding: 1.5rem;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  gap: 1rem;
 }
 
 .settings-section h3 {
   margin: 0;
   font-size: 1.1rem;
   color: var(--text);
+}
+
+.settings-section hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 0;
 }
 
 .setting-group {
@@ -32,6 +34,25 @@
   font-size: 0.9rem;
   font-weight: 500;
   color: var(--text);
+}
+
+.setting-group input[type="text"],
+.setting-group select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.95rem;
+  box-sizing: border-box;
+}
+
+.setting-group input[type="text"]:focus,
+.setting-group select:focus {
+  outline: none;
+  border-color: var(--accent);
 }
 
 .setting-description {
@@ -94,4 +115,27 @@
   text-align: center;
   padding: 2rem;
   color: var(--text-muted);
+}
+
+.save-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Section header row: title left, Save button right, above the hr */
+.section-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section-row h3 {
+  margin: 0;
+}
+
+/* Content block below the hr — plain block, no flex columns */
+.section-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }

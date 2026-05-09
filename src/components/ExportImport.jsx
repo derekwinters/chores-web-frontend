@@ -88,47 +88,53 @@ export default function ExportImport() {
 
       <div className="export-section">
         <h4>Export Data</h4>
-        <p className="section-description">Download all chores, people, and settings as a JSON file for backup.</p>
-        <button
-          className="btn-primary"
-          onClick={() => exportMutation.mutate()}
-          disabled={exportMutation.isPending}
-        >
-          {exportMutation.isPending ? "Exporting…" : "Download Backup"}
-        </button>
+        <div className="section-body">
+          <div className="section-left">
+            <p className="section-description">Download all chores, people, and settings as a JSON file for backup.</p>
+          </div>
+          <div className="section-right">
+            <button
+              className="btn-primary export-import-btn"
+              onClick={() => exportMutation.mutate()}
+              disabled={exportMutation.isPending}
+            >
+              {exportMutation.isPending ? "Exporting…" : "Download Backup"}
+            </button>
+          </div>
+        </div>
       </div>
-
-      <div className="divider"></div>
 
       <div className="import-section">
         <h4>Import Data</h4>
-        <p className="section-description">Upload a backup file to restore data. This will replace all existing chores, people, and settings.</p>
-
         {!confirmImport ? (
-          <>
-            <label htmlFor="import-file" className="file-input-label">
-              <input
-                id="import-file"
-                type="file"
-                accept=".json"
-                onChange={handleFileChange}
-                disabled={importMutation.isPending}
-              />
-              <span className="file-input-button">
-                {importFile ? `Selected: ${importFile.name}` : "Choose File"}
-              </span>
-            </label>
-
-            {importData && (
-              <button
-                className="btn-primary"
-                onClick={() => setConfirmImport(true)}
-                disabled={importMutation.isPending}
-              >
-                Proceed with Import
-              </button>
-            )}
-          </>
+          <div className="section-body">
+            <div className="section-left">
+              <p className="section-description">Upload a backup file to restore data. This will replace all existing chores, people, and settings.</p>
+              <label htmlFor="import-file" className="file-input-label">
+                <input
+                  id="import-file"
+                  type="file"
+                  accept=".json"
+                  onChange={handleFileChange}
+                  disabled={importMutation.isPending}
+                />
+                <span className="file-input-button">
+                  {importFile ? `Selected: ${importFile.name}` : "Choose File"}
+                </span>
+              </label>
+            </div>
+            <div className="section-right">
+              {importData && (
+                <button
+                  className="btn-primary export-import-btn"
+                  onClick={() => setConfirmImport(true)}
+                  disabled={importMutation.isPending}
+                >
+                  Proceed with Import
+                </button>
+              )}
+            </div>
+          </div>
         ) : (
           <div className="import-confirm">
             <div className="confirm-warning">

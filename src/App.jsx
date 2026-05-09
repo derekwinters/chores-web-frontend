@@ -1,15 +1,20 @@
 import React, { useState, useEffect, useLayoutEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "./contexts/AuthContext";
-import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Link, useNavigate, useLocation } from "react-router-dom";
 import Setup from "./pages/Setup";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Chores from "./pages/Chores";
 import UserManagement from "./components/UserManagement";
 import Log from "./components/Log";
-import Settings from "./pages/Settings";
-import AdminPanel from "./pages/AdminPanel";
+import SettingsLayout from "./pages/SettingsLayout";
+import SettingsGeneral from "./pages/SettingsGeneral";
+import SettingsAuth from "./pages/SettingsAuth";
+import SettingsChores from "./pages/SettingsChores";
+import SettingsTheme from "./pages/SettingsTheme";
+import SettingsData from "./pages/SettingsData";
+import SettingsAbout from "./pages/SettingsAbout";
 import UserDetail from "./pages/UserDetail";
 import UserAvatarMenu from "./components/UserAvatarMenu";
 import { getConfig, getCurrentTheme, getPeople } from "./api/client";
@@ -143,8 +148,19 @@ function AppContent() {
             <Route path="/users" element={<UserManagement />} />
             <Route path="/users/:userName" element={<UserDetail />} />
             <Route path="/log" element={<Log />} />
-            <Route path="/settings" element={<Settings onTitleUpdate={(newTitle) => setAppTitle(newTitle)} />} />
-            <Route path="/admin" element={<AdminPanel />} />
+            <Route
+              path="/settings"
+              element={<SettingsLayout onTitleUpdate={(newTitle) => setAppTitle(newTitle)} />}
+            >
+              <Route index element={<Navigate to="/settings/general" replace />} />
+              <Route path="general" element={<SettingsGeneral />} />
+              <Route path="auth" element={<SettingsAuth />} />
+              <Route path="chores" element={<SettingsChores />} />
+              <Route path="theme" element={<SettingsTheme />} />
+              <Route path="data" element={<SettingsData />} />
+              <Route path="about" element={<SettingsAbout />} />
+            </Route>
+            <Route path="/admin" element={<Navigate to="/settings/general" replace />} />
           </Routes>
         </main>
       </div>

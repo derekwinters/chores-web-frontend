@@ -132,9 +132,11 @@ export default function ThemeSettings() {
             })}
           </div>
 
-          <button className="btn-primary" onClick={handleCustomize}>
-            Customize Current Theme
-          </button>
+          <div style={{ display: "flex", justifyContent: "flex-end" }}>
+            <button className="btn-primary" onClick={handleCustomize}>
+              Customize Current Theme
+            </button>
+          </div>
         </>
       ) : (
         <div className="theme-editor">
