@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -26,20 +26,26 @@ export default function AdminPanel() {
   const { data: retentionData, isLoading: retentionLoading } = useQuery({
     queryKey: ["log-retention"],
     queryFn: getLogRetention,
-    onSuccess: (data) => {
-      setRetentionInput(String(data.retention_days));
-    },
   });
+
+  useEffect(() => {
+    if (retentionData?.retention_days !== undefined) {
+      setRetentionInput(String(retentionData.retention_days));
+    }
+  }, [retentionData]);
 
   const { data: configData, isLoading: configLoading } = useQuery({
     queryKey: ["config"],
     queryFn: getConfig,
-    onSuccess: (data) => {
-      setDueSoonDaysInput(String(data.due_soon_days));
-      setUpdateCheckEnabledInput(data.update_check_enabled);
-      setUpdateCheckIntervalInput(data.update_check_interval);
-    },
   });
+
+  useEffect(() => {
+    if (configData) {
+      setDueSoonDaysInput(String(configData.due_soon_days));
+      setUpdateCheckEnabledInput(configData.update_check_enabled);
+      setUpdateCheckIntervalInput(configData.update_check_interval);
+    }
+  }, [configData]);
 
   const { data: updateCheckStatus, isLoading: updateCheckLoading, refetch: refetchUpdateCheck } = useQuery({
     queryKey: ["update-check-status"],
