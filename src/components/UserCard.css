@@ -171,13 +171,3 @@
 .uc-workload-count:hover {
   opacity: 0.8;
 }
-
-@media (max-width: 640px) {
-  .uc-points-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .uc-due-grid {
-    grid-template-columns: 1fr;
-  }
-}
