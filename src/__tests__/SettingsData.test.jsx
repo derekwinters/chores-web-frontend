@@ -66,4 +66,30 @@ describe("SettingsData", () => {
       expect(input.value).toBe("30");
     });
   });
+
+  it("renders the Data Management section heading", () => {
+    wrap();
+    expect(screen.getByText("Data Management")).toBeInTheDocument();
+  });
+
+  it("renders the Data Management section description", () => {
+    wrap();
+    expect(
+      screen.getByText(/directly modify or remove records in specific database tables/i)
+    ).toBeInTheDocument();
+  });
+
+  it("renders a Points Log link in the Data Management section", () => {
+    wrap();
+    const link = screen.getByRole("link", { name: /points log/i });
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute("href", "/settings/data/pointslog");
+  });
+
+  it("renders the Points Log entry description inline", () => {
+    wrap();
+    expect(
+      screen.getByText(/modify or remove records for recently completed chores/i)
+    ).toBeInTheDocument();
+  });
 });

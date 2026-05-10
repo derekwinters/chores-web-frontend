@@ -14,6 +14,7 @@ import SettingsAuth from "./pages/SettingsAuth";
 import SettingsChores from "./pages/SettingsChores";
 import SettingsTheme from "./pages/SettingsTheme";
 import SettingsData from "./pages/SettingsData";
+import SettingsDataPointsLog from "./pages/SettingsDataPointsLog";
 import SettingsAbout from "./pages/SettingsAbout";
 import UserDetail from "./pages/UserDetail";
 import UserAvatarMenu from "./components/UserAvatarMenu";
@@ -158,6 +159,7 @@ function AppContent() {
               <Route path="chores" element={<SettingsChores />} />
               <Route path="theme" element={<SettingsTheme />} />
               <Route path="data" element={<SettingsData />} />
+              <Route path="data/pointslog" element={<SettingsDataPointsLog />} />
               <Route path="about" element={<SettingsAbout />} />
             </Route>
             <Route path="/admin" element={<Navigate to="/settings/general" replace />} />

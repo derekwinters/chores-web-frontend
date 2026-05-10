@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 import { getLogRetention, setLogRetention } from "../api/client";
 import ExportImport from "../components/ExportImport";
 import "./Settings.css";
@@ -91,6 +92,22 @@ export default function SettingsData() {
             </div>
           </div>
         )}
+      </section>
+
+      <section className="settings-section">
+        <div className="section-row">
+          <h3>Data Management</h3>
+        </div>
+        <hr />
+        <div className="section-content">
+          <p className="setting-description">
+            Directly modify or remove records in specific database tables.
+          </p>
+          <div className="data-management-entry">
+            <Link to="/settings/data/pointslog">Points Log</Link>
+            {" — Modify or remove records for recently completed chores."}
+          </div>
+        </div>
       </section>
     </div>
   );

@@ -139,3 +139,87 @@
   flex-direction: column;
   gap: 0.5rem;
 }
+
+/* ── Data Management entries ─────────────────────────────────────────────── */
+
+.data-management-entry {
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+/* ── DatabaseSection ─────────────────────────────────────────────────────── */
+
+.db-table-wrapper {
+  overflow-x: auto;
+}
+
+.db-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.db-table th,
+.db-table td {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.db-table th {
+  background: var(--surface2);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.db-table tr:nth-child(even) td {
+  background: var(--surface);
+}
+
+.db-edit-input {
+  width: 100%;
+  padding: 0.3rem 0.5rem;
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+}
+
+.db-edit-input--narrow {
+  max-width: 80px;
+}
+
+.db-actions {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.db-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.db-pagination-info {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.db-pagination-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.db-modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1.25rem;
+}

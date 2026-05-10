@@ -120,6 +120,19 @@ export const changePassword = (oldPassword, newPassword) =>
 export const redeemPoints = (personId, amount) =>
   request("POST", `/people/${personId}/redeem`, { amount });
 
+// Admin DB
+export const getAdminPointsLog = (params = {}) => {
+  const query = new URLSearchParams();
+  if (params.limit !== undefined) query.append("limit", params.limit);
+  if (params.offset !== undefined) query.append("offset", params.offset);
+  const qs = query.toString();
+  return request("GET", `/admin/db/points-log${qs ? `?${qs}` : ""}`);
+};
+export const updateAdminPointsLog = (id, data) =>
+  request("PATCH", `/admin/db/points-log/${id}`, data);
+export const deleteAdminPointsLog = (id) =>
+  request("DELETE", `/admin/db/points-log/${id}`);
+
 // Export/Import
 export const exportConfig = () => request("GET", "/export/config");
 
