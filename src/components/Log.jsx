@@ -70,6 +70,9 @@ function LogRow({ entry, isMobile, formatTimestamp, colSpan }) {
         {!isMobile && (
           <td className="log-actor">{entry.person}</td>
         )}
+        {!isMobile && (
+          <td className="log-assignee">{entry.assignee ?? ""}</td>
+        )}
         <td className="log-target">{targetName}</td>
       </tr>
 
@@ -112,6 +115,13 @@ function LogRow({ entry, isMobile, formatTimestamp, colSpan }) {
                 <div className="detail-item">
                   <span className="detail-label">Reassigned To</span>
                   <span className="detail-value">{entry.reassigned_to}</span>
+                </div>
+              )}
+
+              {entry.assignee && (
+                <div className="detail-item">
+                  <span className="detail-label">Assignee</span>
+                  <span className="detail-value">{entry.assignee}</span>
                 </div>
               )}
 
@@ -209,7 +219,7 @@ export default function Log() {
   };
 
   // Number of visible columns (for colSpan on detail rows)
-  const colSpan = isMobile ? 3 : 5;
+  const colSpan = isMobile ? 3 : 6;
 
   return (
     <div className="log">
@@ -317,6 +327,7 @@ export default function Log() {
                   <th>Action</th>
                   {!isMobile && <th>Target Type</th>}
                   {!isMobile && <th>Actor</th>}
+                  {!isMobile && <th>Assignee</th>}
                   <th>Target</th>
                 </tr>
               </thead>

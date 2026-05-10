@@ -26,6 +26,7 @@ const LOG_ENTRIES = [
     person: "Alice",
     action: "completed",
     timestamp: "2026-04-19T10:00:00Z",
+    assignee: "Alice",
   },
   {
     id: 2,
@@ -412,6 +413,48 @@ describe("Log", () => {
       expect(screen.queryByText("Reassigned To")).not.toBeInTheDocument();
     });
 
+    it("detail row shows assignee when present", async () => {
+      setViewportWidth(1024);
+      wrap(<Log />);
+      await waitFor(() => {
+        const vacuums = screen.getAllByText("Vacuum");
+        expect(vacuums.length).toBeGreaterThan(0);
+      });
+
+      // Entry index 0 (completed) has assignee: "Alice"
+      const rows = document.querySelectorAll("tbody tr.log-table-row");
+      fireEvent.click(rows[0]);
+
+      await waitFor(() => {
+        // "Assignee" appears as both a <th> header and a detail label — use getAllByText
+        const assigneeEls = screen.getAllByText("Assignee");
+        expect(assigneeEls.length).toBeGreaterThan(1);
+      });
+    });
+
+    it("detail row hides assignee when absent", async () => {
+      setViewportWidth(1024);
+      wrap(<Log />);
+      await waitFor(() => {
+        const vacuums = screen.getAllByText("Vacuum");
+        expect(vacuums.length).toBeGreaterThan(0);
+      });
+
+      // Entry index 1 (skipped, no assignee)
+      const rows = document.querySelectorAll("tbody tr.log-table-row");
+      fireEvent.click(rows[1]);
+
+      await waitFor(() => {
+        expect(screen.getAllByText("Timestamp").length).toBeGreaterThan(1);
+      });
+
+      // "Assignee" column header <th> is visible, but the detail row label <span> should not be.
+      // So exactly one "Assignee" element (the header) should exist.
+      const assigneeEls = screen.queryAllByText("Assignee");
+      expect(assigneeEls.length).toBe(1);
+      expect(assigneeEls[0].tagName).toBe("TH");
+    });
+
     it("detail row shows field_name, old_value, new_value when present", async () => {
       setViewportWidth(1024);
       wrap(<Log />);
@@ -586,9 +629,10 @@ describe("Log", () => {
         expect(screen.getAllByText("Timestamp").length).toBeGreaterThan(0);
         expect(screen.getAllByText("Action").length).toBeGreaterThan(0);
         expect(screen.getAllByText("Target").length).toBeGreaterThan(0);
-        // Target Type and Actor columns are hidden on mobile
+        // Target Type, Actor, and Assignee columns are hidden on mobile
         expect(screen.queryByText("Target Type")).not.toBeInTheDocument();
         expect(screen.queryByText("Actor")).not.toBeInTheDocument();
+        expect(screen.queryByText("Assignee")).not.toBeInTheDocument();
       });
     });
 
@@ -597,6 +641,14 @@ describe("Log", () => {
       wrap(<Log />);
       await waitFor(() => {
         expect(screen.queryByText("Target Type")).not.toBeInTheDocument();
+      });
+    });
+
+    it("hides Assignee column header on mobile (<850px)", async () => {
+      setViewportWidth(375);
+      wrap(<Log />);
+      await waitFor(() => {
+        expect(screen.queryByText("Assignee")).not.toBeInTheDocument();
       });
     });
 
@@ -633,7 +685,7 @@ describe("Log", () => {
       });
     });
 
-    it("shows 5 column headers on desktop (>=850px): Timestamp, Action, Target Type, Actor, Target", async () => {
+    it("shows 6 column headers on desktop (>=850px): Timestamp, Action, Target Type, Actor, Assignee, Target", async () => {
       setViewportWidth(1024);
       wrap(<Log />);
       await waitFor(() => {
@@ -641,6 +693,7 @@ describe("Log", () => {
         expect(screen.getAllByText("Action").length).toBeGreaterThan(0);
         expect(screen.getAllByText("Target Type").length).toBeGreaterThan(0);
         expect(screen.getAllByText("Actor").length).toBeGreaterThan(0);
+        expect(screen.getAllByText("Assignee").length).toBeGreaterThan(0);
         expect(screen.getAllByText("Target").length).toBeGreaterThan(0);
       });
     });
