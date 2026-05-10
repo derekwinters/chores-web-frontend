@@ -518,6 +518,62 @@ describe("Log", () => {
     });
   });
 
+  describe("Person log entries (UserLog unified view)", () => {
+    it("shows target type 'user' for entries whose chore_name starts with 'Person:'", async () => {
+      const personEntry = {
+        id: 99,
+        chore_id: 0,
+        chore_name: "Person: Alice",
+        person: "testuser",
+        action: "updated",
+        timestamp: "2026-04-20T12:00:00Z",
+        field_name: "goal_7d",
+        old_value: "20",
+        new_value: "30",
+      };
+      client.getLog.mockResolvedValue([personEntry]);
+      setViewportWidth(1024);
+      wrap(<Log />);
+
+      await waitFor(() => {
+        const userBadges = screen.getAllByText("user");
+        expect(userBadges.length).toBeGreaterThan(0);
+      });
+    });
+
+    it("strips 'Person: ' prefix from chore_name for the Target cell", async () => {
+      const personEntry = {
+        id: 99,
+        chore_id: 0,
+        chore_name: "Person: Alice",
+        person: "testuser",
+        action: "updated",
+        timestamp: "2026-04-20T12:00:00Z",
+      };
+      client.getLog.mockResolvedValue([personEntry]);
+      setViewportWidth(1024);
+      wrap(<Log />);
+
+      await waitFor(() => {
+        // "Alice" should appear as the target name (without the "Person: " prefix)
+        expect(screen.getByText("Alice")).toBeInTheDocument();
+      });
+
+      // The raw "Person: Alice" string should not be visible as a cell value
+      expect(screen.queryByText("Person: Alice")).not.toBeInTheDocument();
+    });
+
+    it("shows target type 'chore' for entries whose chore_name does not start with 'Person:'", async () => {
+      setViewportWidth(1024);
+      wrap(<Log />);
+
+      await waitFor(() => {
+        const choreBadges = screen.getAllByText("chore");
+        expect(choreBadges.length).toBeGreaterThan(0);
+      });
+    });
+  });
+
   describe("Responsive breakpoints (850px minimum for 5-column layout)", () => {
     afterEach(() => {
       setViewportWidth(1024); // Reset to desktop width
