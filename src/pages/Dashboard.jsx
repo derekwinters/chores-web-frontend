@@ -52,7 +52,7 @@ export default function Dashboard() {
               person={person}
               chores={chores}
               people={people}
-              summary={summaryByPerson[person.name]}
+              summary={summaryByPerson[person.username]}
             />
           </div>
         ))}

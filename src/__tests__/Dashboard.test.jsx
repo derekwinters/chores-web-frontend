@@ -10,7 +10,7 @@ vi.mock("../api/client");
 
 const TODAY = new Date().toISOString().split("T")[0];
 
-const PEOPLE = [{ id: 1, name: "Alice" }, { id: 2, name: "Bob" }];
+const PEOPLE = [{ id: 1, name: "Alice", username: "alice" }, { id: 2, name: "Bob", username: "bob" }];
 
 const CHORES = [
   {
@@ -40,8 +40,8 @@ const CHORES = [
 ];
 
 const SUMMARY = [
-  { person: "Alice", points_7d: 10, points_30d: 25 },
-  { person: "Bob", points_7d: 0, points_30d: 5 },
+  { person: "alice", points_7d: 10, points_30d: 25 },
+  { person: "bob", points_7d: 0, points_30d: 5 },
 ];
 
 function wrap(ui) {
