@@ -160,7 +160,7 @@ export default function ExportImport() {
                 Cancel
               </button>
               <button
-                className="btn-danger"
+                className="btn-error"
                 onClick={handleImportConfirm}
                 disabled={importMutation.isPending}
               >

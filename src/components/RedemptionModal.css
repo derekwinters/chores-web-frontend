@@ -221,7 +221,7 @@
 
 .btn-cancel,
 .btn-primary,
-.btn-danger {
+.btn-error {
   padding: 10px 16px;
   border-radius: 6px;
   border: none;
@@ -249,18 +249,18 @@
   background-color: #2563eb;
 }
 
-.btn-danger {
+.btn-error {
   background-color: #dc2626;
   color: white;
 }
 
-.btn-danger:hover:not(:disabled) {
+.btn-error:hover:not(:disabled) {
   background-color: #b91c1c;
 }
 
 .btn-cancel:disabled,
 .btn-primary:disabled,
-.btn-danger:disabled {
+.btn-error:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }

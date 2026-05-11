@@ -123,7 +123,7 @@ export default function ChoreCard({ chore, selected, onClick, onEdit, onDelete, 
                   </button>
                 )}
                 {onDelete && (
-                  <button className="action-btn danger" onClick={(e) => handleAction("delete", e)} aria-label={`Delete ${chore.name}`}>
+                  <button className="action-btn error" onClick={(e) => handleAction("delete", e)} aria-label={`Delete ${chore.name}`}>
                     Delete
                   </button>
                 )}

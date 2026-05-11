@@ -18,7 +18,7 @@ const THEMES = [
       accent: "#73B1DD",
       success: "#3db87a",
       warning: "#e8a930",
-      danger: "#e05c6a",
+      error: "#e05c6a",
     },
   },
   {
@@ -30,7 +30,7 @@ const THEMES = [
       accent: "#0066cc",
       success: "#00aa00",
       warning: "#ff9900",
-      danger: "#cc0000",
+      error: "#cc0000",
     },
   },
   {
@@ -42,7 +42,7 @@ const THEMES = [
       accent: "#e94560",
       success: "#00d4ff",
       warning: "#ffa502",
-      danger: "#e05c6a",
+      error: "#e05c6a",
     },
   },
 ];
@@ -94,10 +94,12 @@ describe("ThemeSettings", () => {
     fireEvent.click(screen.getByRole("button", { name: /customize|edit/i }));
 
     await waitFor(() => {
-      expect(screen.getByLabelText(/primary|accent/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/^accent$/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/^primary$/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/^secondary$/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/success|green/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/warning|yellow/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/danger|red/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/error|red/i)).toBeInTheDocument();
     });
   });
 
@@ -107,9 +109,9 @@ describe("ThemeSettings", () => {
     await waitFor(() => screen.getByText("Dark"));
 
     fireEvent.click(screen.getByRole("button", { name: /customize|edit/i }));
-    await waitFor(() => screen.getByLabelText(/primary|accent/i));
+    await waitFor(() => screen.getByLabelText(/^accent$/i));
 
-    const colorInput = screen.getByLabelText(/primary|accent/i);
+    const colorInput = screen.getByLabelText(/^accent$/i);
     fireEvent.change(colorInput, { target: { value: "#FF0000" } });
 
     fireEvent.click(screen.getByRole("button", { name: /save.*theme/i }));
@@ -128,7 +130,7 @@ describe("ThemeSettings", () => {
     await waitFor(() => screen.getByText("Dark"));
 
     fireEvent.click(screen.getByRole("button", { name: /customize|edit/i }));
-    await waitFor(() => screen.getByLabelText(/primary|accent/i));
+    await waitFor(() => screen.getByLabelText(/^accent$/i));
 
     const nameInput = screen.getByPlaceholderText(/theme name/i);
     await user.clear(nameInput);

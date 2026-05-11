@@ -59,7 +59,7 @@
 }
 
 .action-error {
-  color: var(--danger);
+  color: var(--error);
   font-size: 0.85rem;
   margin-top: 0.25rem;
 }

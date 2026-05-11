@@ -28,7 +28,7 @@
   height: 28px;
   padding: 0;
   border-radius: 50%;
-  background: var(--danger);
+  background: var(--error);
   border: none;
   cursor: pointer;
   display: flex;
@@ -151,9 +151,9 @@
 .error-message {
   padding: 0.75rem;
   background: rgba(224, 92, 106, 0.1);
-  border: 1px solid var(--danger);
+  border: 1px solid var(--error);
   border-radius: 4px;
-  color: var(--danger);
+  color: var(--error);
   font-size: 0.9rem;
 }
 

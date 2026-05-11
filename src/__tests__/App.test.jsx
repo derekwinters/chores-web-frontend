@@ -34,7 +34,7 @@ const LIGHT_THEME = {
     accent: "#0066cc",
     success: "#28a745",
     warning: "#ffc107",
-    danger: "#dc3545",
+    error: "#dc3545",
   },
 };
 
@@ -58,7 +58,7 @@ const DARK_THEME = {
     accent: "#73B1DD",
     success: "#3db87a",
     warning: "#e8a930",
-    danger: "#e05c6a",
+    error: "#e05c6a",
   },
 };
 

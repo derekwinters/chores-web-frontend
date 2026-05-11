@@ -81,14 +81,14 @@
 .confirm-warning {
   padding: 1rem;
   background: var(--surface2);
-  border-left: 4px solid var(--danger);
+  border-left: 4px solid var(--error);
   border-radius: 4px;
 }
 
 .confirm-warning strong {
   display: block;
   margin-bottom: 0.5rem;
-  color: var(--danger);
+  color: var(--error);
 }
 
 .confirm-warning p {
@@ -129,8 +129,8 @@
 
 .error-message {
   background: rgba(224, 92, 106, 0.1);
-  color: var(--danger);
-  border: 1px solid var(--danger);
+  color: var(--error);
+  border: 1px solid var(--error);
 }
 
 .success-message {

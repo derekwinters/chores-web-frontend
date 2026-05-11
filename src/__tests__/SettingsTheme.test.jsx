@@ -22,7 +22,7 @@ const MOCK_THEMES = [
       accent: "#73B1DD",
       success: "#3db87a",
       warning: "#e8a930",
-      danger: "#e05c6a",
+      error: "#e05c6a",
     },
   },
 ];

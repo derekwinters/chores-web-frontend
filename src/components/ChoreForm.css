@@ -197,12 +197,12 @@
 .clear-link:hover { color: var(--text); }
 
 .form-error {
-  color: var(--danger);
+  color: var(--error);
   font-size: 0.875rem;
   padding: 0.5rem 0.75rem;
   background: rgba(248, 113, 113, 0.1);
   border-radius: var(--radius);
-  border: 1px solid var(--danger);
+  border: 1px solid var(--error);
 }
 
 .toggle-pill {

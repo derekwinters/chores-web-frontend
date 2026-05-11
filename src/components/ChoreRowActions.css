@@ -69,7 +69,7 @@
   white-space: nowrap;
   flex-shrink: 0;
 }
-.chore-row-age.overdue { color: var(--danger); }
+.chore-row-age.overdue { color: var(--error); }
 .chore-row-age.today   { color: var(--warning); }
 .chore-row-age.future  { color: var(--text-muted); }
 
@@ -141,5 +141,5 @@
 .chore-row-error {
   width: 100%;
   font-size: 0.75rem;
-  color: var(--danger);
+  color: var(--error);
 }

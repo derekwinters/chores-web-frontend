@@ -26,7 +26,7 @@
   transition: background 0.2s;
 }
 
-.chore-card.due .accent-bar { background: var(--danger); }
+.chore-card.due .accent-bar { background: var(--error); }
 .chore-card.done .accent-bar { background: var(--text-muted); }
 
 .card-content {
@@ -70,7 +70,7 @@
   transition: color 0.2s;
 }
 
-.chore-card.due .chore-due-date { color: var(--danger); }
+.chore-card.due .chore-due-date { color: var(--error); }
 .chore-card.done .chore-due-date { color: var(--text-muted); }
 
 .expanded-view {
@@ -142,13 +142,13 @@
   color: var(--accent);
 }
 
-.action-btn.danger {
-  color: var(--danger);
+.action-btn.error {
+  color: var(--error);
 }
 
-.action-btn.danger:hover {
-  background: rgba(var(--danger-rgb), 0.1);
-  border-color: var(--danger);
+.action-btn.error:hover {
+  background: rgba(var(--error-rgb), 0.1);
+  border-color: var(--error);
 }
 
 .action-btn.success {

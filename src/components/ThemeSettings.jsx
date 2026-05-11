@@ -119,7 +119,7 @@ export default function ThemeSettings() {
                   </button>
                   {isCustom && (
                     <button
-                      className="theme-delete-btn btn-danger btn-xs"
+                      className="theme-delete-btn btn-error btn-xs"
                       onClick={() => setDeleteTarget(theme)}
                       disabled={deleteThemeMutation.isPending}
                       aria-label={`Delete ${theme.name}`}
@@ -149,7 +149,7 @@ export default function ThemeSettings() {
           />
 
           <div className="color-inputs">
-            {["bg", "surface", "accent", "success", "warning", "danger"].map((key) => (
+            {["bg", "surface", "surface2", "accent", "primary", "secondary", "success", "warning", "error"].map((key) => (
               <div key={key} className="color-input-group">
                 <label htmlFor={`color-${key}`}>{key.charAt(0).toUpperCase() + key.slice(1)}</label>
                 <input
@@ -207,7 +207,7 @@ export default function ThemeSettings() {
                   Cancel
                 </button>
                 <button
-                  className="btn-danger"
+                  className="btn-error"
                   onClick={() => deleteThemeMutation.mutate(deleteTarget.id)}
                   disabled={deleteThemeMutation.isPending}
                 >

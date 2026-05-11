@@ -139,7 +139,7 @@ export default function RedemptionModal({ person, onClose, onRedeemSuccess }) {
               <button className="btn-cancel" onClick={handleBack} disabled={loading}>
                 Back
               </button>
-              <button className="btn-danger" onClick={handleConfirm} disabled={loading}>
+              <button className="btn-error" onClick={handleConfirm} disabled={loading}>
                 {loading ? "Redeeming..." : "Confirm Redemption"}
               </button>
             </>

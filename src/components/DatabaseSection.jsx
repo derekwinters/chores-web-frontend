@@ -204,7 +204,7 @@ export default function DatabaseSection() {
                             Edit
                           </button>
                           <button
-                            className="btn-danger"
+                            className="btn-error"
                             onClick={() => confirmDelete(item)}
                             aria-label={`Delete entry ${item.id}`}
                           >
@@ -259,7 +259,7 @@ export default function DatabaseSection() {
           </p>
           <div className="db-modal-actions">
             <button
-              className="btn-danger"
+              className="btn-error"
               onClick={doDelete}
               disabled={deleteMutation.isPending}
             >

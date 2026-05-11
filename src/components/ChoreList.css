@@ -50,7 +50,7 @@
 
 .chore-state-badge.due {
   background: rgba(224, 92, 106, 0.15);
-  color: var(--danger);
+  color: var(--error);
 }
 
 .chore-state-badge.complete {
@@ -93,7 +93,7 @@
 }
 
 .chore-action-delete {
-  color: var(--danger);
+  color: var(--error);
 }
 
 .chore-action-delete:hover {

@@ -395,7 +395,7 @@ export default function Manage() {
                 Cancel
               </button>
               <button
-                className="btn-danger"
+                className="btn-error"
                 disabled={deleteMut.isPending}
                 onClick={() => deleteMut.mutate(deleteTarget.unique_id)}
               >
