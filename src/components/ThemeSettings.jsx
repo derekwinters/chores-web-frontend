@@ -1,18 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getThemes, getCurrentTheme, setTheme, saveTheme, deleteTheme } from "../api/client";
+import { getThemes, getCurrentTheme, setTheme, saveTheme, deleteTheme, renameTheme, updateTheme } from "../api/client";
 import { applyTheme } from "../utils/theme";
 import "./ThemeSettings.css";
 
 const DEFAULT_THEME_IDS = ["dark", "light", "charcoal", "paper", "pink", "frog"];
+const PROTECTED_THEME_IDS = ["dark", "light"];
+const PREVIEW_COLORS = ["primary", "secondary", "accent", "bg"];
 
 export default function ThemeSettings() {
   const queryClient = useQueryClient();
   const [customizing, setCustomizing] = useState(false);
+  const [customizingTheme, setCustomizingTheme] = useState(null); // Track which theme is being edited
   const [customName, setCustomName] = useState("");
   const [customColors, setCustomColors] = useState({});
   const [error, setError] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [renameTarget, setRenameTarget] = useState(null);
+  const [renameName, setRenameName] = useState("");
 
   const { data: themes = [], isLoading: themesLoading } = useQuery({
     queryKey: ["themes"],
@@ -48,12 +53,29 @@ export default function ThemeSettings() {
       queryClient.invalidateQueries({ queryKey: ["themes"] });
       queryClient.invalidateQueries({ queryKey: ["current-theme"] });
       setCustomizing(false);
+      setCustomizingTheme(null);
       setCustomName("");
       setCustomColors({});
       setError(null);
     },
     onError: (err) => {
       setError(err.message || "Failed to save theme");
+    },
+  });
+
+  const updateThemeMutation = useMutation({
+    mutationFn: ({ themeId, name, colors }) => updateTheme(themeId, { name, colors }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["themes"] });
+      queryClient.invalidateQueries({ queryKey: ["current-theme"] });
+      setCustomizing(false);
+      setCustomizingTheme(null);
+      setCustomName("");
+      setCustomColors({});
+      setError(null);
+    },
+    onError: (err) => {
+      setError(err.message || "Failed to update theme");
     },
   });
 
@@ -70,10 +92,34 @@ export default function ThemeSettings() {
     },
   });
 
-  const handleCustomize = () => {
-    if (currentTheme?.colors) {
-      setCustomColors({ ...currentTheme.colors });
-      setCustomName(`${currentTheme.name} Custom`);
+  const renameThemeMutation = useMutation({
+    mutationFn: ({ themeId, name }) => renameTheme(themeId, name),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["themes"] });
+      setRenameTarget(null);
+      setRenameName("");
+      setError(null);
+    },
+    onError: (err) => {
+      setError(err.message || "Failed to rename theme");
+    },
+  });
+
+  const handleCustomize = (theme = null) => {
+    const themeToCustomize = theme || currentTheme;
+    if (themeToCustomize?.colors) {
+      setCustomColors({ ...themeToCustomize.colors });
+      setCustomName(theme ? themeToCustomize.name : `${themeToCustomize.name} Custom`);
+      setCustomizingTheme(theme ? themeToCustomize.id : null);
+      setCustomizing(true);
+    }
+  };
+
+  const handleCopyTheme = (theme) => {
+    if (theme?.colors) {
+      setCustomColors({ ...theme.colors });
+      setCustomName(`${theme.name} Copy`);
+      setCustomizingTheme(null);
       setCustomizing(true);
     }
   };
@@ -87,7 +133,26 @@ export default function ThemeSettings() {
       setError("Theme name cannot be empty");
       return;
     }
-    saveThemeMutation.mutate({ name: customName, colors: customColors });
+
+    if (customizingTheme) {
+      // Editing existing custom theme
+      updateThemeMutation.mutate({
+        themeId: customizingTheme,
+        name: customName,
+        colors: customColors,
+      });
+    } else {
+      // Creating new custom theme
+      saveThemeMutation.mutate({ name: customName, colors: customColors });
+    }
+  };
+
+  const handleRenameSubmit = () => {
+    if (!renameName.trim()) {
+      setError("Theme name cannot be empty");
+      return;
+    }
+    renameThemeMutation.mutate({ themeId: renameTarget.id, name: renameName });
   };
 
   if (themesLoading || currentLoading) return <div className="loading">Loading themes…</div>;
@@ -102,7 +167,9 @@ export default function ThemeSettings() {
         <>
           <div className="themes-list">
             {themes.map((theme) => {
-              const isCustom = !DEFAULT_THEME_IDS.includes(theme.id);
+              const isProtected = PROTECTED_THEME_IDS.includes(theme.id);
+              const isBuiltIn = DEFAULT_THEME_IDS.includes(theme.id);
+              const isCustom = !isBuiltIn;
               return (
                 <div key={theme.id} className={`theme-card-wrapper ${currentTheme?.id === theme.id ? "active" : ""}`}>
                   <button
@@ -112,28 +179,75 @@ export default function ThemeSettings() {
                   >
                     <div className="theme-name">{theme.name}</div>
                     <div className="theme-preview">
-                      <div className="color-sample" style={{ backgroundColor: theme.colors.bg }} />
-                      <div className="color-sample" style={{ backgroundColor: theme.colors.surface }} />
-                      <div className="color-sample" style={{ backgroundColor: theme.colors.accent }} />
+                      {PREVIEW_COLORS.map((colorKey) => (
+                        <div
+                          key={colorKey}
+                          className="color-sample"
+                          style={{ backgroundColor: theme.colors[colorKey] }}
+                        />
+                      ))}
+                    </div>
+                    <div className="theme-actions">
+                      {isCustom && (
+                        <button
+                          className="action-btn edit-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleCustomize(theme);
+                          }}
+                          title="Edit theme"
+                          aria-label={`Edit ${theme.name}`}
+                        >
+                          <span className="material-icons">edit</span>
+                        </button>
+                      )}
+                      <button
+                        className="action-btn copy-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCopyTheme(theme);
+                        }}
+                        title="Copy theme"
+                        aria-label={`Copy ${theme.name}`}
+                      >
+                        <span className="material-icons">content_copy</span>
+                      </button>
+                      {isCustom && (
+                        <>
+                          <button
+                            className="action-btn rename-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setRenameTarget(theme);
+                              setRenameName(theme.name);
+                            }}
+                            title="Rename theme"
+                            aria-label={`Rename ${theme.name}`}
+                          >
+                            <span className="material-icons">drive_file_rename_outline</span>
+                          </button>
+                          <button
+                            className="action-btn delete-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDeleteTarget(theme);
+                            }}
+                            title="Delete theme"
+                            aria-label={`Delete ${theme.name}`}
+                          >
+                            <span className="material-icons">delete</span>
+                          </button>
+                        </>
+                      )}
                     </div>
                   </button>
-                  {isCustom && (
-                    <button
-                      className="theme-delete-btn btn-error btn-xs"
-                      onClick={() => setDeleteTarget(theme)}
-                      disabled={deleteThemeMutation.isPending}
-                      aria-label={`Delete ${theme.name}`}
-                    >
-                      🗑️
-                    </button>
-                  )}
                 </div>
               );
             })}
           </div>
 
           <div style={{ display: "flex", justifyContent: "flex-end" }}>
-            <button className="btn-primary" onClick={handleCustomize}>
+            <button className="btn-primary" onClick={() => handleCustomize()}>
               Customize Current Theme
             </button>
           </div>
@@ -145,7 +259,7 @@ export default function ThemeSettings() {
             placeholder="Theme name"
             value={customName}
             onChange={(e) => setCustomName(e.target.value)}
-            disabled={saveThemeMutation.isPending}
+            disabled={saveThemeMutation.isPending || updateThemeMutation.isPending}
           />
 
           <div className="color-inputs">
@@ -157,7 +271,7 @@ export default function ThemeSettings() {
                   type="color"
                   value={customColors[key] || "#000000"}
                   onChange={(e) => handleColorChange(key, e.target.value)}
-                  disabled={saveThemeMutation.isPending}
+                  disabled={saveThemeMutation.isPending || updateThemeMutation.isPending}
                 />
               </div>
             ))}
@@ -167,17 +281,64 @@ export default function ThemeSettings() {
             <button
               className="btn-primary"
               onClick={handleSaveCustom}
-              disabled={saveThemeMutation.isPending}
+              disabled={saveThemeMutation.isPending || updateThemeMutation.isPending}
             >
-              Save Theme
+              {customizingTheme ? "Update Theme" : "Save Theme"}
             </button>
             <button
               className="btn-secondary"
-              onClick={() => setCustomizing(false)}
-              disabled={saveThemeMutation.isPending}
+              onClick={() => {
+                setCustomizing(false);
+                setCustomizingTheme(null);
+              }}
+              disabled={saveThemeMutation.isPending || updateThemeMutation.isPending}
             >
               Cancel
             </button>
+          </div>
+        </div>
+      )}
+
+      {renameTarget && (
+        <div className="modal-overlay" onClick={() => !renameThemeMutation.isPending && setRenameTarget(null)}>
+          <div className="modal" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Rename theme</h2>
+              <button
+                className="modal-close btn-secondary"
+                onClick={() => setRenameTarget(null)}
+                disabled={renameThemeMutation.isPending}
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="modal-body">
+              <input
+                type="text"
+                placeholder="New theme name"
+                value={renameName}
+                onChange={(e) => setRenameName(e.target.value)}
+                disabled={renameThemeMutation.isPending}
+                autoFocus
+              />
+              <div className="confirm-actions">
+                <button
+                  className="btn-secondary"
+                  onClick={() => setRenameTarget(null)}
+                  disabled={renameThemeMutation.isPending}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="btn-primary"
+                  onClick={handleRenameSubmit}
+                  disabled={renameThemeMutation.isPending}
+                >
+                  {renameThemeMutation.isPending ? "Renaming…" : "Rename"}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

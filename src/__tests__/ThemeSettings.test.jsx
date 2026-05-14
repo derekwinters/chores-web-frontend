@@ -15,7 +15,10 @@ const THEMES = [
     colors: {
       bg: "#080c14",
       surface: "#16202e",
+      surface2: "#1e2d40",
       accent: "#73B1DD",
+      primary: "#3574B3",
+      secondary: "#4a5568",
       success: "#3db87a",
       warning: "#e8a930",
       error: "#e05c6a",
@@ -27,10 +30,28 @@ const THEMES = [
     colors: {
       bg: "#f5f5f5",
       surface: "#ffffff",
+      surface2: "#eeeeee",
       accent: "#0066cc",
+      primary: "#0066cc",
+      secondary: "#6c757d",
       success: "#00aa00",
       warning: "#ff9900",
       error: "#cc0000",
+    },
+  },
+  {
+    id: "charcoal",
+    name: "Charcoal",
+    colors: {
+      bg: "#1a1a1a",
+      surface: "#2d2d2d",
+      surface2: "#3a3a3a",
+      accent: "#999999",
+      primary: "#666666",
+      secondary: "#555555",
+      success: "#999999",
+      warning: "#999999",
+      error: "#999999",
     },
   },
   {
@@ -39,7 +60,10 @@ const THEMES = [
     colors: {
       bg: "#1a1a2e",
       surface: "#16213e",
+      surface2: "#2d2d4d",
       accent: "#e94560",
+      primary: "#ff6b9d",
+      secondary: "#c44b8a",
       success: "#00d4ff",
       warning: "#ffa502",
       error: "#e05c6a",
@@ -58,6 +82,8 @@ describe("ThemeSettings", () => {
     client.getThemes.mockResolvedValue(THEMES);
     client.getCurrentTheme.mockResolvedValue(THEMES[0]);
     client.deleteTheme.mockResolvedValue({ message: "Theme deleted" });
+    client.renameTheme.mockResolvedValue({ id: "charcoal", name: "Charcoal Updated", colors: THEMES[2].colors });
+    client.updateTheme.mockResolvedValue({ id: "custom_0", name: "My Custom Theme", colors: THEMES[3].colors });
   });
 
   it("renders theme list", async () => {
@@ -65,6 +91,7 @@ describe("ThemeSettings", () => {
     await waitFor(() => {
       expect(screen.getByText("Dark")).toBeInTheDocument();
       expect(screen.getByText("Light")).toBeInTheDocument();
+      expect(screen.getByText("Charcoal")).toBeInTheDocument();
     });
   });
 
@@ -87,28 +114,43 @@ describe("ThemeSettings", () => {
     });
   });
 
-  it("shows color editor for custom theme", async () => {
+  it("shows color editor for current theme", async () => {
     wrap(<ThemeSettings />);
     await waitFor(() => screen.getByText("Dark"));
 
-    fireEvent.click(screen.getByRole("button", { name: /customize|edit/i }));
+    fireEvent.click(screen.getByRole("button", { name: /customize.*current/i }));
 
     await waitFor(() => {
       expect(screen.getByLabelText(/^accent$/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/^primary$/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/^secondary$/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/success|green/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/warning|yellow/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/error|red/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/^success$/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/^warning$/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/^error$/i)).toBeInTheDocument();
+    });
+  });
+
+  it("shows color editor for custom theme when clicking edit", async () => {
+    wrap(<ThemeSettings />);
+    await waitFor(() => screen.getByText("My Custom Theme"));
+
+    // Click edit icon on custom theme
+    const editButtons = screen.getAllByLabelText(/edit/i);
+    const customThemeEditBtn = editButtons.find(btn => btn.getAttribute("aria-label") === "Edit My Custom Theme");
+    fireEvent.click(customThemeEditBtn);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(/^accent$/i)).toBeInTheDocument();
+      expect(screen.getByDisplayValue(/My Custom Theme/i)).toBeInTheDocument();
     });
   });
 
   it("allows editing individual colors", async () => {
-    client.saveTheme.mockResolvedValue({ id: "custom", name: "Dark Custom", colors: { accent: "#ff0000" } });
+    client.saveTheme.mockResolvedValue({ id: "custom", name: "Dark Custom", colors: THEMES[0].colors });
     wrap(<ThemeSettings />);
     await waitFor(() => screen.getByText("Dark"));
 
-    fireEvent.click(screen.getByRole("button", { name: /customize|edit/i }));
+    fireEvent.click(screen.getByRole("button", { name: /customize.*current/i }));
     await waitFor(() => screen.getByLabelText(/^accent$/i));
 
     const colorInput = screen.getByLabelText(/^accent$/i);
@@ -125,11 +167,11 @@ describe("ThemeSettings", () => {
 
   it("allows saving custom theme", async () => {
     const user = userEvent.setup();
-    client.saveTheme.mockResolvedValue({ id: "custom", name: "My Theme", colors: {} });
+    client.saveTheme.mockResolvedValue({ id: "custom", name: "My Theme", colors: THEMES[0].colors });
     wrap(<ThemeSettings />);
     await waitFor(() => screen.getByText("Dark"));
 
-    fireEvent.click(screen.getByRole("button", { name: /customize|edit/i }));
+    fireEvent.click(screen.getByRole("button", { name: /customize.*current/i }));
     await waitFor(() => screen.getByLabelText(/^accent$/i));
 
     const nameInput = screen.getByPlaceholderText(/theme name/i);
@@ -145,6 +187,55 @@ describe("ThemeSettings", () => {
     });
   });
 
+  it("shows 4 color swatches per theme card", async () => {
+    wrap(<ThemeSettings />);
+    await waitFor(() => {
+      const container = screen.getByText("Dark").closest(".theme-card");
+      const colorSamples = container.querySelectorAll(".color-sample");
+      expect(colorSamples.length).toBe(4);
+    });
+  });
+
+  it("renders copy button for built-in non-protected themes", async () => {
+    wrap(<ThemeSettings />);
+    await waitFor(() => screen.getByText("Charcoal"));
+
+    // Charcoal is built-in non-protected, should have copy only
+    const charcoalCard = screen.getByText("Charcoal").closest(".theme-card-wrapper");
+    const actionsContainer = charcoalCard.querySelector(".theme-actions");
+    expect(actionsContainer).toBeInTheDocument();
+
+    const copyBtn = charcoalCard.querySelector('[aria-label="Copy Charcoal"]');
+    const editBtn = charcoalCard.querySelector('[aria-label="Edit Charcoal"]');
+    const renameBtn = charcoalCard.querySelector('[aria-label="Rename Charcoal"]');
+    const deleteBtn = charcoalCard.querySelector('[aria-label="Delete Charcoal"]');
+
+    expect(copyBtn).toBeInTheDocument();
+    expect(editBtn).not.toBeInTheDocument();
+    expect(renameBtn).not.toBeInTheDocument();
+    expect(deleteBtn).not.toBeInTheDocument();
+  });
+
+  it("renders copy button for protected themes", async () => {
+    wrap(<ThemeSettings />);
+    await waitFor(() => screen.getByText("Dark"));
+
+    // Dark is protected, should have copy only
+    const darkCard = screen.getByText("Dark").closest(".theme-card-wrapper");
+    const actionsContainer = darkCard.querySelector(".theme-actions");
+    expect(actionsContainer).toBeInTheDocument();
+
+    const copyBtn = darkCard.querySelector('[aria-label="Copy Dark"]');
+    const editBtn = darkCard.querySelector('[aria-label="Edit Dark"]');
+    const renameBtn = darkCard.querySelector('[aria-label="Rename Dark"]');
+    const deleteBtn = darkCard.querySelector('[aria-label="Delete Dark"]');
+
+    expect(copyBtn).toBeInTheDocument();
+    expect(editBtn).not.toBeInTheDocument();
+    expect(renameBtn).not.toBeInTheDocument();
+    expect(deleteBtn).not.toBeInTheDocument();
+  });
+
   it("applies theme colors globally", async () => {
     wrap(<ThemeSettings />);
     await waitFor(() => screen.getByText("Dark"));
@@ -157,18 +248,21 @@ describe("ThemeSettings", () => {
     });
   });
 
-  it("shows delete button for custom themes only", async () => {
+  it("renders action buttons for custom themes", async () => {
     wrap(<ThemeSettings />);
-    await waitFor(() => screen.getByText("Dark"));
+    await waitFor(() => screen.getByText("My Custom Theme"));
 
-    const deleteButtons = screen.queryAllByLabelText(/delete/i);
-    expect(deleteButtons.length).toBe(1);
-    expect(deleteButtons[0]).toHaveAttribute("aria-label", "Delete My Custom Theme");
+    const customCard = screen.getByText("My Custom Theme").closest(".theme-card-wrapper");
+    const actionsContainer = customCard.querySelector(".theme-actions");
+    expect(actionsContainer).toBeInTheDocument();
+
+    const deleteBtn = customCard.querySelector('[aria-label="Delete My Custom Theme"]');
+    expect(deleteBtn).toBeInTheDocument();
   });
 
   it("shows delete confirmation modal", async () => {
     wrap(<ThemeSettings />);
-    await waitFor(() => screen.getByText("Dark"));
+    await waitFor(() => screen.getByText("My Custom Theme"));
 
     const deleteBtn = screen.getByLabelText("Delete My Custom Theme");
     fireEvent.click(deleteBtn);
@@ -179,7 +273,7 @@ describe("ThemeSettings", () => {
 
   it("calls deleteTheme on confirm", async () => {
     wrap(<ThemeSettings />);
-    await waitFor(() => screen.getByText("Dark"));
+    await waitFor(() => screen.getByText("My Custom Theme"));
 
     const deleteBtn = screen.getByLabelText("Delete My Custom Theme");
     fireEvent.click(deleteBtn);
@@ -190,5 +284,33 @@ describe("ThemeSettings", () => {
     await waitFor(() => {
       expect(client.deleteTheme).toHaveBeenCalledWith("custom_0");
     });
+  });
+
+  it("renders copy button for non-protected themes", async () => {
+    wrap(<ThemeSettings />);
+    await waitFor(() => screen.getByText("Charcoal"));
+
+    // Check that copy buttons are rendered (they exist in DOM, even if hidden by CSS)
+    const copyButtons = screen.queryAllByLabelText(/copy/i);
+    expect(copyButtons.length).toBeGreaterThan(0);
+    expect(copyButtons.some(btn => btn.getAttribute("aria-label") === "Copy Charcoal")).toBe(true);
+  });
+
+  it("renders rename button for custom themes", async () => {
+    wrap(<ThemeSettings />);
+    await waitFor(() => screen.getByText("My Custom Theme"));
+
+    const customCard = screen.getByText("My Custom Theme").closest(".theme-card-wrapper");
+    const renameBtn = customCard.querySelector('[aria-label="Rename My Custom Theme"]');
+    expect(renameBtn).toBeInTheDocument();
+  });
+
+  it("renders edit button for custom themes", async () => {
+    wrap(<ThemeSettings />);
+    await waitFor(() => screen.getByText("My Custom Theme"));
+
+    const customCard = screen.getByText("My Custom Theme").closest(".theme-card-wrapper");
+    const editBtn = customCard.querySelector('[aria-label="Edit My Custom Theme"]');
+    expect(editBtn).toBeInTheDocument();
   });
 });

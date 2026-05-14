@@ -99,6 +99,8 @@ export const getCurrentTheme = () => request("GET", "/theme/current");
 export const setTheme = (themeId) => request("POST", `/theme/set/${themeId}`);
 export const saveTheme = (data) => request("POST", "/theme/save", data);
 export const deleteTheme = (themeId) => request("DELETE", `/theme/delete/${themeId}`);
+export const updateTheme = (themeId, data) => request("PATCH", `/theme/update/${themeId}`, data);
+export const renameTheme = (themeId, name) => request("PATCH", `/theme/rename/${themeId}`, { name });
 
 // Auth
 export const getSetupStatus = () =>
