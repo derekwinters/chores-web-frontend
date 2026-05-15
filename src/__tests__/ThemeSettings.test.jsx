@@ -313,4 +313,114 @@ describe("ThemeSettings", () => {
     const editBtn = customCard.querySelector('[aria-label="Edit My Custom Theme"]');
     expect(editBtn).toBeInTheDocument();
   });
+
+  it("hex text input updates color picker on valid hex", async () => {
+    wrap(<ThemeSettings />);
+    await waitFor(() => screen.getByText("Dark"));
+
+    fireEvent.click(screen.getByRole("button", { name: /customize.*current/i }));
+    await waitFor(() => screen.getByLabelText(/^accent$/i));
+
+    const hexInput = screen.getByLabelText(/^accent$/i);
+    fireEvent.change(hexInput, { target: { value: "#ff0000" } });
+
+    await waitFor(() => {
+      const picker = screen.getByLabelText(/accent picker/i);
+      expect(picker).toHaveValue("#ff0000");
+    });
+  });
+
+  it("color picker updates hex text input", async () => {
+    wrap(<ThemeSettings />);
+    await waitFor(() => screen.getByText("Dark"));
+
+    fireEvent.click(screen.getByRole("button", { name: /customize.*current/i }));
+    await waitFor(() => screen.getByLabelText(/accent picker/i));
+
+    const picker = screen.getByLabelText(/accent picker/i);
+    fireEvent.change(picker, { target: { value: "#00ff00" } });
+
+    await waitFor(() => {
+      const hexInput = screen.getByLabelText(/^accent$/i);
+      expect(hexInput).toHaveValue("#00ff00");
+    });
+  });
+
+  it("incomplete hex does not update color state", async () => {
+    client.saveTheme.mockResolvedValue({ id: "custom", name: "Dark Custom", colors: THEMES[0].colors });
+    wrap(<ThemeSettings />);
+    await waitFor(() => screen.getByText("Dark"));
+
+    fireEvent.click(screen.getByRole("button", { name: /customize.*current/i }));
+    await waitFor(() => screen.getByLabelText(/^accent$/i));
+
+    fireEvent.change(screen.getByLabelText(/^accent$/i), { target: { value: "#abc" } });
+
+    fireEvent.click(screen.getByRole("button", { name: /save.*theme/i }));
+
+    await waitFor(() => {
+      expect(client.saveTheme).toHaveBeenCalledWith(
+        expect.objectContaining({
+          colors: expect.objectContaining({ accent: THEMES[0].colors.accent }),
+        })
+      );
+    });
+  });
+
+  it("invalid hex chars do not update color state", async () => {
+    client.saveTheme.mockResolvedValue({ id: "custom", name: "Dark Custom", colors: THEMES[0].colors });
+    wrap(<ThemeSettings />);
+    await waitFor(() => screen.getByText("Dark"));
+
+    fireEvent.click(screen.getByRole("button", { name: /customize.*current/i }));
+    await waitFor(() => screen.getByLabelText(/^accent$/i));
+
+    fireEvent.change(screen.getByLabelText(/^accent$/i), { target: { value: "#gg0000" } });
+
+    fireEvent.click(screen.getByRole("button", { name: /save.*theme/i }));
+
+    await waitFor(() => {
+      expect(client.saveTheme).toHaveBeenCalledWith(
+        expect.objectContaining({
+          colors: expect.objectContaining({ accent: THEMES[0].colors.accent }),
+        })
+      );
+    });
+  });
+
+  it("hex input normalizes missing # prefix", async () => {
+    wrap(<ThemeSettings />);
+    await waitFor(() => screen.getByText("Dark"));
+
+    fireEvent.click(screen.getByRole("button", { name: /customize.*current/i }));
+    await waitFor(() => screen.getByLabelText(/^accent$/i));
+
+    const hexInput = screen.getByLabelText(/^accent$/i);
+    fireEvent.change(hexInput, { target: { value: "ff0000" } });
+
+    await waitFor(() => {
+      expect(hexInput).toHaveValue("#ff0000");
+    });
+  });
+
+  it("saved theme uses hex-typed value same as picker-chosen value", async () => {
+    client.saveTheme.mockResolvedValue({ id: "custom", name: "Dark Custom", colors: THEMES[0].colors });
+    wrap(<ThemeSettings />);
+    await waitFor(() => screen.getByText("Dark"));
+
+    fireEvent.click(screen.getByRole("button", { name: /customize.*current/i }));
+    await waitFor(() => screen.getByLabelText(/^accent$/i));
+
+    fireEvent.change(screen.getByLabelText(/^accent$/i), { target: { value: "#cc3366" } });
+
+    fireEvent.click(screen.getByRole("button", { name: /save.*theme/i }));
+
+    await waitFor(() => {
+      expect(client.saveTheme).toHaveBeenCalledWith(
+        expect.objectContaining({
+          colors: expect.objectContaining({ accent: "#cc3366" }),
+        })
+      );
+    });
+  });
 });

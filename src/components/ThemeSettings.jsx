@@ -5,6 +5,11 @@ import { applyTheme } from "../utils/theme";
 import "./ThemeSettings.css";
 
 const DEFAULT_THEME_IDS = ["dark", "light", "charcoal", "paper", "pink", "frog"];
+
+const FULL_HEX_RE = /^#[0-9a-fA-F]{6}$/;
+function isValidHex(val) {
+  return FULL_HEX_RE.test(val);
+}
 const PROTECTED_THEME_IDS = ["dark", "light"];
 const PREVIEW_COLORS = ["primary", "secondary", "accent", "bg"];
 
@@ -14,6 +19,7 @@ export default function ThemeSettings() {
   const [customizingTheme, setCustomizingTheme] = useState(null); // Track which theme is being edited
   const [customName, setCustomName] = useState("");
   const [customColors, setCustomColors] = useState({});
+  const [hexInputs, setHexInputs] = useState({});
   const [error, setError] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [renameTarget, setRenameTarget] = useState(null);
@@ -56,6 +62,7 @@ export default function ThemeSettings() {
       setCustomizingTheme(null);
       setCustomName("");
       setCustomColors({});
+      setHexInputs({});
       setError(null);
     },
     onError: (err) => {
@@ -72,6 +79,7 @@ export default function ThemeSettings() {
       setCustomizingTheme(null);
       setCustomName("");
       setCustomColors({});
+      setHexInputs({});
       setError(null);
     },
     onError: (err) => {
@@ -109,6 +117,7 @@ export default function ThemeSettings() {
     const themeToCustomize = theme || currentTheme;
     if (themeToCustomize?.colors) {
       setCustomColors({ ...themeToCustomize.colors });
+      setHexInputs({ ...themeToCustomize.colors });
       setCustomName(theme ? themeToCustomize.name : `${themeToCustomize.name} Custom`);
       setCustomizingTheme(theme ? themeToCustomize.id : null);
       setCustomizing(true);
@@ -118,6 +127,7 @@ export default function ThemeSettings() {
   const handleCopyTheme = (theme) => {
     if (theme?.colors) {
       setCustomColors({ ...theme.colors });
+      setHexInputs({ ...theme.colors });
       setCustomName(`${theme.name} Copy`);
       setCustomizingTheme(null);
       setCustomizing(true);
@@ -265,14 +275,39 @@ export default function ThemeSettings() {
           <div className="color-inputs">
             {["bg", "surface", "surface2", "accent", "primary", "secondary", "success", "warning", "error"].map((key) => (
               <div key={key} className="color-input-group">
-                <label htmlFor={`color-${key}`}>{key.charAt(0).toUpperCase() + key.slice(1)}</label>
-                <input
-                  id={`color-${key}`}
-                  type="color"
-                  value={customColors[key] || "#000000"}
-                  onChange={(e) => handleColorChange(key, e.target.value)}
-                  disabled={saveThemeMutation.isPending || updateThemeMutation.isPending}
-                />
+                <label htmlFor={`color-text-${key}`}>{key.charAt(0).toUpperCase() + key.slice(1)}</label>
+                <div className="color-input-row">
+                  <input
+                    id={`color-text-${key}`}
+                    type="text"
+                    value={hexInputs[key] ?? customColors[key] ?? "#000000"}
+                    onChange={(e) => {
+                      const raw = e.target.value;
+                      const val = raw.startsWith("#") ? raw : `#${raw}`;
+                      setHexInputs((prev) => ({ ...prev, [key]: val }));
+                      if (isValidHex(val)) {
+                        handleColorChange(key, val.toLowerCase());
+                      }
+                    }}
+                    disabled={saveThemeMutation.isPending || updateThemeMutation.isPending}
+                    placeholder="#rrggbb"
+                    maxLength={7}
+                    spellCheck={false}
+                    aria-label={`${key} hex`}
+                  />
+                  <input
+                    id={`color-${key}`}
+                    type="color"
+                    value={customColors[key] || "#000000"}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      handleColorChange(key, val);
+                      setHexInputs((prev) => ({ ...prev, [key]: val }));
+                    }}
+                    disabled={saveThemeMutation.isPending || updateThemeMutation.isPending}
+                    aria-label={`${key} picker`}
+                  />
+                </div>
               </div>
             ))}
           </div>
@@ -290,6 +325,7 @@ export default function ThemeSettings() {
               onClick={() => {
                 setCustomizing(false);
                 setCustomizingTheme(null);
+                setHexInputs({});
               }}
               disabled={saveThemeMutation.isPending || updateThemeMutation.isPending}
             >
