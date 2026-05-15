@@ -42,12 +42,12 @@ describe("SettingsTheme", () => {
   beforeEach(() => {
     vi.resetAllMocks();
     client.getThemes.mockResolvedValue(MOCK_THEMES);
-    client.getCurrentTheme.mockResolvedValue(MOCK_THEMES[0]);
+    client.getDefaultTheme.mockResolvedValue(MOCK_THEMES[0]);
   });
 
-  it("renders the Theme section heading", () => {
+  it("renders the Default Theme section heading", () => {
     wrap();
-    expect(screen.getByText("Theme")).toBeInTheDocument();
+    expect(screen.getByText("Default Theme")).toBeInTheDocument();
   });
 
   it("renders the ThemeSettings component within the Theme section", async () => {

@@ -8,6 +8,7 @@ import Dashboard from "./pages/Dashboard";
 import Chores from "./pages/Chores";
 import UserManagement from "./components/UserManagement";
 import Log from "./components/Log";
+import Preferences from "./pages/Preferences";
 import SettingsLayout from "./pages/SettingsLayout";
 import SettingsGeneral from "./pages/SettingsGeneral";
 import SettingsAuth from "./pages/SettingsAuth";
@@ -19,7 +20,7 @@ import SettingsAbout from "./pages/SettingsAbout";
 import UserDetail from "./pages/UserDetail";
 import UserAvatarMenu from "./components/UserAvatarMenu";
 import { getConfig, getCurrentTheme, getPeople } from "./api/client";
-import { MdDashboard, MdCheckCircle, MdPeople, MdHistory, MdSettings, MdMenu } from "react-icons/md";
+import { MdDashboard, MdCheckCircle, MdPeople, MdHistory, MdSettings, MdMenu, MdTune } from "react-icons/md";
 import { applyTheme, DEFAULT_THEME_COLORS } from "./utils/theme";
 import "./App.css";
 
@@ -28,6 +29,7 @@ const PAGES = [
   { key: "chores", path: "/chores", label: "Chores", Icon: MdCheckCircle },
   { key: "users", path: "/users", label: "Users", Icon: MdPeople, adminOnly: true },
   { key: "log", path: "/log", label: "Log", Icon: MdHistory },
+  { key: "preferences", path: "/preferences", label: "Preferences", Icon: MdTune },
 ];
 
 function AppContent() {
@@ -104,6 +106,7 @@ function AppContent() {
           <UserAvatarMenu
             user={displayUser}
             onLogout={logout}
+            onPreferences={() => navigate("/preferences")}
             onSettings={() => navigate("/settings")}
             isAdmin={loggedInUser?.is_admin}
           />
@@ -136,6 +139,7 @@ function AppContent() {
         <UserAvatarMenu
           user={displayUser}
           onLogout={logout}
+          onPreferences={() => navigate("/preferences")}
           onSettings={() => navigate("/settings")}
           isAdmin={loggedInUser?.is_admin}
         />
@@ -149,6 +153,7 @@ function AppContent() {
             <Route path="/users" element={<UserManagement />} />
             <Route path="/users/:userName" element={<UserDetail />} />
             <Route path="/log" element={<Log />} />
+            <Route path="/preferences" element={<Preferences />} />
             <Route
               path="/settings"
               element={<SettingsLayout onTitleUpdate={(newTitle) => setAppTitle(newTitle)} />}

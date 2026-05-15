@@ -80,7 +80,7 @@ describe("ThemeSettings", () => {
   beforeEach(() => {
     vi.resetAllMocks();
     client.getThemes.mockResolvedValue(THEMES);
-    client.getCurrentTheme.mockResolvedValue(THEMES[0]);
+    client.getDefaultTheme.mockResolvedValue(THEMES[0]);
     client.deleteTheme.mockResolvedValue({ message: "Theme deleted" });
     client.renameTheme.mockResolvedValue({ id: "charcoal", name: "Charcoal Updated", colors: THEMES[2].colors });
     client.updateTheme.mockResolvedValue({ id: "custom_0", name: "My Custom Theme", colors: THEMES[3].colors });
@@ -95,26 +95,33 @@ describe("ThemeSettings", () => {
     });
   });
 
-  it("shows current theme as selected", async () => {
+  it("renders default theme description label", async () => {
+    wrap(<ThemeSettings />);
+    await waitFor(() => {
+      expect(screen.getByText(/default theme used for users who have not set a personal preference/i)).toBeInTheDocument();
+    });
+  });
+
+  it("shows default theme as selected", async () => {
     wrap(<ThemeSettings />);
     await waitFor(() => {
       expect(screen.getByText("Dark").closest("button")).toHaveClass("theme-active");
     });
   });
 
-  it("allows switching themes", async () => {
-    client.setTheme.mockResolvedValue(THEMES[1]);
+  it("clicking a theme card calls setDefaultTheme", async () => {
+    client.setDefaultTheme.mockResolvedValue(THEMES[1]);
     wrap(<ThemeSettings />);
     await waitFor(() => screen.getByText("Light"));
 
     fireEvent.click(screen.getByText("Light"));
 
     await waitFor(() => {
-      expect(client.setTheme).toHaveBeenCalledWith("light");
+      expect(client.setDefaultTheme).toHaveBeenCalledWith("light");
     });
   });
 
-  it("shows color editor for current theme", async () => {
+  it("shows color editor for current default theme", async () => {
     wrap(<ThemeSettings />);
     await waitFor(() => screen.getByText("Dark"));
 
@@ -236,16 +243,23 @@ describe("ThemeSettings", () => {
     expect(deleteBtn).not.toBeInTheDocument();
   });
 
-  it("applies theme colors globally", async () => {
+  it("does not apply theme colors to the document when default theme is set", async () => {
+    // Setting the site-wide default theme should NOT affect the admin's visual theme;
+    // the admin's visual appearance is controlled by their personal preference.
+    client.setDefaultTheme.mockResolvedValue(THEMES[1]);
     wrap(<ThemeSettings />);
-    await waitFor(() => screen.getByText("Dark"));
+    await waitFor(() => screen.getByText("Light"));
+
+    const rootBefore = document.documentElement.style.getPropertyValue("--bg");
 
     fireEvent.click(screen.getByText("Light"));
 
     await waitFor(() => {
-      const root = document.documentElement;
-      expect(root.style.getPropertyValue("--bg")).toBeTruthy();
+      expect(client.setDefaultTheme).toHaveBeenCalledWith("light");
     });
+
+    // CSS custom properties on documentElement should not have been altered by this action
+    expect(document.documentElement.style.getPropertyValue("--bg")).toBe(rootBefore);
   });
 
   it("renders action buttons for custom themes", async () => {

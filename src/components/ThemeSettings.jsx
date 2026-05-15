@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getThemes, getCurrentTheme, setTheme, saveTheme, deleteTheme, renameTheme, updateTheme } from "../api/client";
-import { applyTheme, DEFAULT_THEME_COLORS } from "../utils/theme";
+import { getThemes, getDefaultTheme, setDefaultTheme, saveTheme, deleteTheme, renameTheme, updateTheme } from "../api/client";
+import { DEFAULT_THEME_COLORS } from "../utils/theme";
 import "./ThemeSettings.css";
 
 const DEFAULT_THEME_IDS = ["dark", "light", "charcoal", "paper", "pink", "frog"];
@@ -30,26 +30,21 @@ export default function ThemeSettings() {
     queryFn: getThemes,
   });
 
-  const { data: currentTheme, isLoading: currentLoading, refetch: refetchCurrentTheme } = useQuery({
-    queryKey: ["current-theme"],
-    queryFn: getCurrentTheme,
+  const { data: defaultTheme, isLoading: defaultLoading, refetch: refetchDefaultTheme } = useQuery({
+    queryKey: ["default-theme"],
+    queryFn: getDefaultTheme,
   });
 
-  useEffect(() => {
-    if (currentTheme?.colors) {
-      applyTheme(currentTheme.colors);
-    }
-  }, [currentTheme]);
-
-  const setThemeMutation = useMutation({
-    mutationFn: (themeId) => setTheme(themeId),
-    onSuccess: async (data) => {
-      applyTheme(data.colors);
-      await refetchCurrentTheme();
+  const setDefaultThemeMutation = useMutation({
+    mutationFn: (themeId) => setDefaultTheme(themeId),
+    onSuccess: async () => {
+      await refetchDefaultTheme();
+      // Also invalidate default-theme-info so the Preferences page label stays fresh
+      queryClient.invalidateQueries({ queryKey: ["default-theme-info"] });
       setError(null);
     },
     onError: (err) => {
-      setError(err.message || "Failed to set theme");
+      setError(err.message || "Failed to set default theme");
     },
   });
 
@@ -57,7 +52,7 @@ export default function ThemeSettings() {
     mutationFn: (data) => saveTheme(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["themes"] });
-      queryClient.invalidateQueries({ queryKey: ["current-theme"] });
+      queryClient.invalidateQueries({ queryKey: ["default-theme"] });
       setCustomizing(false);
       setCustomizingTheme(null);
       setCustomName("");
@@ -74,7 +69,7 @@ export default function ThemeSettings() {
     mutationFn: ({ themeId, name, colors }) => updateTheme(themeId, { name, colors }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["themes"] });
-      queryClient.invalidateQueries({ queryKey: ["current-theme"] });
+      queryClient.invalidateQueries({ queryKey: ["default-theme"] });
       setCustomizing(false);
       setCustomizingTheme(null);
       setCustomName("");
@@ -91,7 +86,7 @@ export default function ThemeSettings() {
     mutationFn: (themeId) => deleteTheme(themeId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["themes"] });
-      queryClient.invalidateQueries({ queryKey: ["current-theme"] });
+      queryClient.invalidateQueries({ queryKey: ["default-theme"] });
       setDeleteTarget(null);
       setError(null);
     },
@@ -114,7 +109,7 @@ export default function ThemeSettings() {
   });
 
   const handleCustomize = (theme = null) => {
-    const themeToCustomize = theme || currentTheme;
+    const themeToCustomize = theme || defaultTheme;
     if (themeToCustomize?.colors) {
       setCustomColors({ ...themeToCustomize.colors });
       setHexInputs({ ...themeToCustomize.colors });
@@ -165,7 +160,7 @@ export default function ThemeSettings() {
     renameThemeMutation.mutate({ themeId: renameTarget.id, name: renameName });
   };
 
-  if (themesLoading || currentLoading) return <div className="loading">Loading themes…</div>;
+  if (themesLoading || defaultLoading) return <div className="loading">Loading themes…</div>;
 
   return (
     <div className="theme-settings">
@@ -175,17 +170,21 @@ export default function ThemeSettings() {
 
       {!customizing ? (
         <>
+          <p className="theme-description">
+            Default theme used for users who have not set a personal preference.
+          </p>
+
           <div className="themes-list">
             {themes.map((theme) => {
               const isProtected = PROTECTED_THEME_IDS.includes(theme.id);
               const isBuiltIn = DEFAULT_THEME_IDS.includes(theme.id);
               const isCustom = !isBuiltIn;
               return (
-                <div key={theme.id} className={`theme-card-wrapper ${currentTheme?.id === theme.id ? "active" : ""}`}>
+                <div key={theme.id} className={`theme-card-wrapper ${defaultTheme?.id === theme.id ? "active" : ""}`}>
                   <button
-                    className={`theme-card ${currentTheme?.id === theme.id ? "theme-active" : ""}`}
-                    onClick={() => setThemeMutation.mutate(theme.id)}
-                    disabled={setThemeMutation.isPending}
+                    className={`theme-card ${defaultTheme?.id === theme.id ? "theme-active" : ""}`}
+                    onClick={() => setDefaultThemeMutation.mutate(theme.id)}
+                    disabled={setDefaultThemeMutation.isPending}
                   >
                     <div className="theme-name">{theme.name}</div>
                     <div className="theme-preview">

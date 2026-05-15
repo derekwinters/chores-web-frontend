@@ -10,6 +10,12 @@
   color: var(--text);
 }
 
+.theme-description {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-muted, var(--secondary));
+}
+
 .themes-list {
   display: flex;
   flex-direction: column;

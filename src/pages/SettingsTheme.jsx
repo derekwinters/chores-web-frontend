@@ -6,7 +6,7 @@ export default function SettingsTheme() {
   return (
     <div className="settings-page">
       <section className="settings-section">
-        <h3>Theme</h3>
+        <h3>Default Theme</h3>
         <hr />
         <ThemeSettings />
       </section>
