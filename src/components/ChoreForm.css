@@ -114,7 +114,7 @@
 
 .day-btn.active {
   background: var(--accent-btn);
-  color: #fff;
+  color: var(--on-primary);
   border-color: var(--accent-btn);
 }
 
@@ -137,7 +137,7 @@
 
 .person-btn.active {
   background: var(--accent-btn);
-  color: #fff;
+  color: var(--on-primary);
   border-color: var(--accent-btn);
 }
 
@@ -200,7 +200,7 @@
   color: var(--error);
   font-size: 0.875rem;
   padding: 0.5rem 0.75rem;
-  background: rgba(248, 113, 113, 0.1);
+  background: rgba(var(--error-rgb), 0.1);
   border-radius: var(--radius);
   border: 1px solid var(--error);
 }
@@ -234,7 +234,7 @@
   transform: translateY(-50%);
   width: 1rem;
   height: 1rem;
-  background: #fff;
+  background: var(--on-primary);
   border-radius: 50%;
   transition: left 0.3s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -278,7 +278,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--overlay);
   display: flex;
   align-items: center;
   justify-content: center;

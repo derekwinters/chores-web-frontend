@@ -35,6 +35,8 @@ function LogRow({ entry, isMobile, formatTimestamp, colSpan }) {
 
   const targetType = entry.chore_name.startsWith("Person:") ? "user" : "chore";
   const targetName = entry.chore_name.replace("Person: ", "");
+  const actionClass = `action-badge action-badge--${entry.action}`;
+  const targetClass = `target-badge target-badge--${targetType}`;
   const fullTimestamp = new Date(entry.timestamp).toLocaleString();
 
   const handleClick = () => {
@@ -60,11 +62,11 @@ function LogRow({ entry, isMobile, formatTimestamp, colSpan }) {
       >
         <td className="log-timestamp">{formatTimestamp(entry.timestamp)}</td>
         <td className="log-action">
-          <span className="action-badge">{entry.action}</span>
+          <span className={actionClass}>{entry.action}</span>
         </td>
         {!isMobile && (
           <td className="log-target-type">
-            <span className="target-badge">{targetType}</span>
+            <span className={targetClass}>{targetType}</span>
           </td>
         )}
         {!isMobile && (

@@ -8,9 +8,9 @@ export function getTrendStatus(points, goal) {
 
 export function getTrendColor(status) {
   const colors = {
-    ahead: "#3db87a",
-    "on-track": "#e8a930",
-    behind: "#e05c6a",
+    ahead: "var(--success)",
+    "on-track": "var(--warning)",
+    behind: "var(--error)",
   };
-  return colors[status] || "#dce8f5";
+  return colors[status] || "var(--text)";
 }

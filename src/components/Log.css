@@ -186,6 +186,19 @@
   border: 1px solid var(--border);
 }
 
+/* Semantic action colors */
+.action-badge--completed  { border-color: var(--success); color: var(--success); }
+.action-badge--created    { border-color: var(--success); color: var(--success); }
+.action-badge--skipped    { border-color: var(--warning); color: var(--warning); }
+.action-badge--marked_due { border-color: var(--warning); color: var(--warning); }
+.action-badge--deleted    { border-color: var(--error);   color: var(--error); }
+.action-badge--reassigned { border-color: var(--accent);  color: var(--accent); }
+.action-badge--updated    { border-color: var(--accent);  color: var(--accent); }
+
+/* Semantic target type colors */
+.target-badge--chore { border-color: var(--accent); color: var(--accent); }
+.target-badge--user  { border-color: var(--gold);   color: var(--gold); }
+
 /* Detail row — expands inline below the clicked row */
 .log-detail-row {
   cursor: pointer;

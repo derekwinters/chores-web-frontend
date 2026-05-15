@@ -61,8 +61,8 @@
 }
 
 .redeem-btn {
-  background: var(--accent);
-  color: white;
+  background: var(--primary);
+  color: var(--on-primary);
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 4px;

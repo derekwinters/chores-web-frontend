@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getThemes, getCurrentTheme, setTheme, saveTheme, deleteTheme, renameTheme, updateTheme } from "../api/client";
-import { applyTheme } from "../utils/theme";
+import { applyTheme, DEFAULT_THEME_COLORS } from "../utils/theme";
 import "./ThemeSettings.css";
 
 const DEFAULT_THEME_IDS = ["dark", "light", "charcoal", "paper", "pink", "frog"];
@@ -280,7 +280,7 @@ export default function ThemeSettings() {
                   <input
                     id={`color-text-${key}`}
                     type="text"
-                    value={hexInputs[key] ?? customColors[key] ?? "#000000"}
+                    value={hexInputs[key] ?? customColors[key] ?? DEFAULT_THEME_COLORS[key]}
                     onChange={(e) => {
                       const raw = e.target.value;
                       const val = raw.startsWith("#") ? raw : `#${raw}`;
@@ -298,7 +298,7 @@ export default function ThemeSettings() {
                   <input
                     id={`color-${key}`}
                     type="color"
-                    value={customColors[key] || "#000000"}
+                    value={customColors[key] || DEFAULT_THEME_COLORS[key]}
                     onChange={(e) => {
                       const val = e.target.value;
                       handleColorChange(key, val);

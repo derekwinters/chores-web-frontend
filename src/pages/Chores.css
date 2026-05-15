@@ -108,8 +108,8 @@
   text-transform: uppercase;
 }
 .assign-badge.open { background: var(--surface2); color: var(--text-muted); }
-.assign-badge.fixed { background: var(--accent-btn); color: #fff; }
-.assign-badge.rotating { background: #6d4aad; color: #fff; }
+.assign-badge.fixed { background: var(--accent-btn); color: var(--on-primary); }
+.assign-badge.rotating { background: var(--secondary); color: var(--on-primary); }
 
 .assignee-name { font-size: 0.85rem; color: var(--text-muted); }
 

@@ -46,7 +46,7 @@
 .theme-card.theme-active {
   border-color: var(--accent);
   background: var(--surface);
-  box-shadow: 0 0 8px rgba(115, 177, 221, 0.3);
+  box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.3);
 }
 
 .theme-preview {
@@ -220,7 +220,7 @@
 
 .error-message {
   padding: 0.75rem;
-  background: rgba(224, 92, 106, 0.1);
+  background: rgba(var(--error-rgb), 0.1);
   border: 1px solid var(--error);
   border-radius: 4px;
   color: var(--error);
@@ -239,7 +239,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--overlay);
   display: flex;
   align-items: center;
   justify-content: center;

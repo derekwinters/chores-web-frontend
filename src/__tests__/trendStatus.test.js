@@ -28,22 +28,24 @@ describe("trendStatus", () => {
   });
 
   describe("getTrendColor", () => {
-    it("returns green for ahead status", () => {
-      const color = getTrendColor("ahead");
-      expect(color).toMatch(/^#[0-9a-f]{6}$/i);
+    it("returns success CSS variable for ahead status", () => {
+      expect(getTrendColor("ahead")).toBe("var(--success)");
     });
 
-    it("returns yellow for on-track status", () => {
-      const color = getTrendColor("on-track");
-      expect(color).toMatch(/^#[0-9a-f]{6}$/i);
+    it("returns warning CSS variable for on-track status", () => {
+      expect(getTrendColor("on-track")).toBe("var(--warning)");
     });
 
-    it("returns red for behind status", () => {
-      const color = getTrendColor("behind");
-      expect(color).toMatch(/^#[0-9a-f]{6}$/i);
+    it("returns error CSS variable for behind status", () => {
+      expect(getTrendColor("behind")).toBe("var(--error)");
     });
 
-    it("returns different colors for different statuses", () => {
+    it("returns text CSS variable for unknown status", () => {
+      expect(getTrendColor("unknown")).toBe("var(--text)");
+      expect(getTrendColor(undefined)).toBe("var(--text)");
+    });
+
+    it("returns different CSS variables for different statuses", () => {
       const ahead = getTrendColor("ahead");
       const onTrack = getTrendColor("on-track");
       const behind = getTrendColor("behind");

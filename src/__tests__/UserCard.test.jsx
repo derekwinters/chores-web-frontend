@@ -135,27 +135,27 @@ describe("UserCard", () => {
     expect(dueSoonHeaders.length).toBeGreaterThan(0);
   });
 
-  it("shows green color for points ahead of goal (>0.8)", () => {
+  it("shows success color for points ahead of goal (>0.8)", () => {
     const aheadSummary = { person: "Alice", points_7d: 20, points_30d: 25 };
     const personWithGoal = { ...PERSON, goal_7d: 20, goal_30d: 30 };
     wrap(<UserCard person={personWithGoal} chores={[]} people={PEOPLE} summary={aheadSummary} />);
     const points7d = screen.getAllByText("20")[0];
-    expect(points7d).toHaveStyle({ color: "#3db87a" });
+    expect(points7d).toHaveStyle({ color: "var(--success)" });
   });
 
-  it("shows yellow color for points on-track (0.5-0.8)", () => {
+  it("shows warning color for points on-track (0.5-0.8)", () => {
     const onTrackSummary = { person: "Alice", points_7d: 10, points_30d: 25 };
     const personWithGoal = { ...PERSON, goal_7d: 20, goal_30d: 50 };
     wrap(<UserCard person={personWithGoal} chores={[]} people={PEOPLE} summary={onTrackSummary} />);
     const points7d = screen.getByText("10");
-    expect(points7d).toHaveStyle({ color: "#e8a930" });
+    expect(points7d).toHaveStyle({ color: "var(--warning)" });
   });
 
-  it("shows red color for points behind goal (<0.5)", () => {
+  it("shows error color for points behind goal (<0.5)", () => {
     const behindSummary = { person: "Alice", points_7d: 5, points_30d: 25 };
     const personWithGoal = { ...PERSON, goal_7d: 20, goal_30d: 50 };
     wrap(<UserCard person={personWithGoal} chores={[]} people={PEOPLE} summary={behindSummary} />);
     const points7d = screen.getByText("5");
-    expect(points7d).toHaveStyle({ color: "#e05c6a" });
+    expect(points7d).toHaveStyle({ color: "var(--error)" });
   });
 });

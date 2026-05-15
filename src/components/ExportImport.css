@@ -128,13 +128,13 @@
 }
 
 .error-message {
-  background: rgba(224, 92, 106, 0.1);
+  background: rgba(var(--error-rgb), 0.1);
   color: var(--error);
   border: 1px solid var(--error);
 }
 
 .success-message {
-  background: rgba(61, 184, 122, 0.1);
+  background: rgba(var(--success-rgb), 0.1);
   color: var(--success);
   border: 1px solid var(--success);
 }

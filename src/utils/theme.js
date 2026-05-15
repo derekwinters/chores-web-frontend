@@ -29,13 +29,18 @@ export function applyTheme(colors) {
   root.style.setProperty("--warning", colors.warning);
   root.style.setProperty("--error", colors.error);
 
-  // Keep --error-rgb in sync so rgba(var(--error-rgb), alpha) patterns work
-  if (colors.error) {
-    const r = parseInt(colors.error.slice(1, 3), 16);
-    const g = parseInt(colors.error.slice(3, 5), 16);
-    const b = parseInt(colors.error.slice(5, 7), 16);
-    root.style.setProperty("--error-rgb", `${r},${g},${b}`);
-  }
+  // Keep *-rgb vars in sync so rgba(var(--*-rgb), alpha) patterns work
+  const syncRgb = (varName, hex) => {
+    if (!hex) return;
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    root.style.setProperty(varName, `${r},${g},${b}`);
+  };
+  syncRgb("--error-rgb", colors.error);
+  syncRgb("--success-rgb", colors.success);
+  syncRgb("--accent-rgb", colors.accent);
+  syncRgb("--warning-rgb", colors.warning);
 
   const bgBrightness = getBrightness(colors.bg);
   if (bgBrightness > 128) {

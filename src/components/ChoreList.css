@@ -49,12 +49,12 @@
 }
 
 .chore-state-badge.due {
-  background: rgba(224, 92, 106, 0.15);
+  background: rgba(var(--error-rgb), 0.15);
   color: var(--error);
 }
 
 .chore-state-badge.complete {
-  background: rgba(61, 184, 122, 0.15);
+  background: rgba(var(--success-rgb), 0.15);
   color: var(--success);
 }
 
@@ -97,7 +97,7 @@
 }
 
 .chore-action-delete:hover {
-  color: #ff6b6b;
+  color: var(--error);
 }
 
 .chore-content {
@@ -215,7 +215,7 @@
   width: fit-content;
   padding: 0.3rem 0.6rem;
   border-radius: 999px;
-  background: rgba(115, 177, 221, 0.12);
+  background: rgba(var(--accent-rgb), 0.12);
   color: var(--text);
 }
 
@@ -260,17 +260,17 @@
 }
 
 .assignment-info.rotating {
-  background: rgba(115, 177, 221, 0.15);
+  background: rgba(var(--accent-rgb), 0.15);
   color: var(--accent);
 }
 
 .assignment-info.open {
-  background: rgba(232, 169, 48, 0.15);
+  background: rgba(var(--warning-rgb), 0.15);
   color: var(--warning);
 }
 
 .assignment-info.fixed {
-  background: rgba(61, 184, 122, 0.15);
+  background: rgba(var(--success-rgb), 0.15);
   color: var(--success);
 }
 
