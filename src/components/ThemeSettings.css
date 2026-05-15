@@ -90,7 +90,7 @@
   display: flex;
 }
 
-.action-btn {
+.theme-actions .action-btn {
   width: 32px;
   height: 32px;
   padding: 0;
@@ -105,31 +105,31 @@
   font-size: 0;
 }
 
-.action-btn .material-icons {
+.theme-actions .action-btn .material-icons {
   font-size: 20px;
 }
 
-.action-btn:hover {
+.theme-actions .action-btn:hover {
   background-color: var(--surface);
 }
 
-.action-btn.edit-btn {
+.theme-actions .action-btn.edit-btn {
   color: var(--primary);
 }
 
-.action-btn.copy-btn {
+.theme-actions .action-btn.copy-btn {
   color: var(--secondary);
 }
 
-.action-btn.rename-btn {
+.theme-actions .action-btn.rename-btn {
   color: var(--accent);
 }
 
-.action-btn.delete-btn {
+.theme-actions .action-btn.delete-btn {
   color: var(--error);
 }
 
-.action-btn:disabled {
+.theme-actions .action-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
@@ -299,9 +299,8 @@
     max-width: 100%;
   }
 
-  .action-btn {
+  .theme-actions .action-btn {
     width: 28px;
     height: 28px;
-    font-size: 0.9rem;
   }
 }

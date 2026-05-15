@@ -4,7 +4,7 @@ import { useSearchParams } from "react-router-dom";
 import { MdFilterList, MdAdd } from "react-icons/md";
 import { Select, MenuItem, Chip, Box } from "@mui/material";
 import { useAuth } from "../contexts/AuthContext";
-import { getChores, getPeople, createChore, updateChore, deleteChore, completeChore, skipChore, markDueChore } from "../api/client";
+import { getChores, getPeople, createChore, updateChore, deleteChore, completeChore, skipChore, markDueChore, getPointsSummary } from "../api/client";
 import ChoreForm from "../components/ChoreForm";
 import ChoreList from "../components/ChoreList";
 import Modal from "../components/Modal";
@@ -94,6 +94,10 @@ export default function Manage() {
     queryFn: getPeople,
   });
 
+  const { data: pointsSummary = [] } = useQuery({
+    queryKey: ["points-summary"],
+    queryFn: getPointsSummary,
+  });
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["chores"] });
 
@@ -186,6 +190,28 @@ export default function Manage() {
   const assignees = [...new Set(chores.map(getChoreAssigneeName).filter(Boolean))].sort();
   const states = [...new Set(chores.map(c => c.state))].sort();
 
+  const summaryStats = useMemo(() => {
+    const totalChores = chores.filter(c => !c.disabled).length;
+    const totalPoints = chores.filter(c => !c.disabled).reduce((sum, c) => sum + (c.points || 0), 0);
+    const points7d = pointsSummary.reduce((sum, p) => sum + (p.points_7d || 0), 0);
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const cutoff = new Date(today);
+    cutoff.setDate(cutoff.getDate() + 7);
+
+    const pointsDueNext7 = chores
+      .filter(c => !c.disabled && c.next_due)
+      .filter(c => {
+        const d = new Date(c.next_due);
+        d.setHours(0, 0, 0, 0);
+        return d >= today && d <= cutoff;
+      })
+      .reduce((sum, c) => sum + (c.points || 0), 0);
+
+    return { totalChores, totalPoints, points7d, pointsDueNext7 };
+  }, [chores, pointsSummary]);
+
   return (
     <div className="manage-page">
       <div className="page-header">
@@ -199,6 +225,25 @@ export default function Manage() {
             <MdAdd className="action-icon" />
             <span className="action-text">Add Chore</span>
           </button>
+        </div>
+      </div>
+
+      <div className="chore-stats-grid">
+        <div className="chore-stat-card">
+          <div className="chore-stat-label">Chores</div>
+          <div className="chore-stat-value">{summaryStats.totalChores}</div>
+        </div>
+        <div className="chore-stat-card">
+          <div className="chore-stat-label">Total Points</div>
+          <div className="chore-stat-value">{summaryStats.totalPoints}</div>
+        </div>
+        <div className="chore-stat-card">
+          <div className="chore-stat-label">Completed Last 7 Days</div>
+          <div className="chore-stat-value">{summaryStats.points7d}</div>
+        </div>
+        <div className="chore-stat-card">
+          <div className="chore-stat-label">Due Next 7 Days</div>
+          <div className="chore-stat-value">{summaryStats.pointsDueNext7}</div>
         </div>
       </div>
 

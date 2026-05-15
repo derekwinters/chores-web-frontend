@@ -279,3 +279,37 @@
 .MuiPopover-paper.MuiMenu-paper .MuiMenuItem-root.Mui-selected:hover {
   background-color: var(--accent-bg) !important;
 }
+
+.chore-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.chore-stat-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.chore-stat-label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.chore-stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+@media (max-width: 768px) {
+  .chore-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
