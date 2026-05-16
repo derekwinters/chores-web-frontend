@@ -1,22 +1,12 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import Log from "../components/Log";
 import * as client from "../api/client";
 
 vi.mock("../api/client");
-
-// Mock window.innerWidth for breakpoint testing
-function setViewportWidth(width) {
-  Object.defineProperty(window, "innerWidth", {
-    writable: true,
-    configurable: true,
-    value: width,
-  });
-  window.dispatchEvent(new Event("resize"));
-}
 
 const LOG_ENTRIES = [
   {
@@ -95,7 +85,7 @@ describe("Log", () => {
     });
   });
 
-  it("shows log entry details (person, chore, action, timestamp)", async () => {
+  it("shows log entry details (action badges visible)", async () => {
     wrap(<Log />);
     await waitFor(() => {
       const actions = screen.getAllByText(/completed|skipped|reassigned/i);
@@ -106,7 +96,6 @@ describe("Log", () => {
   it("renders a table structure", async () => {
     wrap(<Log />);
     await waitFor(() => {
-      // Should have a table element
       expect(document.querySelector("table.log-table")).toBeInTheDocument();
       expect(document.querySelector("thead")).toBeInTheDocument();
       expect(document.querySelector("tbody")).toBeInTheDocument();
@@ -297,39 +286,70 @@ describe("Log", () => {
     });
   });
 
+  describe("Column layout", () => {
+    it("shows 5 column headers: Timestamp, Target Type, Action, Actor, Target", async () => {
+      wrap(<Log />);
+      await waitFor(() => {
+        expect(screen.getAllByText("Timestamp").length).toBeGreaterThan(0);
+        expect(screen.getAllByText("Target Type").length).toBeGreaterThan(0);
+        expect(screen.getAllByText("Action").length).toBeGreaterThan(0);
+        expect(screen.getAllByText("Actor").length).toBeGreaterThan(0);
+        expect(screen.getAllByText("Target").length).toBeGreaterThan(0);
+      });
+    });
+
+    it("does not show Assignee as a column header", async () => {
+      wrap(<Log />);
+      await waitFor(() => {
+        const vacuums = screen.queryAllByText("Vacuum");
+        expect(vacuums.length).toBeGreaterThan(0);
+      });
+      expect(screen.queryByRole("columnheader", { name: "Assignee" })).not.toBeInTheDocument();
+    });
+
+    it("never shows Content column", async () => {
+      wrap(<Log />);
+      await waitFor(() => {
+        expect(screen.queryByText("Content")).not.toBeInTheDocument();
+      });
+    });
+  });
+
+  describe("Relative timestamps", () => {
+    it("formats timestamps as relative time (e.g. Xd ago for old entries)", async () => {
+      wrap(<Log />);
+      await waitFor(() => {
+        // All test entries are from April 2026 (>24h old from May 2026 test run)
+        const relTimestamps = screen.getAllByText(/\d+[mhd] ago|just now/);
+        expect(relTimestamps.length).toBeGreaterThan(0);
+      });
+    });
+  });
+
   describe("Log entry inline expand (detail row)", () => {
     it("clicking a row inserts a detail row below it", async () => {
-      setViewportWidth(1024);
       wrap(<Log />);
       await waitFor(() => {
         const vacuums = screen.getAllByText("Vacuum");
         expect(vacuums.length).toBeGreaterThan(0);
       });
 
-      // No modal or dialog ever appears
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-      // No article cards
       expect(screen.queryByRole("article")).not.toBeInTheDocument();
-
-      // Before click: no detail rows in the DOM
       expect(document.querySelectorAll("tr.log-detail-row").length).toBe(0);
 
-      // Click the first data row
       const rows = document.querySelectorAll("tbody tr.log-table-row");
       fireEvent.click(rows[0]);
 
       await waitFor(() => {
-        // Detail row appears — no modal
         expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-        // A detail row is now present
         expect(document.querySelectorAll("tr.log-detail-row").length).toBe(1);
-        // "Timestamp" appears in both thead and the detail row
+        // Timestamp appears in thead + detail row
         expect(screen.getAllByText("Timestamp").length).toBeGreaterThan(1);
       });
     });
 
     it("clicking an expanded row removes the detail row", async () => {
-      setViewportWidth(1024);
       wrap(<Log />);
       await waitFor(() => {
         const vacuums = screen.getAllByText("Vacuum");
@@ -338,24 +358,19 @@ describe("Log", () => {
 
       const rows = document.querySelectorAll("tbody tr.log-table-row");
 
-      // Expand
       fireEvent.click(rows[0]);
       await waitFor(() => {
         expect(screen.getAllByText("Timestamp").length).toBeGreaterThan(1);
       });
 
-      // Collapse
       fireEvent.click(rows[0]);
       await waitFor(() => {
-        // Detail labels gone; only the thead "Timestamp" remains
         expect(screen.getAllByText("Timestamp").length).toBe(1);
-        // No detail rows remain
         expect(document.querySelectorAll("tr.log-detail-row").length).toBe(0);
       });
     });
 
     it("detail row shows timestamp, actor, target type, and target labels", async () => {
-      setViewportWidth(1024);
       wrap(<Log />);
       await waitFor(() => {
         const vacuums = screen.getAllByText("Vacuum");
@@ -366,26 +381,21 @@ describe("Log", () => {
       fireEvent.click(rows[0]);
 
       await waitFor(() => {
-        // Detail row has all base labels (Timestamp appears in thead + detail row)
+        // These all appear in both thead and detail row (>1 each)
         expect(screen.getAllByText("Timestamp").length).toBeGreaterThan(1);
-        // Actor appears in thead + detail row (>=2 at desktop)
         expect(screen.getAllByText("Actor").length).toBeGreaterThan(1);
-        // Target Type appears in thead + detail row (>=2 at desktop)
         expect(screen.getAllByText("Target Type").length).toBeGreaterThan(1);
-        // Target appears in thead + detail row (>=2 at desktop)
         expect(screen.getAllByText("Target").length).toBeGreaterThan(1);
       });
     });
 
     it("detail row shows reassigned_to when present", async () => {
-      setViewportWidth(1024);
       wrap(<Log />);
       await waitFor(() => {
         const vacuums = screen.getAllByText("Vacuum");
         expect(vacuums.length).toBeGreaterThan(0);
       });
 
-      // Entry index 2 (rows[2]) has reassigned_to: "Bob"
       const rows = document.querySelectorAll("tbody tr.log-table-row");
       fireEvent.click(rows[2]);
 
@@ -395,14 +405,12 @@ describe("Log", () => {
     });
 
     it("detail row hides reassigned_to when absent", async () => {
-      setViewportWidth(1024);
       wrap(<Log />);
       await waitFor(() => {
         const vacuums = screen.getAllByText("Vacuum");
         expect(vacuums.length).toBeGreaterThan(0);
       });
 
-      // Entry index 0 (completed, no reassigned_to)
       const rows = document.querySelectorAll("tbody tr.log-table-row");
       fireEvent.click(rows[0]);
 
@@ -414,33 +422,29 @@ describe("Log", () => {
     });
 
     it("detail row shows assignee when present", async () => {
-      setViewportWidth(1024);
       wrap(<Log />);
       await waitFor(() => {
         const vacuums = screen.getAllByText("Vacuum");
         expect(vacuums.length).toBeGreaterThan(0);
       });
 
-      // Entry index 0 (completed) has assignee: "Alice"
       const rows = document.querySelectorAll("tbody tr.log-table-row");
       fireEvent.click(rows[0]);
 
       await waitFor(() => {
-        // "Assignee" appears as both a <th> header and a detail label — use getAllByText
+        // Assignee is detail-only (not a column header), so exactly 1 occurrence
         const assigneeEls = screen.getAllByText("Assignee");
-        expect(assigneeEls.length).toBeGreaterThan(1);
+        expect(assigneeEls.length).toBeGreaterThan(0);
       });
     });
 
     it("detail row hides assignee when absent", async () => {
-      setViewportWidth(1024);
       wrap(<Log />);
       await waitFor(() => {
         const vacuums = screen.getAllByText("Vacuum");
         expect(vacuums.length).toBeGreaterThan(0);
       });
 
-      // Entry index 1 (skipped, no assignee)
       const rows = document.querySelectorAll("tbody tr.log-table-row");
       fireEvent.click(rows[1]);
 
@@ -448,22 +452,17 @@ describe("Log", () => {
         expect(screen.getAllByText("Timestamp").length).toBeGreaterThan(1);
       });
 
-      // "Assignee" column header <th> is visible, but the detail row label <span> should not be.
-      // So exactly one "Assignee" element (the header) should exist.
-      const assigneeEls = screen.queryAllByText("Assignee");
-      expect(assigneeEls.length).toBe(1);
-      expect(assigneeEls[0].tagName).toBe("TH");
+      // No Assignee text: not in header, not in detail when absent
+      expect(screen.queryByText("Assignee")).not.toBeInTheDocument();
     });
 
     it("detail row shows field_name, old_value, new_value when present", async () => {
-      setViewportWidth(1024);
       wrap(<Log />);
       await waitFor(() => {
         const vacuums = screen.getAllByText("Vacuum");
         expect(vacuums.length).toBeGreaterThan(0);
       });
 
-      // Entry index 3 is the updated entry with field_name/old_value/new_value
       const rows = document.querySelectorAll("tbody tr.log-table-row");
       fireEvent.click(rows[3]);
 
@@ -478,7 +477,6 @@ describe("Log", () => {
     });
 
     it("pressing Enter on a row expands the detail row", async () => {
-      setViewportWidth(1024);
       wrap(<Log />);
       await waitFor(() => {
         const vacuums = screen.getAllByText("Vacuum");
@@ -496,7 +494,6 @@ describe("Log", () => {
     });
 
     it("pressing Space on a row expands the detail row", async () => {
-      setViewportWidth(1024);
       wrap(<Log />);
       await waitFor(() => {
         const vacuums = screen.getAllByText("Vacuum");
@@ -514,7 +511,6 @@ describe("Log", () => {
     });
 
     it("rows have tabIndex for keyboard navigation", async () => {
-      setViewportWidth(1024);
       wrap(<Log />);
       await waitFor(() => {
         const vacuums = screen.getAllByText("Vacuum");
@@ -526,7 +522,6 @@ describe("Log", () => {
     });
 
     it("rows have aria-expanded attribute", async () => {
-      setViewportWidth(1024);
       wrap(<Log />);
       await waitFor(() => {
         const vacuums = screen.getAllByText("Vacuum");
@@ -544,7 +539,6 @@ describe("Log", () => {
     });
 
     it("only one detail row is inserted per expanded row", async () => {
-      setViewportWidth(1024);
       wrap(<Log />);
       await waitFor(() => {
         const vacuums = screen.getAllByText("Vacuum");
@@ -562,7 +556,7 @@ describe("Log", () => {
   });
 
   describe("Person log entries (UserLog unified view)", () => {
-    it("shows target type 'user' for entries whose chore_name starts with 'Person:'", async () => {
+    it("shows target type 'user' badge in main row for entries whose chore_name starts with 'Person:'", async () => {
       const personEntry = {
         id: 99,
         chore_id: 0,
@@ -575,7 +569,6 @@ describe("Log", () => {
         new_value: "30",
       };
       client.getLog.mockResolvedValue([personEntry]);
-      setViewportWidth(1024);
       wrap(<Log />);
 
       await waitFor(() => {
@@ -594,176 +587,21 @@ describe("Log", () => {
         timestamp: "2026-04-20T12:00:00Z",
       };
       client.getLog.mockResolvedValue([personEntry]);
-      setViewportWidth(1024);
       wrap(<Log />);
 
       await waitFor(() => {
-        // "Alice" should appear as the target name (without the "Person: " prefix)
         expect(screen.getByText("Alice")).toBeInTheDocument();
       });
 
-      // The raw "Person: Alice" string should not be visible as a cell value
       expect(screen.queryByText("Person: Alice")).not.toBeInTheDocument();
     });
 
-    it("shows target type 'chore' for entries whose chore_name does not start with 'Person:'", async () => {
-      setViewportWidth(1024);
+    it("shows target type 'chore' badge in main row for entries whose chore_name does not start with 'Person:'", async () => {
       wrap(<Log />);
 
       await waitFor(() => {
         const choreBadges = screen.getAllByText("chore");
         expect(choreBadges.length).toBeGreaterThan(0);
-      });
-    });
-  });
-
-  describe("Responsive breakpoints (850px minimum for 5-column layout)", () => {
-    afterEach(() => {
-      setViewportWidth(1024); // Reset to desktop width
-    });
-
-    it("shows 3 column headers on mobile (<850px): Timestamp, Action, Target", async () => {
-      setViewportWidth(375);
-      wrap(<Log />);
-      await waitFor(() => {
-        expect(screen.getAllByText("Timestamp").length).toBeGreaterThan(0);
-        expect(screen.getAllByText("Action").length).toBeGreaterThan(0);
-        expect(screen.getAllByText("Target").length).toBeGreaterThan(0);
-        // Target Type, Actor, and Assignee columns are hidden on mobile
-        expect(screen.queryByText("Target Type")).not.toBeInTheDocument();
-        expect(screen.queryByText("Actor")).not.toBeInTheDocument();
-        expect(screen.queryByText("Assignee")).not.toBeInTheDocument();
-      });
-    });
-
-    it("hides Target Type column header on mobile (<850px)", async () => {
-      setViewportWidth(375);
-      wrap(<Log />);
-      await waitFor(() => {
-        expect(screen.queryByText("Target Type")).not.toBeInTheDocument();
-      });
-    });
-
-    it("hides Assignee column header on mobile (<850px)", async () => {
-      setViewportWidth(375);
-      wrap(<Log />);
-      await waitFor(() => {
-        expect(screen.queryByText("Assignee")).not.toBeInTheDocument();
-      });
-    });
-
-    it("hides Actor column header on mobile (<850px)", async () => {
-      setViewportWidth(375);
-      wrap(<Log />);
-      await waitFor(() => {
-        const vacuums = screen.getAllByText("Vacuum");
-        expect(vacuums.length).toBeGreaterThan(0);
-      });
-      // Verify Actor cells are not rendered on mobile
-      const aliceElements = screen.queryAllByText("Alice");
-      expect(aliceElements.length).toBe(0);
-    });
-
-    it("shows 3 column headers on tablet (between breakpoints, <850px): Timestamp, Action, Target", async () => {
-      setViewportWidth(600);
-      wrap(<Log />);
-      await waitFor(() => {
-        expect(screen.getAllByText("Timestamp").length).toBeGreaterThan(0);
-        expect(screen.getAllByText("Action").length).toBeGreaterThan(0);
-        expect(screen.getAllByText("Target").length).toBeGreaterThan(0);
-        expect(screen.queryByText("Target Type")).not.toBeInTheDocument();
-        expect(screen.queryByText("Actor")).not.toBeInTheDocument();
-      });
-    });
-
-    it("hides Target Type on tablet (<850px)", async () => {
-      setViewportWidth(600);
-      wrap(<Log />);
-      await waitFor(() => {
-        const targetTypeHeaders = screen.queryAllByText("Target Type");
-        expect(targetTypeHeaders.length).toBe(0);
-      });
-    });
-
-    it("shows 6 column headers on desktop (>=850px): Timestamp, Action, Target Type, Actor, Assignee, Target", async () => {
-      setViewportWidth(1024);
-      wrap(<Log />);
-      await waitFor(() => {
-        expect(screen.getAllByText("Timestamp").length).toBeGreaterThan(0);
-        expect(screen.getAllByText("Action").length).toBeGreaterThan(0);
-        expect(screen.getAllByText("Target Type").length).toBeGreaterThan(0);
-        expect(screen.getAllByText("Actor").length).toBeGreaterThan(0);
-        expect(screen.getAllByText("Assignee").length).toBeGreaterThan(0);
-        expect(screen.getAllByText("Target").length).toBeGreaterThan(0);
-      });
-    });
-
-    it("shows Target Type on desktop (>=850px)", async () => {
-      setViewportWidth(1024);
-      wrap(<Log />);
-      await waitFor(() => {
-        const targetTypeHeaders = screen.getAllByText("Target Type");
-        expect(targetTypeHeaders.length).toBeGreaterThan(0);
-      });
-    });
-
-    it("shows Actor on desktop (>=850px)", async () => {
-      setViewportWidth(1024);
-      wrap(<Log />);
-      await waitFor(() => {
-        const alices = screen.getAllByText("Alice");
-        expect(alices.length).toBeGreaterThan(0);
-      });
-    });
-
-    it("never shows Content column on any breakpoint", async () => {
-      for (const width of [375, 600, 1024]) {
-        vi.resetAllMocks();
-        client.getLog.mockResolvedValue(LOG_ENTRIES);
-        client.getPeople.mockResolvedValue(PEOPLE);
-        client.getChores.mockResolvedValue(CHORES);
-
-        setViewportWidth(width);
-        const { unmount } = wrap(<Log />);
-        await waitFor(() => {
-          const contentHeader = screen.queryByText("Content");
-          expect(contentHeader).not.toBeInTheDocument();
-        });
-        unmount();
-      }
-    });
-
-    it("formats timestamp as time-only on mobile (<850px)", async () => {
-      setViewportWidth(375);
-      wrap(<Log />);
-      await waitFor(() => {
-        const timestamps = screen.getAllByText(/\d{1,2}:\d{2}/);
-        expect(timestamps.length).toBeGreaterThan(0);
-      });
-    });
-
-    it("formats timestamp as full date on desktop (>=850px)", async () => {
-      setViewportWidth(1024);
-      wrap(<Log />);
-      await waitFor(() => {
-        // Check for presence of log entries with full rendering
-        const content = screen.getAllByText(/Vacuum|Alice|completed|skipped/);
-        expect(content.length).toBeGreaterThan(0);
-      });
-    });
-
-    it("handles window resize from mobile (<850px) to desktop (>=850px)", async () => {
-      setViewportWidth(375);
-      wrap(<Log />);
-      await waitFor(() => {
-        expect(screen.queryByText("Target Type")).not.toBeInTheDocument();
-        expect(screen.queryByText("Actor")).not.toBeInTheDocument();
-      });
-
-      setViewportWidth(1024);
-      await waitFor(() => {
-        expect(screen.getAllByText("Target Type").length).toBeGreaterThan(0);
-        expect(screen.getAllByText("Actor").length).toBeGreaterThan(0);
       });
     });
   });

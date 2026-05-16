@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { MdFilterList } from "react-icons/md";
@@ -7,41 +7,46 @@ import "./Log.css";
 
 const ACTIONS = ["completed", "skipped", "reassigned", "created", "deleted", "updated", "marked_due"];
 
+const ACTION_LABELS = {
+  completed: "Completed",
+  skipped: "Skipped",
+  reassigned: "Reassigned",
+  created: "Created",
+  deleted: "Deleted",
+  updated: "Updated",
+  marked_due: "Marked Due",
+};
+
 const PAGE_SIZE = 20;
 
-// Breakpoint detection (log table needs 850px to comfortably show 5 columns)
-const BREAKPOINT_MOBILE = 850;
+function formatRelativeTimestamp(timestamp) {
+  const diffMs = Date.now() - new Date(timestamp).getTime();
+  const diffMin = Math.floor(diffMs / 60000);
+  const diffHr = Math.floor(diffMs / 3600000);
+  const diffDay = Math.floor(diffMs / 86400000);
 
-function useBreakpoint() {
-  const [isMobile, setIsMobile] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return window.innerWidth < BREAKPOINT_MOBILE;
-  });
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < BREAKPOINT_MOBILE);
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  return isMobile;
+  if (diffMin < 1) return "just now";
+  if (diffMin < 60) return `${diffMin}m ago`;
+  if (diffHr < 24) return `${diffHr}h ago`;
+  return `${diffDay}d ago`;
 }
 
-function LogRow({ entry, isMobile, formatTimestamp, colSpan }) {
+function isAged(timestamp) {
+  return Date.now() - new Date(timestamp).getTime() >= 86400000;
+}
+
+function LogRow({ entry }) {
   const [expanded, setExpanded] = useState(false);
 
   const targetType = entry.chore_name.startsWith("Person:") ? "user" : "chore";
   const targetName = entry.chore_name.replace("Person: ", "");
   const actionClass = `action-badge action-badge--${entry.action}`;
-  const targetClass = `target-badge target-badge--${targetType}`;
+  const actionLabel = ACTION_LABELS[entry.action] || entry.action;
   const fullTimestamp = new Date(entry.timestamp).toLocaleString();
+  const relTimestamp = formatRelativeTimestamp(entry.timestamp);
+  const aged = isAged(entry.timestamp);
 
-  const handleClick = () => {
-    setExpanded((prev) => !prev);
-  };
+  const handleClick = () => setExpanded((prev) => !prev);
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" || e.key === " ") {
@@ -60,22 +65,18 @@ function LogRow({ entry, isMobile, formatTimestamp, colSpan }) {
         aria-expanded={expanded}
         style={expanded ? { display: "none" } : undefined}
       >
-        <td className="log-timestamp">{formatTimestamp(entry.timestamp)}</td>
-        <td className="log-action">
-          <span className={actionClass}>{entry.action}</span>
+        <td className={`log-timestamp${aged ? " log-timestamp--aged" : ""}`}>
+          {relTimestamp}
         </td>
-        {!isMobile && (
-          <td className="log-target-type">
-            <span className={targetClass}>{targetType}</span>
-          </td>
-        )}
-        {!isMobile && (
-          <td className="log-actor">{entry.person}</td>
-        )}
-        {!isMobile && (
-          <td className="log-assignee">{entry.assignee ?? ""}</td>
-        )}
+        <td className="log-target-type">
+          <span className={`target-badge target-badge--${targetType}`}>{targetType}</span>
+        </td>
+        <td className="log-action">
+          <span className={actionClass}>{actionLabel}</span>
+        </td>
+        <td className="log-actor">{entry.person}</td>
         <td className="log-target">{targetName}</td>
+        <td className="log-chevron">›</td>
       </tr>
 
       {expanded && (
@@ -86,7 +87,7 @@ function LogRow({ entry, isMobile, formatTimestamp, colSpan }) {
           tabIndex={0}
           aria-expanded={expanded}
         >
-          <td colSpan={colSpan} className="log-detail-cell">
+          <td colSpan={6} className="log-detail-cell">
             <div className="log-detail-content">
               <div className="detail-item">
                 <span className="detail-label">Timestamp</span>
@@ -94,13 +95,13 @@ function LogRow({ entry, isMobile, formatTimestamp, colSpan }) {
               </div>
 
               <div className="detail-item">
-                <span className="detail-label">Action</span>
-                <span className="detail-value">{entry.action}</span>
+                <span className="detail-label">Target Type</span>
+                <span className="detail-value">{targetType}</span>
               </div>
 
               <div className="detail-item">
-                <span className="detail-label">Target Type</span>
-                <span className="detail-value">{targetType}</span>
+                <span className="detail-label">Action</span>
+                <span className="detail-value">{actionLabel}</span>
               </div>
 
               <div className="detail-item">
@@ -159,7 +160,6 @@ export default function Log() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [filtersExpanded, setFiltersExpanded] = useState(false);
   const [page, setPage] = useState(0);
-  const isMobile = useBreakpoint();
 
   const filters = (() => {
     const f = {};
@@ -211,18 +211,6 @@ export default function Log() {
     setPage(0);
   };
 
-  const formatTimestamp = (timestamp) => {
-    const date = new Date(timestamp);
-    // On mobile, show time-only; on tablet/desktop, show full date and time
-    if (isMobile) {
-      return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    }
-    return date.toLocaleString();
-  };
-
-  // Number of visible columns (for colSpan on detail rows)
-  const colSpan = isMobile ? 3 : 6;
-
   return (
     <div className="log">
       <div className="page-header">
@@ -238,81 +226,81 @@ export default function Log() {
       </div>
 
       {filtersExpanded && (
-      <div className="log-filters">
-        <div className="filter-group">
-          <label htmlFor="filter-person">Filter by person</label>
-          <select
-            id="filter-person"
-            value={searchParams.get("person") || ""}
-            onChange={(e) => handleFilterChange("person", e.target.value)}
-          >
-            <option value="">All people</option>
-            <option value="system">System</option>
-            <option value="schedule">Schedule</option>
-            {people.map((p) => (
-              <option key={p.id} value={p.name}>
-                {p.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <div className="log-filters">
+          <div className="filter-group">
+            <label htmlFor="filter-person">Filter by person</label>
+            <select
+              id="filter-person"
+              value={searchParams.get("person") || ""}
+              onChange={(e) => handleFilterChange("person", e.target.value)}
+            >
+              <option value="">All people</option>
+              <option value="system">System</option>
+              <option value="schedule">Schedule</option>
+              {people.map((p) => (
+                <option key={p.id} value={p.name}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        <div className="filter-group">
-          <label htmlFor="filter-chore">Filter by chore</label>
-          <select
-            id="filter-chore"
-            value={searchParams.get("chore_id") || ""}
-            onChange={(e) => handleFilterChange("chore_id", e.target.value)}
-          >
-            <option value="">All chores</option>
-            {chores.map((c) => (
-              <option key={c.unique_id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </div>
+          <div className="filter-group">
+            <label htmlFor="filter-chore">Filter by chore</label>
+            <select
+              id="filter-chore"
+              value={searchParams.get("chore_id") || ""}
+              onChange={(e) => handleFilterChange("chore_id", e.target.value)}
+            >
+              <option value="">All chores</option>
+              {chores.map((c) => (
+                <option key={c.unique_id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        <div className="filter-group">
-          <label htmlFor="filter-action">Filter by action</label>
-          <select
-            id="filter-action"
-            value={searchParams.get("action") || ""}
-            onChange={(e) => handleFilterChange("action", e.target.value)}
-          >
-            <option value="">All actions</option>
-            {ACTIONS.map((a) => (
-              <option key={a} value={a}>
-                {a.charAt(0).toUpperCase() + a.slice(1)}
-              </option>
-            ))}
-          </select>
-        </div>
+          <div className="filter-group">
+            <label htmlFor="filter-action">Filter by action</label>
+            <select
+              id="filter-action"
+              value={searchParams.get("action") || ""}
+              onChange={(e) => handleFilterChange("action", e.target.value)}
+            >
+              <option value="">All actions</option>
+              {ACTIONS.map((a) => (
+                <option key={a} value={a}>
+                  {ACTION_LABELS[a] || a}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        <div className="filter-group">
-          <label htmlFor="filter-start-date">Start date</label>
-          <input
-            id="filter-start-date"
-            type="date"
-            value={searchParams.get("start_date") || ""}
-            onChange={(e) => handleFilterChange("start_date", e.target.value)}
-          />
-        </div>
+          <div className="filter-group">
+            <label htmlFor="filter-start-date">Start date</label>
+            <input
+              id="filter-start-date"
+              type="date"
+              value={searchParams.get("start_date") || ""}
+              onChange={(e) => handleFilterChange("start_date", e.target.value)}
+            />
+          </div>
 
-        <div className="filter-group">
-          <label htmlFor="filter-end-date">End date</label>
-          <input
-            id="filter-end-date"
-            type="date"
-            value={searchParams.get("end_date") || ""}
-            onChange={(e) => handleFilterChange("end_date", e.target.value)}
-          />
-        </div>
+          <div className="filter-group">
+            <label htmlFor="filter-end-date">End date</label>
+            <input
+              id="filter-end-date"
+              type="date"
+              value={searchParams.get("end_date") || ""}
+              onChange={(e) => handleFilterChange("end_date", e.target.value)}
+            />
+          </div>
 
-        <button className="btn-secondary" onClick={handleClearFilters}>
-          Clear filters
-        </button>
-      </div>
+          <button className="btn-secondary" onClick={handleClearFilters}>
+            Clear filters
+          </button>
+        </div>
       )}
 
       <div className="log-entries">
@@ -326,22 +314,16 @@ export default function Log() {
               <thead>
                 <tr>
                   <th>Timestamp</th>
+                  <th>Target Type</th>
                   <th>Action</th>
-                  {!isMobile && <th>Target Type</th>}
-                  {!isMobile && <th>Actor</th>}
-                  {!isMobile && <th>Assignee</th>}
+                  <th>Actor</th>
                   <th>Target</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
                 {logEntries.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE).map((entry) => (
-                  <LogRow
-                    key={entry.id}
-                    entry={entry}
-                    isMobile={isMobile}
-                    formatTimestamp={formatTimestamp}
-                    colSpan={colSpan}
-                  />
+                  <LogRow key={entry.id} entry={entry} />
                 ))}
               </tbody>
             </table>
