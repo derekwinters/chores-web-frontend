@@ -20,7 +20,7 @@ import SettingsAbout from "./pages/SettingsAbout";
 import UserDetail from "./pages/UserDetail";
 import UserAvatarMenu from "./components/UserAvatarMenu";
 import { getConfig, getCurrentTheme, getPeople } from "./api/client";
-import { MdDashboard, MdCheckCircle, MdPeople, MdHistory, MdSettings, MdMenu, MdTune } from "react-icons/md";
+import { MdDashboard, MdCheckCircle, MdPeople, MdHistory, MdSettings, MdMenu } from "react-icons/md";
 import { applyTheme, DEFAULT_THEME_COLORS } from "./utils/theme";
 import "./App.css";
 
@@ -29,7 +29,6 @@ const PAGES = [
   { key: "chores", path: "/chores", label: "Chores", Icon: MdCheckCircle },
   { key: "users", path: "/users", label: "Users", Icon: MdPeople, adminOnly: true },
   { key: "log", path: "/log", label: "Log", Icon: MdHistory },
-  { key: "preferences", path: "/preferences", label: "Preferences", Icon: MdTune },
 ];
 
 function AppContent() {
