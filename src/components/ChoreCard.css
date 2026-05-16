@@ -2,7 +2,7 @@
   display: flex;
   position: relative;
   border-radius: var(--radius);
-  border: 1px solid var(--border);
+  border: none;
   background: var(--surface);
   cursor: pointer;
   transition: background 0.1s, border-color 0.1s, max-height 0.3s ease, filter 0.2s ease;

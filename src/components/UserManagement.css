@@ -44,7 +44,7 @@
 
 .add-user-form input {
   padding: 0.5rem;
-  background: var(--surface);
+  background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: 4px;
   color: var(--text);
@@ -94,11 +94,18 @@
   border: 1px solid var(--border);
 }
 
-.user-card {
-  background: var(--surface2);
-  border: 1px solid var(--border);
+.admin-user-card {
+  background: var(--surface);
+  border: none;
   border-radius: 8px;
   padding: 1rem;
+  box-shadow: var(--shadow);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.admin-user-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
 }
 
 .user-header {
@@ -126,7 +133,7 @@
   font-size: 0.9rem;
 }
 
-.user-card .user-name {
+.admin-user-card .user-name {
   font-weight: 700;
   font-size: 2em;
   display: block;
@@ -149,7 +156,7 @@
 }
 
 .user-role-pill.member {
-  background: var(--surface);
+  background: var(--surface2);
   color: var(--text-muted);
   border: 1px solid var(--border);
 }
@@ -214,7 +221,7 @@
     gap: 0.75rem;
   }
 
-  .user-card {
+  .admin-user-card {
     padding: 1.25rem;
   }
 
@@ -274,7 +281,7 @@
 
 .property input[type="number"] {
   padding: 0.5rem;
-  background: var(--surface);
+  background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: 4px;
   color: var(--text);
@@ -336,7 +343,7 @@
 .password-input-group input {
   flex: 1;
   padding: 0.5rem;
-  background: var(--surface);
+  background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: 4px;
   color: var(--text);
@@ -432,7 +439,7 @@
 
 .form-display {
   padding: 0.5rem 0.75rem;
-  background: var(--surface);
+  background: var(--surface2);
   border-radius: 4px;
   color: var(--text);
   font-size: 0.95rem;
@@ -450,7 +457,7 @@
 .form-row input[type="password"],
 .form-row input[type="text"] {
   padding: 0.5rem 0.75rem;
-  background: var(--surface);
+  background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: 4px;
   color: var(--text);

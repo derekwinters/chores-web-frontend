@@ -155,7 +155,7 @@ export default function UserManagement() {
   const renderUserCards = (users) => (
     <>
       {users.map((person) => (
-          <div key={person.name} className="user-card">
+          <div key={person.name} className="admin-user-card">
             <div className="user-header">
               <div className="user-info">
                 <div

@@ -1,13 +1,13 @@
 export const DEFAULT_THEME_COLORS = {
-  bg: "#080c14",
-  surface: "#16202e",
-  surface2: "#1e2d40",
-  accent: "#73B1DD",
-  primary: "#3574B3",
-  secondary: "#4a5568",
-  success: "#3db87a",
-  warning: "#e8a930",
-  error: "#e05c6a",
+  bg: "#f0ede6",
+  surface: "#faf8f3",
+  surface2: "#f0ede6",
+  accent: "#b8860b",
+  primary: "#8b6914",
+  secondary: "#7a7a6a",
+  success: "#558b2f",
+  warning: "#e0860b",
+  error: "#d32f2f",
 };
 
 function getBrightness(hex) {

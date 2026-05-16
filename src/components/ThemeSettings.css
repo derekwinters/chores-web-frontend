@@ -36,23 +36,23 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 1rem;
-  background: var(--surface2);
-  border: 2px solid var(--border);
+  background: var(--surface);
+  border: none;
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
   flex: 1;
+  box-shadow: var(--shadow);
 }
 
 .theme-card:hover {
-  border-color: var(--accent);
+  box-shadow: var(--shadow-lg);
   transform: translateY(-2px);
 }
 
 .theme-card.theme-active {
-  border-color: var(--accent);
   background: var(--surface);
-  box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.3);
+  box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.4), var(--shadow-lg);
 }
 
 .theme-preview {
@@ -145,9 +145,11 @@
   flex-direction: column;
   gap: 1.5rem;
   padding: 1.5rem;
-  background: var(--surface2);
-  border: 1px solid var(--border);
+  background: var(--surface);
+  border: none;
   border-radius: 8px;
+  box-shadow: var(--shadow);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .theme-editor input[type="text"] {
