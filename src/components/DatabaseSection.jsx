@@ -7,6 +7,7 @@ import {
   getPeople,
 } from "../api/client";
 import Modal from "./Modal";
+import { useSaveStatus } from "../hooks/useSaveStatus";
 import "../pages/Settings.css";
 
 const PAGE_SIZE = 20;
@@ -20,6 +21,7 @@ export default function DatabaseSection() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const { saveStatus: rowSaveStatus, saveBtnClass: rowSaveBtnClass, triggerSaving: triggerRowSaving, triggerSuccess: triggerRowSuccess, triggerError: triggerRowError, getCloseDelay: getRowCloseDelay } = useSaveStatus();
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["admin-points-log", offset],
@@ -41,12 +43,12 @@ export default function DatabaseSection() {
       updateAdminPointsLog(id, { points: Number(points), person }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-points-log"] });
-      setEditId(null);
-      setSuccess("Entry updated.");
+      triggerRowSuccess();
       setError(null);
-      setTimeout(() => setSuccess(null), 3000);
+      setTimeout(() => setEditId(null), getRowCloseDelay());
     },
     onError: (err) => {
+      triggerRowError();
       setError(err.message || "Failed to update entry.");
     },
   });
@@ -87,6 +89,7 @@ export default function DatabaseSection() {
       setError("Person cannot be empty.");
       return;
     }
+    triggerRowSaving();
     updateMutation.mutate({ id, points: pts, person: editPerson.trim() });
   }
 
@@ -173,11 +176,11 @@ export default function DatabaseSection() {
                         <td>{new Date(item.completed_at).toLocaleString()}</td>
                         <td className="db-actions">
                           <button
-                            className="btn-primary"
+                            className={rowSaveBtnClass}
                             onClick={() => saveEdit(item.id)}
                             disabled={updateMutation.isPending}
                           >
-                            {updateMutation.isPending ? "Saving…" : "Save"}
+                            {rowSaveStatus === "saving" ? "Saving…" : rowSaveStatus === "success" ? "Saved" : "Save"}
                           </button>
                           <button
                             className="btn-secondary"

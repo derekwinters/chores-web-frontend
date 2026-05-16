@@ -3,13 +3,14 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { getLogRetention, setLogRetention } from "../api/client";
 import ExportImport from "../components/ExportImport";
+import { useSaveStatus } from "../hooks/useSaveStatus";
 import "./Settings.css";
 import "./AdminPanel.css";
 
 export default function SettingsData() {
   const [retentionInput, setRetentionInput] = useState("");
   const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(false);
+  const { saveStatus, saveBtnClass, triggerSaving, triggerSuccess, triggerError } = useSaveStatus();
 
   const { data: retentionData, isLoading: retentionLoading } = useQuery({
     queryKey: ["log-retention"],
@@ -26,11 +27,11 @@ export default function SettingsData() {
     mutationFn: (days) => setLogRetention(parseInt(days)),
     onSuccess: (data) => {
       setRetentionInput(String(data.retention_days));
-      setSuccess(true);
+      triggerSuccess();
       setError(null);
-      setTimeout(() => setSuccess(false), 2000);
     },
     onError: (err) => {
+      triggerError();
       setError(err.message || "Failed to update log retention");
     },
   });
@@ -41,13 +42,13 @@ export default function SettingsData() {
       setError("Days must be a number greater than 0");
       return;
     }
+    triggerSaving();
     retentionMutation.mutate(days);
   };
 
   return (
     <div className="settings-page">
       {error && <div className="error-message">{error}</div>}
-      {success && <div className="success-message">Settings saved!</div>}
 
       <section className="settings-section">
         <div className="section-row">
@@ -61,11 +62,11 @@ export default function SettingsData() {
         <div className="section-row">
           <h3>Log Retention</h3>
           <button
-            className="btn-primary"
+            className={saveBtnClass}
             onClick={handleSaveRetention}
             disabled={retentionMutation.isPending || retentionLoading}
           >
-            {retentionMutation.isPending ? "Saving…" : "Save"}
+            {saveStatus === "saving" ? "Saving…" : saveStatus === "success" ? "Saved" : "Save"}
           </button>
         </div>
         <hr />

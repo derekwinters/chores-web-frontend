@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useOutletContext } from "react-router-dom";
 import { getConfig, updateConfig } from "../api/client";
+import { useSaveStatus } from "../hooks/useSaveStatus";
 import "./Settings.css";
 import "./AdminPanel.css";
 
@@ -26,7 +27,8 @@ export default function SettingsGeneral() {
   const [title, setTitle] = useState("");
   const [timezone, setTimezone] = useState("UTC");
   const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(false);
+  const titleSave = useSaveStatus();
+  const timezoneSave = useSaveStatus();
 
   const { data: config, isLoading: configLoading } = useQuery({
     queryKey: ["config"],
@@ -40,27 +42,46 @@ export default function SettingsGeneral() {
     }
   }, [config]);
 
-  const generalMutation = useMutation({
+  const titleMutation = useMutation({
     mutationFn: (data) => updateConfig(data),
     onSuccess: (data) => {
       setTitle(data.title);
       onTitleUpdate?.(data.title);
       queryClient.invalidateQueries({ queryKey: ["config"] });
-      setSuccess(true);
+      titleSave.triggerSuccess();
       setError(null);
-      setTimeout(() => setSuccess(false), 2000);
     },
     onError: (err) => {
+      titleSave.triggerError();
       setError(err.message || "Failed to update settings");
     },
   });
 
-  const handleSaveGeneral = () => {
+  const timezoneMutation = useMutation({
+    mutationFn: (data) => updateConfig(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["config"] });
+      timezoneSave.triggerSuccess();
+      setError(null);
+    },
+    onError: (err) => {
+      timezoneSave.triggerError();
+      setError(err.message || "Failed to update settings");
+    },
+  });
+
+  const handleSaveTitle = () => {
     if (!title.trim()) {
       setError("Title cannot be empty");
       return;
     }
-    generalMutation.mutate({ title, timezone });
+    titleSave.triggerSaving();
+    titleMutation.mutate({ title, timezone });
+  };
+
+  const handleSaveTimezone = () => {
+    timezoneSave.triggerSaving();
+    timezoneMutation.mutate({ title, timezone });
   };
 
   if (configLoading) return <div className="loading">Loading settings…</div>;
@@ -68,17 +89,16 @@ export default function SettingsGeneral() {
   return (
     <div className="settings-page">
       {error && <div className="error-message">{error}</div>}
-      {success && <div className="success-message">Settings saved!</div>}
 
       <section className="settings-section">
         <div className="section-row">
           <h3>App Title</h3>
           <button
-            className="btn-primary"
-            onClick={handleSaveGeneral}
-            disabled={generalMutation.isPending}
+            className={titleSave.saveBtnClass}
+            onClick={handleSaveTitle}
+            disabled={titleMutation.isPending}
           >
-            {generalMutation.isPending ? "Saving…" : "Save"}
+            {titleSave.saveStatus === "saving" ? "Saving…" : titleSave.saveStatus === "success" ? "Saved" : "Save"}
           </button>
         </div>
         <hr />
@@ -90,7 +110,7 @@ export default function SettingsGeneral() {
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              disabled={generalMutation.isPending}
+              disabled={titleMutation.isPending}
               placeholder="Enter app title"
             />
           </div>
@@ -101,11 +121,11 @@ export default function SettingsGeneral() {
         <div className="section-row">
           <h3>Date &amp; Time</h3>
           <button
-            className="btn-primary"
-            onClick={handleSaveGeneral}
-            disabled={generalMutation.isPending || !title.trim()}
+            className={timezoneSave.saveBtnClass}
+            onClick={handleSaveTimezone}
+            disabled={timezoneMutation.isPending}
           >
-            {generalMutation.isPending ? "Saving…" : "Save"}
+            {timezoneSave.saveStatus === "saving" ? "Saving…" : timezoneSave.saveStatus === "success" ? "Saved" : "Save"}
           </button>
         </div>
         <hr />
@@ -116,7 +136,7 @@ export default function SettingsGeneral() {
               id="timezone"
               value={timezone}
               onChange={(e) => setTimezone(e.target.value)}
-              disabled={generalMutation.isPending}
+              disabled={timezoneMutation.isPending}
             >
               {COMMON_TIMEZONES.map((tz) => {
                 const offset = new Date().toLocaleString("en-US", {

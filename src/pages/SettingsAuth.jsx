@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useOutletContext } from "react-router-dom";
 import { getConfig, updateConfig } from "../api/client";
+import { useSaveStatus } from "../hooks/useSaveStatus";
 import "./Settings.css";
 import "./AdminPanel.css";
 
@@ -11,7 +12,7 @@ export default function SettingsAuth() {
 
   const [authEnabled, setAuthEnabled] = useState(true);
   const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(false);
+  const { saveStatus, saveBtnClass, triggerSaving, triggerSuccess, triggerError } = useSaveStatus();
 
   const { data: config, isLoading: configLoading } = useQuery({
     queryKey: ["config"],
@@ -29,16 +30,17 @@ export default function SettingsAuth() {
     onSuccess: (data) => {
       if (data.title) onTitleUpdate?.(data.title);
       queryClient.invalidateQueries({ queryKey: ["config"] });
-      setSuccess(true);
+      triggerSuccess();
       setError(null);
-      setTimeout(() => setSuccess(false), 2000);
     },
     onError: (err) => {
+      triggerError();
       setError(err.message || "Failed to update settings");
     },
   });
 
   const handleSave = () => {
+    triggerSaving();
     authMutation.mutate({ auth_enabled: authEnabled });
   };
 
@@ -47,17 +49,16 @@ export default function SettingsAuth() {
   return (
     <div className="settings-page">
       {error && <div className="error-message">{error}</div>}
-      {success && <div className="success-message">Settings saved!</div>}
 
       <section className="settings-section">
         <div className="section-row">
           <h3>Authentication</h3>
           <button
-            className="btn-primary"
+            className={saveBtnClass}
             onClick={handleSave}
             disabled={authMutation.isPending}
           >
-            {authMutation.isPending ? "Saving…" : "Save"}
+            {saveStatus === "saving" ? "Saving…" : saveStatus === "success" ? "Saved" : "Save"}
           </button>
         </div>
         <hr />

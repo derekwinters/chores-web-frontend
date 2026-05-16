@@ -47,10 +47,14 @@ button {
   transition: opacity 0.15s, transform 0.15s;
 }
 button:disabled { opacity: 0.4; cursor: not-allowed; }
+button.btn-saving:disabled,
+button.btn-success:disabled { opacity: 1; cursor: default; }
 button:not(:disabled):hover { opacity: 0.85; }
 
 .btn-primary { background: var(--accent-btn); color: var(--on-primary); }
 .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+.btn-saving { background: transparent; color: var(--success); border: 1px solid var(--success); }
+.btn-success { background: var(--success); color: var(--on-primary); }
 .btn-error { background: var(--error); color: var(--on-primary); }
 .btn-warning { background: var(--warning); color: var(--bg); }
 

@@ -4,6 +4,8 @@ import { MdAdd } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { getPeople, createPerson, updatePerson, deletePerson } from "../api/client";
+import Toast from "./Toast";
+import { useSaveStatus } from "../hooks/useSaveStatus";
 import "./UserManagement.css";
 
 export default function UserManagement() {
@@ -27,16 +29,20 @@ export default function UserManagement() {
     password: "",
   });
   const [error, setError] = useState(null);
+  const [toast, setToast] = useState(null); // null | { message, variant }
+  const { saveStatus, saveBtnClass, triggerSaving, triggerSuccess, triggerError, reset: resetSaveStatus, getCloseDelay } = useSaveStatus();
 
   const createMutation = useMutation({
     mutationFn: ({ name, password, color }) => createPerson(name, password, color),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["people"] });
-      setModal(null);
+      triggerSuccess();
       setError(null);
+      setTimeout(() => setModal(null), getCloseDelay());
     },
     onError: (err) => {
-      setError(err.message || "Failed to create user");
+      triggerError();
+      setToast({ message: err.message || "Failed to create user", variant: "error" });
     },
   });
 
@@ -44,11 +50,13 @@ export default function UserManagement() {
     mutationFn: ({ id, data }) => updatePerson(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["people"] });
-      setModal(null);
+      triggerSuccess();
       setError(null);
+      setTimeout(() => setModal(null), getCloseDelay());
     },
     onError: (err) => {
-      setError(err.message || "Failed to update user");
+      triggerError();
+      setToast({ message: err.message || "Failed to update user", variant: "error" });
     },
   });
 
@@ -74,6 +82,7 @@ export default function UserManagement() {
       password: "",
     });
     setError(null);
+    resetSaveStatus();
     setModal({ mode: "create" });
   };
 
@@ -88,6 +97,7 @@ export default function UserManagement() {
       password: "",
     });
     setError(null);
+    resetSaveStatus();
     setModal({ mode: "edit", person });
   };
 
@@ -107,6 +117,7 @@ export default function UserManagement() {
       return;
     }
 
+    triggerSaving();
     if (modal.mode === "create") {
       createMutation.mutate({
         name: editForm.name.trim(),
@@ -357,15 +368,23 @@ export default function UserManagement() {
                 Cancel
               </button>
               <button
-                className="btn-primary"
+                className={saveBtnClass}
                 onClick={handleSaveForm}
                 disabled={createMutation.isPending || updateMutation.isPending}
               >
-                {createMutation.isPending || updateMutation.isPending ? "Saving…" : "Save"}
+                {saveStatus === "saving" ? "Saving…" : saveStatus === "success" ? "Saved" : "Save"}
               </button>
             </div>
           </div>
         </div>
+      )}
+
+      {toast && (
+        <Toast
+          message={toast.message}
+          variant={toast.variant}
+          onDone={() => setToast(null)}
+        />
       )}
     </div>
   );
