@@ -198,4 +198,24 @@ describe("ChoreCard", () => {
     );
     expect(container.querySelector(".chore-card")).toHaveClass("done");
   });
+
+  it("applies expanded class to card when expanded", () => {
+    const { container } = render(
+      <ChoreCard chore={makeChore()} selected={false} onClick={() => {}} />
+    );
+    const card = container.querySelector(".chore-card");
+    fireEvent.click(card);
+    expect(card).toHaveClass("expanded");
+  });
+
+  it("applies collapsed class to card when collapsed", () => {
+    const { container } = render(
+      <ChoreCard chore={makeChore()} selected={false} onClick={() => {}} />
+    );
+    const card = container.querySelector(".chore-card");
+    expect(card).toHaveClass("collapsed");
+    fireEvent.click(card);
+    fireEvent.click(card);
+    expect(card).toHaveClass("collapsed");
+  });
 });

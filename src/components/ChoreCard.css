@@ -10,7 +10,8 @@
   overflow: hidden;
 }
 
-.chore-card:hover {
+.chore-card:hover,
+.chore-card.expanded {
   background: var(--surface2);
   filter: brightness(1.05) saturate(1.1);
 }
