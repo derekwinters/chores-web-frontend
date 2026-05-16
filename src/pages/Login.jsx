@@ -25,7 +25,7 @@ export default function Login({ onLoginSuccess }) {
       }, 500);
     } catch (err) {
       const msg = err.message || "Invalid credentials";
-      setError(`ERROR: ${msg}`);
+      setError(msg);
       console.error("Login failed:", err);
       setLoading(false);
     }

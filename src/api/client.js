@@ -2,6 +2,18 @@ import { getToken, clearToken } from "../utils/auth";
 
 const BASE = import.meta.env.VITE_API_URL ?? "/api";
 
+// Fallback error messages for HTTP status codes
+const STATUS_CODE_FALLBACK = {
+  400: "Invalid input — check your values",
+  401: "Session expired, please log in",
+  403: "You don't have permission to do that",
+  404: "Not found",
+  409: "Already exists",
+  422: "Invalid input — check your values",
+  500: "Something went wrong. Please try again.",
+  503: "Service unavailable, please try again later",
+};
+
 async function request(method, path, body) {
   const headers = {};
 
@@ -25,7 +37,9 @@ async function request(method, path, body) {
     if (res.status === 401) {
       clearToken();
     }
-    throw new Error(detail.detail ?? `HTTP ${res.status}`);
+    // Use backend detail if available, otherwise use status code fallback
+    const errorMessage = detail.detail ?? STATUS_CODE_FALLBACK[res.status] ?? `Error: ${res.statusText}`;
+    throw new Error(errorMessage);
   }
   if (res.status === 204) return null;
   return res.json();
