@@ -96,6 +96,23 @@ const CHORES = [
     next_due: null,
     age: null,
   },
+  {
+    id: "trash",
+    unique_id: "trash",
+    name: "Trash",
+    state: "due",
+    disabled: false,
+    assignment_type: "open",
+    current_assignee: null,
+    schedule_type: "weekly",
+    schedule_config: { days: [0] },
+    schedule_summary: "Weekly on Mon",
+    eligible_people: ["Alice"],
+    assignee: null,
+    points: 1,
+    next_due: "2024-01-15",
+    age: 0,
+  },
 ];
 
 const PEOPLE = [{ id: 1, name: "Alice" }, { id: 2, name: "Bob" }];
@@ -294,7 +311,7 @@ describe("Manage page", () => {
 
     await waitFor(() => expect(screen.getByText("Dishes")).toBeInTheDocument());
     expect(screen.queryByText("Vacuum")).not.toBeInTheDocument();
-    expect(screen.getByText("Showing 1 of 5 chores")).toBeInTheDocument();
+    expect(screen.getByText("Showing 1 of 6 chores")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /show filters/i }));
     await waitFor(() => {
@@ -336,10 +353,16 @@ describe("Manage page", () => {
   it("hydrates assignee filter from URL params on initial render", async () => {
     wrap(<Chores />, { initialEntries: ["/chores?assignee=Bob"] });
 
+    // Bob's directly-assigned chores
     await waitFor(() => expect(screen.getByText("Countertops")).toBeInTheDocument());
+    expect(screen.getByText("Laundry")).toBeInTheDocument();
+    // Vacuum is assigned to Alice (rotating), not Bob — should not appear
     expect(screen.queryByText("Vacuum")).not.toBeInTheDocument();
-    expect(screen.queryByText("Bathroom")).not.toBeInTheDocument();
-    expect(screen.queryByText("Dishes")).not.toBeInTheDocument();
+    // Bathroom and Dishes are open/unassigned with no eligible restriction (Case 2) — visible to all
+    expect(screen.getByText("Bathroom")).toBeInTheDocument();
+    expect(screen.getByText("Dishes")).toBeInTheDocument();
+    // Trash has eligible_people: ["Alice"] — Bob is not eligible (Case 4), so should not appear
+    expect(screen.queryByText("Trash")).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /show filters/i }));
     await waitFor(() => {
@@ -362,10 +385,15 @@ describe("Manage page", () => {
     const aliceOption = await screen.findByRole("option", { name: /Alice/i });
     await user.click(aliceOption);
 
+    // Vacuum is directly assigned to Alice (Case 1)
     await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
-    expect(screen.queryByText("Bathroom")).not.toBeInTheDocument();
+    // Bathroom and Dishes are open/unassigned with no eligible restriction (Case 2) — visible to all named users
+    expect(screen.getByText("Bathroom")).toBeInTheDocument();
+    expect(screen.getByText("Dishes")).toBeInTheDocument();
+    // Trash has eligible_people: ["Alice"] — Alice is eligible (Case 3), so should appear
+    expect(screen.getByText("Trash")).toBeInTheDocument();
+    // Bob's chores should not appear
     expect(screen.queryByText("Countertops")).not.toBeInTheDocument();
-    expect(screen.queryByText("Dishes")).not.toBeInTheDocument();
     expect(screen.queryByText("Laundry")).not.toBeInTheDocument();
     expect(screen.getByTestId("location")).toHaveTextContent("/chores?assignee=Alice");
   });
@@ -375,6 +403,8 @@ describe("Manage page", () => {
 
     await waitFor(() => expect(screen.getByText("Bathroom")).toBeInTheDocument());
     expect(screen.getByText("Dishes")).toBeInTheDocument();
+    // Trash is unassigned (no current_assignee) so it should appear
+    expect(screen.getByText("Trash")).toBeInTheDocument();
     expect(screen.queryByText("Vacuum")).not.toBeInTheDocument();
     expect(screen.queryByText("Countertops")).not.toBeInTheDocument();
     expect(screen.queryByText("Laundry")).not.toBeInTheDocument();
@@ -394,7 +424,7 @@ describe("Manage page", () => {
       return nameElement?.textContent || "";
     });
 
-    expect(choreNames).toEqual(["Bathroom", "Vacuum", "Countertops", "Dishes", "Laundry"]);
+    expect(choreNames).toEqual(["Bathroom", "Trash", "Vacuum", "Countertops", "Dishes", "Laundry"]);
   });
 
   it("preserves due-date ordering after filters are applied", async () => {
@@ -408,7 +438,7 @@ describe("Manage page", () => {
       return nameElement?.textContent || "";
     });
 
-    expect(choreNames).toEqual(["Bathroom", "Dishes"]);
+    expect(choreNames).toEqual(["Bathroom", "Trash", "Dishes"]);
   });
 
   it("shows complete and skip buttons when card is expanded", async () => {
@@ -458,6 +488,28 @@ describe("Manage page", () => {
     await waitFor(() => {
       expect(client.skipChore).toHaveBeenCalled();
     });
+  });
+
+  it("assignee filter case 3: shows unassigned chore when user IS in eligible_people", async () => {
+    wrap(<Chores />, { initialEntries: ["/chores?assignee=Alice"] });
+
+    // Trash is unassigned but Alice is in eligible_people: ["Alice"], so it should appear
+    await waitFor(() => expect(screen.getByText("Trash")).toBeInTheDocument());
+    // Vacuum is directly assigned to Alice, so it should appear
+    expect(screen.getByText("Vacuum")).toBeInTheDocument();
+    // Bob's chores should not appear
+    expect(screen.queryByText("Countertops")).not.toBeInTheDocument();
+    expect(screen.queryByText("Laundry")).not.toBeInTheDocument();
+  });
+
+  it("assignee filter case 4: hides unassigned chore when user is NOT in eligible_people", async () => {
+    wrap(<Chores />, { initialEntries: ["/chores?assignee=Bob"] });
+
+    // Trash is unassigned but eligible_people is ["Alice"] — Bob is not eligible
+    await waitFor(() => expect(screen.getByText("Countertops")).toBeInTheDocument());
+    expect(screen.queryByText("Trash")).not.toBeInTheDocument();
+    // Bob's directly-assigned chores should appear
+    expect(screen.getByText("Laundry")).toBeInTheDocument();
   });
 
 });

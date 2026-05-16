@@ -9,7 +9,7 @@ import ChoreForm from "../components/ChoreForm";
 import ChoreList from "../components/ChoreList";
 import Modal from "../components/Modal";
 import {
-  getChoreAssigneeName,
+  choreMatchesAssigneeFilter,
   UNASSIGNED_FILTER_VALUE,
   UNASSIGNED_LABEL,
 } from "../utils/choreAssignee";
@@ -166,11 +166,10 @@ export default function Manage() {
       if (filters.state && chore.state !== filters.state) return false;
       if (filters.disabled !== undefined && chore.disabled !== filters.disabled) return false;
       if (filters.assignees && filters.assignees.length > 0) {
-        const assignee = getChoreAssigneeName(chore);
-        const isUnassignedSelected = filters.assignees.includes(UNASSIGNED_FILTER_VALUE);
-        const isAssigneeSelected = filters.assignees.includes(assignee);
-        const matchesAssignee = (assignee === null && isUnassignedSelected) || (assignee !== null && isAssigneeSelected);
-        if (!matchesAssignee) return false;
+        const matches = filters.assignees.some(
+          (filterValue) => choreMatchesAssigneeFilter(chore, filterValue)
+        );
+        if (!matches) return false;
       }
       if (filters.daysFromNow !== undefined) {
         if (chore.next_due === null) return false;
@@ -187,7 +186,7 @@ export default function Manage() {
 
   const scheduleTypes = [...new Set(chores.map(c => c.schedule_type))].sort();
   const assignmentTypes = [...new Set(chores.map(c => c.assignment_type))].sort();
-  const assignees = [...new Set(chores.map(getChoreAssigneeName).filter(Boolean))].sort();
+  const assignees = people.map(p => p.name).sort();
   const states = [...new Set(chores.map(c => c.state))].sort();
 
   const summaryStats = useMemo(() => {
