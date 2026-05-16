@@ -25,12 +25,32 @@ const getThemeColors = () => {
   };
 };
 
+// Determine if current theme is light or dark based on background luminance
+const getThemeMode = () => {
+  const root = document.documentElement;
+  const bgColor = getComputedStyle(root).getPropertyValue("--bg").trim() || "#080c14";
+
+  // Parse hex color to RGB
+  const hex = bgColor.replace("#", "");
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+
+  // Calculate luminance using relative luminance formula
+  // https://www.w3.org/TR/WCAG20/#relativeluminancedef
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+  // Use "light" mode for bright backgrounds, "dark" for dark backgrounds
+  return luminance > 0.5 ? "light" : "dark";
+};
+
 const createCustomTheme = () => {
   const colors = getThemeColors();
+  const mode = getThemeMode();
 
   return createTheme({
     palette: {
-      mode: "dark",
+      mode,
       background: {
         default: colors.surface,
         paper: colors.surface,
@@ -50,8 +70,10 @@ const createCustomTheme = () => {
             "& .MuiPaper-root": {
               backgroundColor: colors.surface,
               color: colors.text,
-              borderColor: colors.border,
               border: `1px solid ${colors.border}`,
+            },
+            "& .MuiIconButton-root": {
+              color: colors.text,
             },
           },
         },
@@ -62,6 +84,12 @@ const createCustomTheme = () => {
             color: colors.text,
             backgroundColor: colors.surface,
             borderBottom: `1px solid ${colors.border}`,
+            "& .MuiIconButton-root": {
+              color: colors.text,
+            },
+            "& .MuiButtonBase-root": {
+              color: colors.text,
+            },
           },
         },
       },
@@ -69,11 +97,19 @@ const createCustomTheme = () => {
         styleOverrides: {
           root: {
             color: colors.text,
+            backgroundColor: "transparent",
+            borderColor: "transparent",
+            "&:hover": {
+              backgroundColor: colors.surface2,
+              borderColor: colors.border,
+            },
             "&.Mui-selected": {
               backgroundColor: colors.accentBtn,
               color: colors.text,
+              borderColor: colors.accentBtn,
               "&:hover": {
                 backgroundColor: colors.accentBtn,
+                borderColor: colors.accentBtn,
               },
             },
             "&.Mui-today": {
