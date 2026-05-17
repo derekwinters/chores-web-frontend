@@ -139,8 +139,10 @@ function wrap(ui, { initialEntries = ["/chores"] } = {}) {
 describe("Manage page", () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    localStorage.clear();
     client.getChores.mockResolvedValue(CHORES);
     client.getPeople.mockResolvedValue(PEOPLE);
+    client.getPointsSummary.mockResolvedValue([]);
     client.createChore.mockResolvedValue({ ...CHORES[0], unique_id: "new_chore", name: "New Chore" });
     client.updateChore.mockResolvedValue({ ...CHORES[0], points: 10 });
     client.deleteChore.mockResolvedValue(null);
@@ -424,7 +426,7 @@ describe("Manage page", () => {
       return nameElement?.textContent || "";
     });
 
-    expect(choreNames).toEqual(["Bathroom", "Trash", "Vacuum", "Countertops", "Dishes", "Laundry"]);
+    expect(choreNames).toEqual(["Bathroom", "Trash", "Vacuum", "Countertops", "Laundry", "Dishes"]);
   });
 
   it("preserves due-date ordering after filters are applied", async () => {
@@ -621,6 +623,50 @@ describe("Manage page", () => {
     await waitFor(() => {
       expect(screen.getByText("Vacuum")).toBeInTheDocument();
       expect(screen.queryByText("Laundry")).not.toBeInTheDocument();
+    });
+  });
+
+  describe("stats section toggle", () => {
+    it("renders stats header with a toggle button", async () => {
+      wrap(<Chores />);
+      await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
+      expect(screen.getByRole("button", { name: /toggle stats/i })).toBeInTheDocument();
+    });
+
+    it("shows stat cards by default (expanded)", async () => {
+      wrap(<Chores />);
+      await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
+      expect(screen.getByText("Chores")).toBeInTheDocument();
+      expect(screen.getByText("Total Points")).toBeInTheDocument();
+    });
+
+    it("hides stat cards when toggle is clicked", async () => {
+      wrap(<Chores />);
+      await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
+      fireEvent.click(screen.getByRole("button", { name: /toggle stats/i }));
+      expect(screen.queryByText("Total Points")).not.toBeInTheDocument();
+    });
+
+    it("restores stat cards when toggle is clicked again", async () => {
+      wrap(<Chores />);
+      await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
+      fireEvent.click(screen.getByRole("button", { name: /toggle stats/i }));
+      fireEvent.click(screen.getByRole("button", { name: /toggle stats/i }));
+      expect(screen.getByText("Total Points")).toBeInTheDocument();
+    });
+
+    it("persists collapsed state to localStorage", async () => {
+      wrap(<Chores />);
+      await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
+      fireEvent.click(screen.getByRole("button", { name: /toggle stats/i }));
+      expect(localStorage.getItem("chores-stats-expanded")).toBe("false");
+    });
+
+    it("starts collapsed when localStorage says collapsed", async () => {
+      localStorage.setItem("chores-stats-expanded", "false");
+      wrap(<Chores />);
+      await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
+      expect(screen.queryByText("Total Points")).not.toBeInTheDocument();
     });
   });
 

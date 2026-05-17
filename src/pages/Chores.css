@@ -354,6 +354,44 @@
   background-color: var(--accent-bg) !important;
 }
 
+.chore-stats-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.chore-stats-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.chore-stats-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  color: var(--text-muted);
+  border-radius: var(--radius);
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.btn-icon:hover {
+  color: var(--text);
+  background: var(--surface2);
+}
+
 .chore-stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);

@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
-import { MdFilterList, MdAdd, MdSearch, MdClose } from "react-icons/md";
+import { MdFilterList, MdAdd, MdSearch, MdClose, MdExpandMore, MdExpandLess } from "react-icons/md";
 import { Select, MenuItem, Chip, Box } from "@mui/material";
 import { useAuth } from "../contexts/AuthContext";
 import { getChores, getPeople, createChore, updateChore, deleteChore, completeChore, skipChore, markDueChore, getPointsSummary } from "../api/client";
@@ -83,6 +83,10 @@ export default function Manage() {
   const [modal, setModal] = useState(null); // null | { mode: "create" } | { mode: "edit", chore }
   const [deleteTarget, setDeleteTarget] = useState(null); // chore to confirm-delete
   const [filtersExpanded, setFiltersExpanded] = useState(false);
+  const [statsExpanded, setStatsExpanded] = useState(() => {
+    const stored = localStorage.getItem("chores-stats-expanded");
+    return stored === null ? true : stored === "true";
+  });
 
   const filters = useMemo(() => getFiltersFromSearchParams(searchParams), [searchParams]);
 
@@ -273,23 +277,41 @@ export default function Manage() {
         </div>
       </div>
 
-      <div className="chore-stats-grid">
-        <div className="chore-stat-card">
-          <div className="chore-stat-label">Chores</div>
-          <div className="chore-stat-value">{summaryStats.totalChores}</div>
+      <div className="chore-stats-section">
+        <div className="chore-stats-header">
+          <span className="chore-stats-label">Stats</span>
+          <button
+            className="btn-icon"
+            aria-label="Toggle stats"
+            onClick={() => {
+              const next = !statsExpanded;
+              setStatsExpanded(next);
+              localStorage.setItem("chores-stats-expanded", String(next));
+            }}
+          >
+            {statsExpanded ? <MdExpandLess className="action-icon" /> : <MdExpandMore className="action-icon" />}
+          </button>
         </div>
-        <div className="chore-stat-card">
-          <div className="chore-stat-label">Total Points</div>
-          <div className="chore-stat-value">{summaryStats.totalPoints}</div>
-        </div>
-        <div className="chore-stat-card">
-          <div className="chore-stat-label">Completed Last 7 Days</div>
-          <div className="chore-stat-value">{summaryStats.points7d}</div>
-        </div>
-        <div className="chore-stat-card">
-          <div className="chore-stat-label">Due Next 7 Days</div>
-          <div className="chore-stat-value">{summaryStats.pointsDueNext7}</div>
-        </div>
+        {statsExpanded && (
+          <div className="chore-stats-grid">
+            <div className="chore-stat-card">
+              <div className="chore-stat-label">Chores</div>
+              <div className="chore-stat-value">{summaryStats.totalChores}</div>
+            </div>
+            <div className="chore-stat-card">
+              <div className="chore-stat-label">Total Points</div>
+              <div className="chore-stat-value">{summaryStats.totalPoints}</div>
+            </div>
+            <div className="chore-stat-card">
+              <div className="chore-stat-label">Completed Last 7 Days</div>
+              <div className="chore-stat-value">{summaryStats.points7d}</div>
+            </div>
+            <div className="chore-stat-card">
+              <div className="chore-stat-label">Due Next 7 Days</div>
+              <div className="chore-stat-value">{summaryStats.pointsDueNext7}</div>
+            </div>
+          </div>
+        )}
       </div>
 
       {isLoading ? (

@@ -43,27 +43,38 @@ export default function ChoreList({ onEdit, onDelete, onComplete, onSkip, onMark
     return <div className="empty">No chores yet. Add one to get started.</div>;
   }
 
+  const hasBothStates =
+    sorted.some((c) => c.state === "due") &&
+    sorted.some((c) => c.state === "complete");
+  const firstCompleteIndex = hasBothStates
+    ? sorted.findIndex((c) => c.state === "complete")
+    : -1;
+
   return (
     <div className="chore-list" role="region" aria-label="Chores list">
-      {sorted.map((chore) => {
+      {sorted.map((chore, index) => {
         const assigneeLabel = getChoreAssigneeLabel(chore);
 
         return (
-          <ChoreCard
-            key={chore.id}
-            chore={{ ...chore, age: calculateAge(chore.next_due) }}
-            choreState={chore.state}
-            status={STATE_LABELS[chore.state] || chore.state}
-            frequency={chore.schedule_summary}
-            assignee={assigneeLabel}
-            onEdit={onEdit}
-            onDelete={onDelete}
-            onComplete={onComplete}
-            onSkip={onSkip}
-            onMarkDue={onMarkDue}
-            onHistory={(c) => navigate(`/log?chore_id=${encodeURIComponent(c.id)}`)}
-            onClick={() => {}}
-          />
+          <React.Fragment key={chore.id}>
+            {index === firstCompleteIndex && (
+              <div className="chore-state-spacer" aria-hidden="true" />
+            )}
+            <ChoreCard
+              chore={{ ...chore, age: calculateAge(chore.next_due) }}
+              choreState={chore.state}
+              status={STATE_LABELS[chore.state] || chore.state}
+              frequency={chore.schedule_summary}
+              assignee={assigneeLabel}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              onComplete={onComplete}
+              onSkip={onSkip}
+              onMarkDue={onMarkDue}
+              onHistory={(c) => navigate(`/log?chore_id=${encodeURIComponent(c.id)}`)}
+              onClick={() => {}}
+            />
+          </React.Fragment>
         );
       })}
     </div>

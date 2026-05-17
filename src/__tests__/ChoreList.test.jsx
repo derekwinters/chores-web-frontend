@@ -219,6 +219,28 @@ describe("ChoreList", () => {
     });
   });
 
+  it("injects invisible spacer between last due and first complete chore", async () => {
+    const mixed = [
+      { id: "a", unique_id: "a", name: "Alpha", points: 1, state: "due", disabled: false,
+        current_assignee: null, schedule_summary: "Weekly", assignment_type: "open", next_due: "2026-05-01" },
+      { id: "b", unique_id: "b", name: "Beta", points: 2, state: "complete", disabled: false,
+        current_assignee: null, schedule_summary: "Weekly", assignment_type: "open", next_due: "2026-05-10" },
+    ];
+    client.getChores.mockResolvedValue(mixed);
+    wrap(<ChoreList />);
+    await waitFor(() => expect(screen.getByText("Alpha")).toBeInTheDocument());
+    const list = screen.getByRole("region");
+    const spacer = list.querySelector(".chore-state-spacer");
+    expect(spacer).toBeInTheDocument();
+  });
+
+  it("does not inject spacer when all chores have the same state", async () => {
+    wrap(<ChoreList />); // all CHORES are state=due
+    await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
+    const list = screen.getByRole("region");
+    expect(list.querySelector(".chore-state-spacer")).not.toBeInTheDocument();
+  });
+
   it("sorts chores by next due date with tied dates by name and no-date chores last", async () => {
     wrap(<ChoreList />);
 
