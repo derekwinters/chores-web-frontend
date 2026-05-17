@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.5.2](https://github.com/derekwinters/chores-web/compare/v1.5.1...v1.5.2) (2026-05-17)
+
+
+### Bug Fixes
+
+* add x-release-please-version annotation to APP_VERSION ([006e8cb](https://github.com/derekwinters/chores-web/commit/006e8cb2fc8478d392633dc2128ae5dc66575871))
+* configure release-please for single repo-wide release ([#257](https://github.com/derekwinters/chores-web/issues/257)) ([28d4058](https://github.com/derekwinters/chores-web/commit/28d405830460cdf8f6bdb0a5fc43dde0891fad4c))
+* sync backend APP_VERSION and prevent stale version in DB ([#256](https://github.com/derekwinters/chores-web/issues/256)) ([0584564](https://github.com/derekwinters/chores-web/commit/0584564ffc683d4a55885bb50829b4f1f4ea2b5f))
+
 ## [1.5.1](https://github.com/derekwinters/chores-web/compare/v1.5.0...v1.5.1) (2026-05-17)
 
 
