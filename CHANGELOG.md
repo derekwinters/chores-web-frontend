@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.5.1](https://github.com/derekwinters/chores-web/compare/v1.5.0...v1.5.1) (2026-05-17)
+
+
+### Bug Fixes
+
+* restore package.json and switch release-type to node ([#249](https://github.com/derekwinters/chores-web/issues/249)) ([80165be](https://github.com/derekwinters/chores-web/commit/80165be87e35960ecbb4782b0b680b428ec47cc4))
+* use valid changelog path for frontend package ([#251](https://github.com/derekwinters/chores-web/issues/251)) ([6efbebc](https://github.com/derekwinters/chores-web/commit/6efbebcc6f8bdc402f64aa625b3af814d165c0a5))
+
 ## [1.5.0](https://github.com/derekwinters/chores-web/compare/v1.4.0...v1.5.0) (2026-05-17)
 
 
