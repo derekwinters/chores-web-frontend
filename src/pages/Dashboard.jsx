@@ -45,7 +45,7 @@ export default function Dashboard() {
         {people.map((person) => (
           <div
             key={person.name}
-            onClick={() => navigate(`/users/${encodeURIComponent(person.name)}`)}
+            onClick={() => navigate(`/users/${encodeURIComponent(person.username)}`)}
             style={{ cursor: "pointer" }}
           >
             <UserCard

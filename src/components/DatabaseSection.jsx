@@ -43,6 +43,8 @@ export default function DatabaseSection() {
       updateAdminPointsLog(id, { points: Number(points), person }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-points-log"] });
+      queryClient.invalidateQueries({ queryKey: ["people"] });
+      queryClient.invalidateQueries({ queryKey: ["user-stats"] });
       triggerRowSuccess();
       setError(null);
       setTimeout(() => setEditId(null), getRowCloseDelay());
@@ -57,6 +59,8 @@ export default function DatabaseSection() {
     mutationFn: (id) => deleteAdminPointsLog(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-points-log"] });
+      queryClient.invalidateQueries({ queryKey: ["people"] });
+      queryClient.invalidateQueries({ queryKey: ["user-stats"] });
       setDeleteTarget(null);
       setSuccess("Entry deleted.");
       setError(null);

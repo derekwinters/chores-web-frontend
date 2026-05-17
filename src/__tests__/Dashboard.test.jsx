@@ -108,7 +108,7 @@ describe("Dashboard", () => {
     fireEvent.click(aliceCard);
 
     await waitFor(() => {
-      expect(screen.getByTestId("location")).toHaveTextContent("/users/Alice");
+      expect(screen.getByTestId("location")).toHaveTextContent("/users/alice");
     });
   });
 });

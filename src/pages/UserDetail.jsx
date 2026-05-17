@@ -31,7 +31,7 @@ export default function UserDetail() {
   });
 
   const personId = useMemo(() => {
-    const person = people.find((p) => p.name === userName);
+    const person = people.find((p) => p.username === userName);
     return person?.id;
   }, [people, userName]);
 
