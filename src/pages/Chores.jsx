@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
-import { MdFilterList, MdAdd } from "react-icons/md";
+import { MdFilterList, MdAdd, MdSearch, MdClose } from "react-icons/md";
 import { Select, MenuItem, Chip, Box } from "@mui/material";
 import { useAuth } from "../contexts/AuthContext";
 import { getChores, getPeople, createChore, updateChore, deleteChore, completeChore, skipChore, markDueChore, getPointsSummary } from "../api/client";
@@ -61,6 +61,7 @@ function getFiltersFromSearchParams(searchParams) {
   const disabled = searchParams.get("disabled");
   const assignees = searchParams.getAll("assignee");
   const daysFromNow = searchParams.get("daysFromNow");
+  const search = searchParams.get("search");
 
   if (scheduleType) filters.schedule_type = scheduleType;
   if (assignmentType) filters.assignment_type = assignmentType;
@@ -69,6 +70,7 @@ function getFiltersFromSearchParams(searchParams) {
   if (disabled === "false") filters.disabled = false;
   if (assignees.length > 0) filters.assignees = assignees;
   if (daysFromNow) filters.daysFromNow = parseInt(daysFromNow, 10);
+  if (search) filters.search = search;
 
   return filters;
 }
@@ -156,6 +158,18 @@ export default function Manage() {
     setSearchParams({});
   };
 
+  const handleSearchChange = useCallback((value) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (value) {
+        next.set("search", value);
+      } else {
+        next.delete("search");
+      }
+      return next;
+    });
+  }, [setSearchParams]);
+
   const filtered = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -176,7 +190,17 @@ export default function Manage() {
         const dueDate = new Date(chore.next_due);
         dueDate.setHours(0, 0, 0, 0);
         const daysUntilDue = Math.floor((dueDate - today) / (1000 * 60 * 60 * 24));
-        if (daysUntilDue > filters.daysFromNow) return false;
+        // Today filter (daysFromNow=0): include today and overdue (daysUntilDue <= 0)
+        if (filters.daysFromNow === 0) {
+          if (daysUntilDue > 0) return false;
+        } else {
+          // Future filters (daysFromNow>0): exclude today and overdue, show only upcoming (0 < daysUntilDue <= daysFromNow)
+          if (daysUntilDue <= 0 || daysUntilDue > filters.daysFromNow) return false;
+        }
+      }
+      if (filters.search) {
+        // Case-insensitive substring match on chore name
+        if (!chore.name.toLowerCase().includes(filters.search.toLowerCase())) return false;
       }
       return true;
     });
@@ -215,15 +239,37 @@ export default function Manage() {
     <div className="manage-page">
       <div className="page-header">
         <h2>All Chores</h2>
-        <div className="header-actions">
-          <button className="btn-secondary" onClick={() => setFiltersExpanded(!filtersExpanded)} title={filtersExpanded ? "Hide filters" : "Show filters"}>
-            <MdFilterList className="action-icon" />
-            <span className="action-text">{filtersExpanded ? "Hide filters" : "Show filters"}</span>
-          </button>
-          <button className="btn-primary" onClick={() => setModal({ mode: "create" })} title="Add Chore">
-            <MdAdd className="action-icon" />
-            <span className="action-text">Add Chore</span>
-          </button>
+        <div className="header-controls">
+          <div className="search-box">
+            <MdSearch className="search-icon" />
+            <input
+              type="text"
+              placeholder="Search..."
+              value={filters.search || ""}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              className="search-input"
+            />
+            {filters.search && (
+              <button
+                className="search-clear"
+                onClick={() => handleSearchChange("")}
+                title="Clear search"
+                aria-label="Clear search"
+              >
+                <MdClose className="search-clear-icon" />
+              </button>
+            )}
+          </div>
+          <div className="header-actions">
+            <button className="btn-secondary" onClick={() => setFiltersExpanded(!filtersExpanded)} title={filtersExpanded ? "Hide filters" : "Show filters"}>
+              <MdFilterList className="action-icon" />
+              <span className="action-text">{filtersExpanded ? "Hide filters" : "Show filters"}</span>
+            </button>
+            <button className="btn-primary" onClick={() => setModal({ mode: "create" })} title="Add Chore">
+              <MdAdd className="action-icon" />
+              <span className="action-text">Add Chore</span>
+            </button>
+          </div>
         </div>
       </div>
 

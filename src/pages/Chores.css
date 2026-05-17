@@ -17,6 +17,69 @@
   margin: 0;
 }
 
+.header-controls {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  flex: 1;
+  min-width: 200px;
+}
+
+.search-icon {
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 0.9rem;
+  padding: 0.25rem 0;
+  outline: none;
+}
+
+.search-input::placeholder {
+  color: var(--text-muted);
+}
+
+.search-input:focus {
+  outline: none;
+}
+
+.search-clear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.search-clear:hover {
+  color: var(--text);
+}
+
+.search-clear-icon {
+  font-size: 1.1rem;
+}
+
 .header-actions {
   display: flex;
   gap: 0.75rem;
@@ -39,6 +102,17 @@
 }
 
 @media (max-width: 768px) {
+  .header-controls {
+    flex-direction: column;
+    width: 100%;
+    gap: 0.75rem;
+  }
+
+  .search-box {
+    min-width: auto;
+    width: 100%;
+  }
+
   .header-actions button {
     padding: 0.5rem;
     min-width: 2.5rem;

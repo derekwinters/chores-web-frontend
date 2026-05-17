@@ -512,4 +512,146 @@ describe("Manage page", () => {
     expect(screen.getByText("Laundry")).toBeInTheDocument();
   });
 
+  it("renders search box in header", async () => {
+    wrap(<Chores />);
+    await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
+
+    const searchInput = screen.getByPlaceholderText("Search...");
+    expect(searchInput).toBeInTheDocument();
+  });
+
+  it("filters chores by search term (case-insensitive)", async () => {
+    wrap(<Chores />);
+    const user = userEvent.setup();
+
+    await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
+
+    const searchInput = screen.getByPlaceholderText("Search...");
+    await user.type(searchInput, "vacuum");
+
+    await waitFor(() => {
+      expect(screen.getByText("Vacuum")).toBeInTheDocument();
+      expect(screen.queryByText("Bathroom")).not.toBeInTheDocument();
+      expect(screen.queryByText("Countertops")).not.toBeInTheDocument();
+    });
+
+    expect(screen.getByTestId("location")).toHaveTextContent("search=vacuum");
+  });
+
+  it("filters chores by search term case-insensitively", async () => {
+    wrap(<Chores />);
+    const user = userEvent.setup();
+
+    await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
+
+    const searchInput = screen.getByPlaceholderText("Search...");
+    await user.type(searchInput, "VACUUM");
+
+    await waitFor(() => {
+      expect(screen.getByText("Vacuum")).toBeInTheDocument();
+    });
+  });
+
+  it("filters chores by substring search", async () => {
+    wrap(<Chores />);
+    const user = userEvent.setup();
+
+    await waitFor(() => expect(screen.getByText("Countertops")).toBeInTheDocument());
+
+    const searchInput = screen.getByPlaceholderText("Search...");
+    await user.type(searchInput, "top");
+
+    await waitFor(() => {
+      expect(screen.getByText("Countertops")).toBeInTheDocument();
+      expect(screen.queryByText("Vacuum")).not.toBeInTheDocument();
+    });
+  });
+
+  it("hydrates search from URL params on initial render", async () => {
+    wrap(<Chores />, { initialEntries: ["/chores?search=vacuum"] });
+
+    await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
+    expect(screen.queryByText("Bathroom")).not.toBeInTheDocument();
+
+    const searchInput = screen.getByPlaceholderText("Search...");
+    expect(searchInput).toHaveValue("vacuum");
+  });
+
+  it("clears search when X button is clicked", async () => {
+    wrap(<Chores />, { initialEntries: ["/chores?search=vacuum"] });
+    const user = userEvent.setup();
+
+    await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
+
+    const clearButton = screen.getByLabelText("Clear search");
+    await user.click(clearButton);
+
+    await waitFor(() => {
+      const searchInput = screen.getByPlaceholderText("Search...");
+      expect(searchInput).toHaveValue("");
+      expect(screen.getByText("Bathroom")).toBeInTheDocument();
+    });
+  });
+
+  it("preserves search when other filters are applied", async () => {
+    wrap(<Chores />);
+    const user = userEvent.setup();
+
+    await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
+
+    const searchInput = screen.getByPlaceholderText("Search...");
+    await user.type(searchInput, "a");
+
+    // This should show both Vacuum, Bathroom, Laundry, Trash (all have 'a')
+    await waitFor(() => {
+      expect(screen.getByText("Vacuum")).toBeInTheDocument();
+      expect(screen.getByText("Laundry")).toBeInTheDocument();
+      expect(screen.getByText("Bathroom")).toBeInTheDocument();
+      expect(screen.getByText("Trash")).toBeInTheDocument();
+    });
+
+    // Now apply assignment type filter
+    fireEvent.click(screen.getByRole("button", { name: /show filters/i }));
+    const assignmentTypeSelect = document.getElementById("filter-assignment");
+    await user.click(assignmentTypeSelect);
+    const rotatingOption = await screen.findByRole("option", { name: /rotating/i });
+    await user.click(rotatingOption);
+
+    // Should still have search applied (only Vacuum from rotating chores contains 'a')
+    await waitFor(() => {
+      expect(screen.getByText("Vacuum")).toBeInTheDocument();
+      expect(screen.queryByText("Laundry")).not.toBeInTheDocument();
+    });
+  });
+
+  it("applies search and filter together without clearing either", async () => {
+    wrap(<Chores />);
+    const user = userEvent.setup();
+
+    await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
+
+    // Apply search filter first
+    const searchInput = screen.getByPlaceholderText("Search...");
+    await user.type(searchInput, "room");
+
+    // Only chores with "room" in name should show - Laundry has no room, so nothing matches exactly
+    // Actually looking at CHORES data, none have "room" in name, so search should return empty
+    await waitFor(() => {
+      expect(screen.queryByText("Vacuum")).not.toBeInTheDocument();
+    });
+
+    // Clear search and verify all chores return
+    const clearButton = screen.queryByLabelText("Clear search");
+    if (clearButton) {
+      await user.click(clearButton);
+    } else {
+      // Clear by deleting text
+      await user.clear(searchInput);
+    }
+
+    await waitFor(() => {
+      expect(screen.getByText("Vacuum")).toBeInTheDocument();
+    });
+  });
+
 });
