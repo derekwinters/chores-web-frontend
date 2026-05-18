@@ -115,7 +115,7 @@ const CHORES = [
   },
 ];
 
-const PEOPLE = [{ id: 1, name: "Alice" }, { id: 2, name: "Bob" }];
+const PEOPLE = [{ id: 1, name: "Alice", username: "alice" }, { id: 2, name: "Bob", username: "bob" }];
 
 function LocationDisplay() {
   const location = useLocation();
@@ -697,6 +697,76 @@ describe("Manage page", () => {
 
     await waitFor(() => {
       expect(screen.getByText("Vacuum")).toBeInTheDocument();
+    });
+  });
+
+  describe("CompleteWithActorModal — unassigned chore", () => {
+    it("shows actor modal when Complete clicked for chore with current_assignee null", async () => {
+      wrap(<Chores />);
+      await waitFor(() => expect(screen.getByText("Bathroom")).toBeInTheDocument());
+
+      // Expand Bathroom card (current_assignee: null)
+      const bathroomCard = screen.getByText("Bathroom").closest("article");
+      fireEvent.click(bathroomCard);
+
+      await waitFor(() => expect(screen.getByText("Complete")).toBeInTheDocument());
+      fireEvent.click(screen.getByText("Complete"));
+
+      await waitFor(() => expect(screen.getByText(/who completed/i)).toBeInTheDocument());
+      expect(client.completeChore).not.toHaveBeenCalled();
+    });
+
+    it("calls completeChore with username after modal confirm", async () => {
+      wrap(<Chores />);
+      await waitFor(() => expect(screen.getByText("Bathroom")).toBeInTheDocument());
+
+      const bathroomCard = screen.getByText("Bathroom").closest("article");
+      fireEvent.click(bathroomCard);
+
+      await waitFor(() => expect(screen.getByText("Complete")).toBeInTheDocument());
+      fireEvent.click(screen.getByText("Complete"));
+
+      await waitFor(() => expect(screen.getByText(/who completed/i)).toBeInTheDocument());
+
+      // PEOPLE = [{ id: 1, name: "Alice" }, { id: 2, name: "Bob" }]
+      // Need username field — but test fixture doesn't have it yet;
+      // we'll add it when implementing. For now test structure is correct.
+      const select = screen.getByRole("combobox", { name: /select a person/i });
+      fireEvent.change(select, { target: { value: "alice" } });
+      fireEvent.click(screen.getByRole("button", { name: /^complete$/i }));
+
+      await waitFor(() => expect(client.completeChore).toHaveBeenCalledWith("bathroom", "alice"));
+    });
+
+    it("closes modal without calling completeChore when cancelled", async () => {
+      wrap(<Chores />);
+      await waitFor(() => expect(screen.getByText("Bathroom")).toBeInTheDocument());
+
+      const bathroomCard = screen.getByText("Bathroom").closest("article");
+      fireEvent.click(bathroomCard);
+
+      await waitFor(() => expect(screen.getByText("Complete")).toBeInTheDocument());
+      fireEvent.click(screen.getByText("Complete"));
+
+      await waitFor(() => expect(screen.getByText(/who completed/i)).toBeInTheDocument());
+      fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
+
+      await waitFor(() => expect(screen.queryByText(/who completed/i)).not.toBeInTheDocument());
+      expect(client.completeChore).not.toHaveBeenCalled();
+    });
+
+    it("does not show modal for chore with an assignee (Vacuum, assigned to Alice)", async () => {
+      wrap(<Chores />);
+      await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
+
+      const vacuumCard = screen.getByText("Vacuum").closest("article");
+      fireEvent.click(vacuumCard);
+
+      await waitFor(() => expect(screen.getByText("Complete")).toBeInTheDocument());
+      fireEvent.click(screen.getByText("Complete"));
+
+      await waitFor(() => expect(client.completeChore).toHaveBeenCalled());
+      expect(screen.queryByText(/who completed/i)).not.toBeInTheDocument();
     });
   });
 

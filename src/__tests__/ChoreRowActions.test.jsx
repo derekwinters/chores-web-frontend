@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ChoreRowActions from "../components/ChoreRowActions";
@@ -17,7 +17,18 @@ const CHORE = {
   next_due: "2024-01-10",
 };
 
-const PEOPLE = [{ name: "Alice" }, { name: "Bob" }];
+const PEOPLE = [{ name: "Alice", username: "alice" }, { name: "Bob", username: "bob" }];
+
+const UNASSIGNED_CHORE = {
+  id: "bathroom",
+  unique_id: "bathroom",
+  name: "Bathroom",
+  state: "due",
+  disabled: false,
+  age: 0,
+  next_due: "2024-01-10",
+  current_assignee: null,
+};
 
 function wrap(ui) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -76,6 +87,60 @@ describe("ChoreRowActions — due mode", () => {
     wrap(<ChoreRowActions chore={CHORE} person={null} people={[]} mode="due" />);
     fireEvent.click(screen.getByText("Complete"));
     await waitFor(() => expect(client.completeChore).toHaveBeenCalledWith("vacuum", null));
+  });
+
+  describe("CompleteWithActorModal — unassigned chore", () => {
+    beforeEach(() => {
+      client.completeChore.mockResolvedValue({ ...UNASSIGNED_CHORE, state: "complete" });
+    });
+
+    it("shows actor modal instead of completing directly when current_assignee is null", async () => {
+      wrap(<ChoreRowActions chore={UNASSIGNED_CHORE} person={null} people={PEOPLE} mode="due" />);
+      fireEvent.click(screen.getByText("Complete"));
+      await waitFor(() => expect(screen.getByText(/who completed/i)).toBeInTheDocument());
+      expect(client.completeChore).not.toHaveBeenCalled();
+    });
+
+    it("calls completeChore with selected username when modal is confirmed", async () => {
+      wrap(<ChoreRowActions chore={UNASSIGNED_CHORE} person={null} people={PEOPLE} mode="due" />);
+      fireEvent.click(screen.getByText("Complete"));
+      await waitFor(() => expect(screen.getByText(/who completed/i)).toBeInTheDocument());
+
+      // Select Alice in the modal
+      const dialog = screen.getByRole("dialog");
+      const select = within(dialog).getByRole("combobox");
+      fireEvent.change(select, { target: { value: "alice" } });
+      fireEvent.click(within(dialog).getByRole("button", { name: /^complete$/i }));
+
+      await waitFor(() => expect(client.completeChore).toHaveBeenCalledWith("bathroom", "alice"));
+    });
+
+    it("does not call completeChore when modal is cancelled", async () => {
+      wrap(<ChoreRowActions chore={UNASSIGNED_CHORE} person={null} people={PEOPLE} mode="due" />);
+      fireEvent.click(screen.getByText("Complete"));
+      await waitFor(() => expect(screen.getByText(/who completed/i)).toBeInTheDocument());
+
+      fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
+      await waitFor(() => expect(screen.queryByText(/who completed/i)).not.toBeInTheDocument());
+      expect(client.completeChore).not.toHaveBeenCalled();
+    });
+
+    it("modal shows all people by name", async () => {
+      wrap(<ChoreRowActions chore={UNASSIGNED_CHORE} person={null} people={PEOPLE} mode="due" />);
+      fireEvent.click(screen.getByText("Complete"));
+      await waitFor(() => expect(screen.getByText(/who completed/i)).toBeInTheDocument());
+
+      expect(screen.getAllByText("Alice").length).toBeGreaterThan(0);
+      expect(screen.getAllByText("Bob").length).toBeGreaterThan(0);
+    });
+
+    it("does not show modal for chore with an assignee", async () => {
+      const assignedChore = { ...CHORE, current_assignee: "alice" };
+      wrap(<ChoreRowActions chore={assignedChore} person="Alice" people={PEOPLE} mode="due" />);
+      fireEvent.click(screen.getByText("Complete"));
+      await waitFor(() => expect(client.completeChore).toHaveBeenCalled());
+      expect(screen.queryByText(/who completed/i)).not.toBeInTheDocument();
+    });
   });
 });
 

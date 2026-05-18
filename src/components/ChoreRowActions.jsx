@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { completeChore, skipChore, reassignChore, markDueChore } from "../api/client";
 import { getPersonColor } from "../utils/personColors";
+import CompleteWithActorModal from "./CompleteWithActorModal";
 import Toast from "./Toast";
 import "./ChoreRowActions.css";
 
@@ -23,6 +24,7 @@ export default function ChoreRowActions({ chore, person, people, mode }) {
   const [reassignTarget, setReassignTarget] = useState("");
   const [justDone, setJustDone] = useState(false);
   const [toast, setToast] = useState(null);
+  const [actorModalOpen, setActorModalOpen] = useState(false);
 
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ["chores"] });
@@ -30,13 +32,26 @@ export default function ChoreRowActions({ chore, person, people, mode }) {
   };
 
   const complete = useMutation({
-    mutationFn: () => completeChore(chore.id, person ?? null),
+    mutationFn: (completedBy) => completeChore(chore.id, completedBy ?? person ?? null),
     onSuccess: () => {
       setJustDone(true);
       if (chore.points) setToast(`+${chore.points} pts!`);
       invalidate();
     },
   });
+
+  const handleCompleteClick = () => {
+    if (chore.current_assignee === null) {
+      setActorModalOpen(true);
+    } else {
+      complete.mutate(undefined);
+    }
+  };
+
+  const handleActorConfirm = (username) => {
+    setActorModalOpen(false);
+    complete.mutate(username);
+  };
   const skip = useMutation({
     mutationFn: () => skipChore(chore.id),
     onSuccess: invalidate,
@@ -56,6 +71,14 @@ export default function ChoreRowActions({ chore, person, people, mode }) {
   return (
     <>
       {toast && <Toast message={toast} onDone={() => setToast(null)} />}
+      {actorModalOpen && (
+        <CompleteWithActorModal
+          chore={chore}
+          people={people}
+          onConfirm={handleActorConfirm}
+          onCancel={() => setActorModalOpen(false)}
+        />
+      )}
       <div className={`chore-row ${justDone ? "done" : ""}`} onClick={(e) => e.stopPropagation()}>
         <div className={`chore-row-icon ${justDone ? "done" : ""}`}>
           {justDone
@@ -91,7 +114,7 @@ export default function ChoreRowActions({ chore, person, people, mode }) {
 
           {mode === "due" && (
             <>
-              <button className="btn-primary btn-xs" disabled={busy || justDone} onClick={() => complete.mutate()}>
+              <button className="btn-primary btn-xs" disabled={busy || justDone} onClick={handleCompleteClick}>
                 Complete
               </button>
               <button className="btn-secondary btn-xs" disabled={busy} onClick={() => skip.mutate()}>

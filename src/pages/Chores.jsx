@@ -8,6 +8,7 @@ import { getChores, getPeople, createChore, updateChore, deleteChore, completeCh
 import ChoreForm from "../components/ChoreForm";
 import ChoreList from "../components/ChoreList";
 import Modal from "../components/Modal";
+import CompleteWithActorModal from "../components/CompleteWithActorModal";
 import {
   choreMatchesAssigneeFilter,
   UNASSIGNED_FILTER_VALUE,
@@ -82,6 +83,7 @@ export default function Manage() {
 
   const [modal, setModal] = useState(null); // null | { mode: "create" } | { mode: "edit", chore }
   const [deleteTarget, setDeleteTarget] = useState(null); // chore to confirm-delete
+  const [completeTarget, setCompleteTarget] = useState(null); // chore awaiting actor selection
   const [filtersExpanded, setFiltersExpanded] = useState(false);
   const [statsExpanded, setStatsExpanded] = useState(() => {
     const stored = localStorage.getItem("chores-stats-expanded");
@@ -123,7 +125,7 @@ export default function Manage() {
   });
 
   const completeMut = useMutation({
-    mutationFn: (id) => completeChore(id),
+    mutationFn: ({ id, completedBy }) => completeChore(id, completedBy),
     onSuccess: () => { invalidate(); setCompleteTarget(null); },
   });
 
@@ -464,7 +466,11 @@ export default function Manage() {
             onEdit={(chore) => setModal({ mode: "edit", chore })}
             onDelete={(chore) => setDeleteTarget(chore)}
             onComplete={(chore) => {
-              completeMut.mutate(chore.id);
+              if (chore.current_assignee === null) {
+                setCompleteTarget(chore);
+              } else {
+                completeMut.mutate({ id: chore.id });
+              }
             }}
             onSkip={(chore) => skipMut.mutate(chore.id)}
             onMarkDue={(chore) => markDueMut.mutate(chore.id)}
@@ -493,6 +499,16 @@ export default function Manage() {
             }}
           />
         </Modal>
+      )}
+
+      {/* Complete actor selection modal */}
+      {completeTarget && (
+        <CompleteWithActorModal
+          chore={completeTarget}
+          people={people}
+          onConfirm={(username) => completeMut.mutate({ id: completeTarget.id, completedBy: username })}
+          onCancel={() => setCompleteTarget(null)}
+        />
       )}
 
       {/* Delete confirmation modal */}
