@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.6.0](https://github.com/derekwinters/chores-web/compare/v1.5.2...v1.6.0) (2026-05-18)
+
+
+### Features
+
+* chores page layout changes ([#266](https://github.com/derekwinters/chores-web/issues/266)) ([#269](https://github.com/derekwinters/chores-web/issues/269)) ([214c3e9](https://github.com/derekwinters/chores-web/commit/214c3e91a7b8d19af914bd0ecaaeb9e408955dd5))
+* mobile chores page improvements ([#267](https://github.com/derekwinters/chores-web/issues/267)) ([#272](https://github.com/derekwinters/chores-web/issues/272)) ([d7c438b](https://github.com/derekwinters/chores-web/commit/d7c438bc1f7ac07cdcd3ae223e9dbe71c559dbdf))
+* prompt for completer when completing unassigned chore ([#214](https://github.com/derekwinters/chores-web/issues/214)) ([#270](https://github.com/derekwinters/chores-web/issues/270)) ([62929ef](https://github.com/derekwinters/chores-web/commit/62929eff227366664986f930ee35aef6ef5d8f56))
+* refresh agents and skills for grilling-based workflow ([#263](https://github.com/derekwinters/chores-web/issues/263)) ([#264](https://github.com/derekwinters/chores-web/issues/264)) ([bcbc7cd](https://github.com/derekwinters/chores-web/commit/bcbc7cd0dfa5c7c0b8d962e20d2a3998bf6db44c))
+
+
+### Bug Fixes
+
+* bypass throttle and cache on manual update check ([#261](https://github.com/derekwinters/chores-web/issues/261)) ([#271](https://github.com/derekwinters/chores-web/issues/271)) ([ba11de5](https://github.com/derekwinters/chores-web/commit/ba11de5f77d3ac89ee9ac0ede49b0aa3ae59fc4c))
+* correct points log edits adjusting person totals ([#215](https://github.com/derekwinters/chores-web/issues/215)) ([#268](https://github.com/derekwinters/chores-web/issues/268)) ([346f611](https://github.com/derekwinters/chores-web/commit/346f61187df2b9216fd2a8522082c32bf2322e28))
+
 ## [1.5.2](https://github.com/derekwinters/chores-web/compare/v1.5.1...v1.5.2) (2026-05-17)
 
 
