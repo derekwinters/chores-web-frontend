@@ -11,17 +11,12 @@
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .page-header h2 {
   margin: 0;
-}
-
-.header-controls {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-  flex-wrap: wrap;
+  flex-shrink: 0;
 }
 
 .search-box {
@@ -34,6 +29,10 @@
   border-radius: var(--radius);
   flex: 1;
   min-width: 200px;
+  max-width: 50%;
+  overflow: hidden;
+  height: 2.5rem;
+  box-sizing: border-box;
 }
 
 .search-icon {
@@ -44,12 +43,14 @@
 
 .search-input {
   flex: 1;
+  min-width: 0;
   border: none;
   background: transparent;
   color: var(--text);
   font-size: 0.9rem;
   padding: 0.25rem 0;
   outline: none;
+  height: 100%;
 }
 
 .search-input::placeholder {
@@ -102,14 +103,13 @@
 }
 
 @media (max-width: 768px) {
-  .header-controls {
-    flex-direction: column;
-    width: 100%;
-    gap: 0.75rem;
-  }
-
   .search-box {
     min-width: auto;
+    max-width: 50%;
+  }
+
+  .header-actions {
+    flex: 0 0 100%;
     width: 100%;
   }
 

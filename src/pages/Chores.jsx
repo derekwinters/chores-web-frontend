@@ -87,7 +87,8 @@ export default function Manage() {
   const [filtersExpanded, setFiltersExpanded] = useState(false);
   const [statsExpanded, setStatsExpanded] = useState(() => {
     const stored = localStorage.getItem("chores-stats-expanded");
-    return stored === null ? true : stored === "true";
+    if (stored !== null) return stored === "true";
+    return window.innerWidth > 768;
   });
 
   const filters = useMemo(() => getFiltersFromSearchParams(searchParams), [searchParams]);
@@ -245,39 +246,173 @@ export default function Manage() {
     <div className="manage-page">
       <div className="page-header">
         <h2>All Chores</h2>
-        <div className="header-controls">
-          <div className="search-box">
-            <MdSearch className="search-icon" />
-            <input
-              type="text"
-              placeholder="Search..."
-              value={filters.search || ""}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              className="search-input"
-            />
-            {filters.search && (
-              <button
-                className="search-clear"
-                onClick={() => handleSearchChange("")}
-                title="Clear search"
-                aria-label="Clear search"
-              >
-                <MdClose className="search-clear-icon" />
-              </button>
-            )}
-          </div>
-          <div className="header-actions">
-            <button className="btn-secondary" onClick={() => setFiltersExpanded(!filtersExpanded)} title={filtersExpanded ? "Hide filters" : "Show filters"}>
-              <MdFilterList className="action-icon" />
-              <span className="action-text">{filtersExpanded ? "Hide filters" : "Show filters"}</span>
+        <div className="search-box">
+          <MdSearch className="search-icon" />
+          <input
+            type="text"
+            placeholder="Search..."
+            value={filters.search || ""}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            className="search-input"
+          />
+          {filters.search && (
+            <button
+              className="search-clear"
+              onClick={() => handleSearchChange("")}
+              title="Clear search"
+              aria-label="Clear search"
+            >
+              <MdClose className="search-clear-icon" />
             </button>
-            <button className="btn-primary" onClick={() => setModal({ mode: "create" })} title="Add Chore">
-              <MdAdd className="action-icon" />
-              <span className="action-text">Add Chore</span>
-            </button>
-          </div>
+          )}
+        </div>
+        <div className="header-actions">
+          <button className="btn-secondary" onClick={() => setFiltersExpanded(!filtersExpanded)} title={filtersExpanded ? "Hide filters" : "Show filters"}>
+            <MdFilterList className="action-icon" />
+            <span className="action-text">{filtersExpanded ? "Hide filters" : "Show filters"}</span>
+          </button>
+          <button className="btn-primary" onClick={() => setModal({ mode: "create" })} title="Add Chore">
+            <MdAdd className="action-icon" />
+            <span className="action-text">Add Chore</span>
+          </button>
         </div>
       </div>
+
+      {Object.keys(filters).length > 0 && (
+        <div className="filter-bar">
+          {user && filters.assignees?.length === 2 && Object.keys(filters).length === 1 && (
+            <span className="filter-hint">Showing chores assigned to you and unassigned</span>
+          )}
+          <button className="btn-secondary" onClick={handleClearFilters}>
+            Clear filters
+          </button>
+        </div>
+      )}
+
+      {filtersExpanded && (
+        <div className="chore-filters">
+          <div className="filter-group">
+            <label htmlFor="filter-schedule">Schedule type</label>
+            <Select
+              id="filter-schedule"
+              value={filters.schedule_type || ""}
+              onChange={(e) => handleFilterChange("schedule_type", e.target.value)}
+              {...SELECT_CONFIG}
+            >
+              <MenuItem value="">All types</MenuItem>
+              {scheduleTypes.map((type) => (
+                <MenuItem key={type} value={type}>
+                  {type}
+                </MenuItem>
+              ))}
+            </Select>
+          </div>
+
+          <div className="filter-group">
+            <label htmlFor="filter-assignment">Assignment type</label>
+            <Select
+              id="filter-assignment"
+              value={filters.assignment_type || ""}
+              onChange={(e) => handleFilterChange("assignment_type", e.target.value)}
+              {...SELECT_CONFIG}
+            >
+              <MenuItem value="">All types</MenuItem>
+              {assignmentTypes.map((type) => (
+                <MenuItem key={type} value={type}>
+                  {type}
+                </MenuItem>
+              ))}
+            </Select>
+          </div>
+
+          <div className="filter-group">
+            <label htmlFor="filter-assignee">Assignee</label>
+            <Select
+              id="filter-assignee"
+              multiple
+              value={filters.assignees || []}
+              onChange={(e) => handleFilterChange("assignees", e.target.value)}
+              {...SELECT_CONFIG}
+              sx={{
+                ...SELECT_CONFIG.sx,
+                "& .MuiChip-root": {
+                  backgroundColor: "var(--accent-bg)",
+                  color: "var(--text)",
+                  borderColor: "var(--accent)",
+                },
+              }}
+              renderValue={(selected) => (
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                  {selected.map((value) => (
+                    <Chip
+                      key={value}
+                      label={value === UNASSIGNED_FILTER_VALUE ? UNASSIGNED_LABEL : value}
+                    />
+                  ))}
+                </Box>
+              )}
+            >
+              {assignees.map((assignee) => (
+                <MenuItem key={assignee} value={assignee}>
+                  {assignee}
+                </MenuItem>
+              ))}
+              <MenuItem value={UNASSIGNED_FILTER_VALUE}>{UNASSIGNED_LABEL}</MenuItem>
+            </Select>
+          </div>
+
+          <div className="filter-group">
+            <label htmlFor="filter-state">State</label>
+            <Select
+              id="filter-state"
+              value={filters.state || ""}
+              onChange={(e) => handleFilterChange("state", e.target.value)}
+              {...SELECT_CONFIG}
+            >
+              <MenuItem value="">All states</MenuItem>
+              {states.map((state) => (
+                <MenuItem key={state} value={state}>
+                  {state}
+                </MenuItem>
+              ))}
+            </Select>
+          </div>
+
+          <div className="filter-group">
+            <label htmlFor="filter-days">Due within</label>
+            <Select
+              id="filter-days"
+              value={filters.daysFromNow !== undefined ? String(filters.daysFromNow) : ""}
+              onChange={(e) => {
+                handleFilterChange("daysFromNow", e.target.value ? parseInt(e.target.value, 10) : undefined);
+              }}
+              {...SELECT_CONFIG}
+            >
+              <MenuItem value="">All chores</MenuItem>
+              <MenuItem value="0">Today</MenuItem>
+              <MenuItem value="3">Next 3 days</MenuItem>
+              <MenuItem value="7">Next 7 days</MenuItem>
+              <MenuItem value="30">Next 30 days</MenuItem>
+            </Select>
+          </div>
+
+          <div className="filter-group">
+            <label htmlFor="filter-disabled">Status</label>
+            <Select
+              id="filter-disabled"
+              value={filters.disabled === undefined ? "" : String(filters.disabled)}
+              onChange={(e) => {
+                handleFilterChange("disabled", e.target.value || undefined);
+              }}
+              {...SELECT_CONFIG}
+            >
+              <MenuItem value="">All chores</MenuItem>
+              <MenuItem value="false">Enabled only</MenuItem>
+              <MenuItem value="true">Disabled only</MenuItem>
+            </Select>
+          </div>
+        </div>
+      )}
 
       <div className="chore-stats-section">
         <div className="chore-stats-header">
@@ -320,142 +455,6 @@ export default function Manage() {
         <div className="loading">Loading…</div>
       ) : (
         <>
-          {Object.keys(filters).length > 0 && (
-            <div className="filter-bar">
-              {user && filters.assignees?.length === 2 && Object.keys(filters).length === 1 && (
-                <span className="filter-hint">Showing chores assigned to you and unassigned</span>
-              )}
-              <button className="btn-secondary" onClick={handleClearFilters}>
-                Clear filters
-              </button>
-            </div>
-          )}
-
-          {filtersExpanded && (
-            <div className="chore-filters">
-              <div className="filter-group">
-                <label htmlFor="filter-schedule">Schedule type</label>
-                <Select
-                  id="filter-schedule"
-                  value={filters.schedule_type || ""}
-                  onChange={(e) => handleFilterChange("schedule_type", e.target.value)}
-                  {...SELECT_CONFIG}
-                >
-                  <MenuItem value="">All types</MenuItem>
-                  {scheduleTypes.map((type) => (
-                    <MenuItem key={type} value={type}>
-                      {type}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </div>
-
-              <div className="filter-group">
-                <label htmlFor="filter-assignment">Assignment type</label>
-                <Select
-                  id="filter-assignment"
-                  value={filters.assignment_type || ""}
-                  onChange={(e) => handleFilterChange("assignment_type", e.target.value)}
-                  {...SELECT_CONFIG}
-                >
-                  <MenuItem value="">All types</MenuItem>
-                  {assignmentTypes.map((type) => (
-                    <MenuItem key={type} value={type}>
-                      {type}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </div>
-
-              <div className="filter-group">
-                <label htmlFor="filter-assignee">Assignee</label>
-                <Select
-                  id="filter-assignee"
-                  multiple
-                  value={filters.assignees || []}
-                  onChange={(e) => handleFilterChange("assignees", e.target.value)}
-                  {...SELECT_CONFIG}
-                  sx={{
-                    ...SELECT_CONFIG.sx,
-                    "& .MuiChip-root": {
-                      backgroundColor: "var(--accent-bg)",
-                      color: "var(--text)",
-                      borderColor: "var(--accent)",
-                    },
-                  }}
-                  renderValue={(selected) => (
-                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                      {selected.map((value) => (
-                        <Chip
-                          key={value}
-                          label={value === UNASSIGNED_FILTER_VALUE ? UNASSIGNED_LABEL : value}
-                        />
-                      ))}
-                    </Box>
-                  )}
-                >
-                  {assignees.map((assignee) => (
-                    <MenuItem key={assignee} value={assignee}>
-                      {assignee}
-                    </MenuItem>
-                  ))}
-                  <MenuItem value={UNASSIGNED_FILTER_VALUE}>{UNASSIGNED_LABEL}</MenuItem>
-                </Select>
-              </div>
-
-              <div className="filter-group">
-                <label htmlFor="filter-state">State</label>
-                <Select
-                  id="filter-state"
-                  value={filters.state || ""}
-                  onChange={(e) => handleFilterChange("state", e.target.value)}
-                  {...SELECT_CONFIG}
-                >
-                  <MenuItem value="">All states</MenuItem>
-                  {states.map((state) => (
-                    <MenuItem key={state} value={state}>
-                      {state}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </div>
-
-              <div className="filter-group">
-                <label htmlFor="filter-days">Due within</label>
-                <Select
-                  id="filter-days"
-                  value={filters.daysFromNow !== undefined ? String(filters.daysFromNow) : ""}
-                  onChange={(e) => {
-                    handleFilterChange("daysFromNow", e.target.value ? parseInt(e.target.value, 10) : undefined);
-                  }}
-                  {...SELECT_CONFIG}
-                >
-                  <MenuItem value="">All chores</MenuItem>
-                  <MenuItem value="0">Today</MenuItem>
-                  <MenuItem value="3">Next 3 days</MenuItem>
-                  <MenuItem value="7">Next 7 days</MenuItem>
-                  <MenuItem value="30">Next 30 days</MenuItem>
-                </Select>
-              </div>
-
-              <div className="filter-group">
-                <label htmlFor="filter-disabled">Status</label>
-                <Select
-                  id="filter-disabled"
-                  value={filters.disabled === undefined ? "" : String(filters.disabled)}
-                  onChange={(e) => {
-                    handleFilterChange("disabled", e.target.value || undefined);
-                  }}
-                  {...SELECT_CONFIG}
-                >
-                  <MenuItem value="">All chores</MenuItem>
-                  <MenuItem value="false">Enabled only</MenuItem>
-                  <MenuItem value="true">Disabled only</MenuItem>
-                </Select>
-              </div>
-            </div>
-          )}
-
           <div className="chore-count">
             Showing {sorted.length} of {chores.length} chore{chores.length !== 1 ? "s" : ""}
           </div>

@@ -140,6 +140,7 @@ describe("Manage page", () => {
   beforeEach(() => {
     vi.resetAllMocks();
     localStorage.clear();
+    Object.defineProperty(window, 'innerWidth', { writable: true, configurable: true, value: 1024 });
     client.getChores.mockResolvedValue(CHORES);
     client.getPeople.mockResolvedValue(PEOPLE);
     client.getPointsSummary.mockResolvedValue([]);
@@ -668,6 +669,28 @@ describe("Manage page", () => {
       await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
       expect(screen.queryByText("Total Points")).not.toBeInTheDocument();
     });
+
+    it("defaults collapsed on mobile cold-start (no localStorage, width <= 768)", async () => {
+      Object.defineProperty(window, 'innerWidth', { writable: true, configurable: true, value: 375 });
+      wrap(<Chores />);
+      await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
+      expect(screen.queryByText("Total Points")).not.toBeInTheDocument();
+    });
+
+    it("defaults expanded on desktop cold-start (no localStorage, width > 768)", async () => {
+      Object.defineProperty(window, 'innerWidth', { writable: true, configurable: true, value: 1024 });
+      wrap(<Chores />);
+      await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
+      expect(screen.getByText("Total Points")).toBeInTheDocument();
+    });
+
+    it("respects localStorage expanded=true on mobile (overrides mobile default)", async () => {
+      Object.defineProperty(window, 'innerWidth', { writable: true, configurable: true, value: 375 });
+      localStorage.setItem("chores-stats-expanded", "true");
+      wrap(<Chores />);
+      await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
+      expect(screen.getByText("Total Points")).toBeInTheDocument();
+    });
   });
 
   it("applies search and filter together without clearing either", async () => {
@@ -697,6 +720,38 @@ describe("Manage page", () => {
 
     await waitFor(() => {
       expect(screen.getByText("Vacuum")).toBeInTheDocument();
+    });
+  });
+
+  describe("section ordering", () => {
+    it("filter panel appears before stats section in DOM", async () => {
+      wrap(<Chores />);
+      await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
+      fireEvent.click(screen.getByRole("button", { name: /show filters/i }));
+      await waitFor(() => expect(document.querySelector(".chore-filters")).toBeInTheDocument());
+
+      const filters = document.querySelector(".chore-filters");
+      const stats = document.querySelector(".chore-stats-section");
+      // DOCUMENT_POSITION_FOLLOWING = 4: stats follows filters (filters comes first)
+      expect(filters.compareDocumentPosition(stats) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    });
+  });
+
+  describe("mobile header layout", () => {
+    it("search-box is direct child of page-header (not wrapped in header-controls)", async () => {
+      wrap(<Chores />);
+      await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
+      const pageHeader = document.querySelector('.page-header');
+      const searchBox = document.querySelector('.search-box');
+      expect(searchBox.parentElement).toBe(pageHeader);
+    });
+
+    it("header-actions is direct child of page-header (not wrapped in header-controls)", async () => {
+      wrap(<Chores />);
+      await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
+      const pageHeader = document.querySelector('.page-header');
+      const headerActions = document.querySelector('.header-actions');
+      expect(headerActions.parentElement).toBe(pageHeader);
     });
   });
 
