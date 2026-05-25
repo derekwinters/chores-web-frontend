@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import { render, screen, within, waitFor, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter, Routes, Route, useLocation } from "react-router-dom";
@@ -10,7 +10,11 @@ vi.mock("../api/client");
 
 const TODAY = new Date().toISOString().split("T")[0];
 
-const PEOPLE = [{ id: 1, name: "Alice", username: "alice" }, { id: 2, name: "Bob", username: "bob" }];
+const PEOPLE = [
+  { id: 1, name: "Alice", username: "alice" },
+  { id: 2, name: "Bob", username: "bob" },
+  { id: 3, name: "Carol", username: "carol" },
+];
 
 const CHORES = [
   {
@@ -74,8 +78,20 @@ describe("Dashboard", () => {
 
   it("shows points summary on each card", async () => {
     wrap(<Dashboard />);
-    await waitFor(() => expect(screen.getByText("10")).toBeInTheDocument());
-    expect(screen.getByText("25")).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText("Alice", { selector: ".uc-name" })).toBeInTheDocument());
+    const aliceCard = screen.getByText("Alice", { selector: ".uc-name" }).closest(".user-card");
+    const alicePointsCols = within(aliceCard).getAllByText(/./, { selector: ".uc-points-value span:first-child" });
+    expect(alicePointsCols[0]).toHaveTextContent("10");
+    expect(alicePointsCols[1]).toHaveTextContent("25");
+  });
+
+  it("shows zero points for person not in summary (Carol)", async () => {
+    wrap(<Dashboard />);
+    await waitFor(() => expect(screen.getByText("Carol", { selector: ".uc-name" })).toBeInTheDocument());
+    const carolCard = screen.getByText("Carol", { selector: ".uc-name" }).closest(".user-card");
+    const carolPointsCols = within(carolCard).getAllByText(/./, { selector: ".uc-points-value span:first-child" });
+    expect(carolPointsCols[0]).toHaveTextContent("0");
+    expect(carolPointsCols[1]).toHaveTextContent("0");
   });
 
   it("shows empty state when no people", async () => {
