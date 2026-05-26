@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.7.0](https://github.com/derekwinters/chores-web/compare/v1.6.0...v1.7.0) (2026-05-26)
+
+
+### Features
+
+* add Prometheus metrics endpoint ([#202](https://github.com/derekwinters/chores-web/issues/202)) ([#275](https://github.com/derekwinters/chores-web/issues/275)) ([8f9d6e1](https://github.com/derekwinters/chores-web/commit/8f9d6e198f3c052fbac447e0831110270e3aaa98))
+* add release notes enforcement and blog infrastructure ([#203](https://github.com/derekwinters/chores-web/issues/203)) ([#280](https://github.com/derekwinters/chores-web/issues/280)) ([c9d9f75](https://github.com/derekwinters/chores-web/commit/c9d9f75787231a48a3eb75813e5f04f4c109801f))
+* add upgrade regression test infrastructure ([#207](https://github.com/derekwinters/chores-web/issues/207)) ([#278](https://github.com/derekwinters/chores-web/issues/278)) ([f213527](https://github.com/derekwinters/chores-web/commit/f213527a9f54a59c1276b5b7ecfed6a6324e7f23))
+
+
+### Documentation
+
+* add release notes blog posts v1.0.0–v1.7.0 ([#279](https://github.com/derekwinters/chores-web/issues/279)) ([#284](https://github.com/derekwinters/chores-web/issues/284)) ([a990c60](https://github.com/derekwinters/chores-web/commit/a990c60217101a6493803b39c02bcffecbea1d79))
+* reorganize docs into focused sub-pages ([#281](https://github.com/derekwinters/chores-web/issues/281)) ([#283](https://github.com/derekwinters/chores-web/issues/283)) ([9613db5](https://github.com/derekwinters/chores-web/commit/9613db569f7bf9cc81131b6b45799140a6adde25))
+
 ## [1.6.0](https://github.com/derekwinters/chores-web/compare/v1.5.2...v1.6.0) (2026-05-18)
 
 
