@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { completeChore, skipChore, reassignChore, markDueChore } from "../api/client";
-import { getPersonColor } from "../utils/personColors";
 import CompleteWithActorModal from "./CompleteWithActorModal";
 import Toast from "./Toast";
 import "./ChoreRowActions.css";
@@ -66,7 +65,7 @@ export default function ChoreRowActions({ chore, person, people, mode }) {
   });
 
   const busy = complete.isPending || skip.isPending || reassign.isPending || markDue.isPending;
-  const assigneeColor = person ? getPersonColor(person) : 'var(--text-muted)';
+  const assigneeColor = person ? 'var(--accent)' : 'var(--text-muted)';
 
   return (
     <>

@@ -22,7 +22,6 @@ export default function UserManagement() {
   const [editForm, setEditForm] = useState({
     name: "",
     username: "",
-    color: "",
     goal_7d: 0,
     goal_30d: 0,
     is_admin: false,
@@ -33,7 +32,7 @@ export default function UserManagement() {
   const { saveStatus, saveBtnClass, triggerSaving, triggerSuccess, triggerError, reset: resetSaveStatus, getCloseDelay } = useSaveStatus();
 
   const createMutation = useMutation({
-    mutationFn: ({ name, password, color }) => createPerson(name, password, color),
+    mutationFn: ({ name, password }) => createPerson(name, password),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["people"] });
       triggerSuccess();
@@ -75,7 +74,6 @@ export default function UserManagement() {
     setEditForm({
       name: "",
       username: "",
-      color: "#004272",
       goal_7d: 0,
       goal_30d: 0,
       is_admin: false,
@@ -90,7 +88,6 @@ export default function UserManagement() {
     setEditForm({
       name: person.name,
       username: person.username,
-      color: person.color,
       goal_7d: person.goal_7d,
       goal_30d: person.goal_30d,
       is_admin: person.is_admin,
@@ -103,7 +100,7 @@ export default function UserManagement() {
 
   const handleCloseDialog = () => {
     setModal(null);
-    setEditForm({ name: "", username: "", color: "", goal_7d: 0, goal_30d: 0, is_admin: false, password: "" });
+    setEditForm({ name: "", username: "", goal_7d: 0, goal_30d: 0, is_admin: false, password: "" });
     setError(null);
   };
 
@@ -122,13 +119,11 @@ export default function UserManagement() {
       createMutation.mutate({
         name: editForm.name.trim(),
         password: editForm.password,
-        color: editForm.color,
       });
     } else {
       const updates = {
         name: editForm.name,
         username: editForm.username,
-        color: editForm.color,
         goal_7d: editForm.goal_7d,
         goal_30d: editForm.goal_30d,
         is_admin: editForm.is_admin,
@@ -160,7 +155,7 @@ export default function UserManagement() {
               <div className="user-info">
                 <div
                   className="user-avatar"
-                  style={{ backgroundColor: person.color }}
+                  style={{ backgroundColor: 'var(--accent)' }}
                 >
                   {person.name.charAt(0).toUpperCase()}
                 </div>
@@ -286,17 +281,6 @@ export default function UserManagement() {
                     type="text"
                     value={editForm.username}
                     onChange={(e) => setEditForm({ ...editForm, username: e.target.value })}
-                    disabled={createMutation.isPending || updateMutation.isPending}
-                  />
-                </div>
-
-                <div className="form-row">
-                  <label htmlFor="edit-color">Color</label>
-                  <input
-                    id="edit-color"
-                    type="color"
-                    value={editForm.color}
-                    onChange={(e) => setEditForm({ ...editForm, color: e.target.value })}
                     disabled={createMutation.isPending || updateMutation.isPending}
                   />
                 </div>

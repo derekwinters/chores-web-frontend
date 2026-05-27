@@ -62,9 +62,9 @@ export const markDueChore = (id) => request("POST", `/chores/${id}/mark-due`);
 
 // People
 export const getPeople = () => request("GET", "/people");
-export const createPerson = (name, password, color) => {
+export const createPerson = (name, password) => {
   const username = name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
-  return request("POST", "/people", { name, username, password, color });
+  return request("POST", "/people", { name, username, password });
 };
 export const updatePerson = (id, data) => request("PUT", `/people/${id}`, data);
 export const deletePerson = (id) => request("DELETE", `/people/${id}`);

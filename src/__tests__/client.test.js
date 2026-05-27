@@ -77,4 +77,14 @@ describe("API client", () => {
     const result = await getLeaderboard();
     expect(result[0].person).toBe("Alice");
   });
+
+  it("createPerson never sends color in request body", async () => {
+    mockOk({ id: 1, name: "Alice", username: "alice" });
+    const { createPerson } = await import("../api/client");
+    // Call with a color value to prove the function ignores it entirely
+    await createPerson("Alice", "password123", "#ff0000");
+    const callArgs = mockFetch.mock.calls[0];
+    const body = JSON.parse(callArgs[1].body);
+    expect(body).not.toHaveProperty("color");
+  });
 });

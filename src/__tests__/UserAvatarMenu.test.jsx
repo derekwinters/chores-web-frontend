@@ -112,4 +112,10 @@ describe("UserAvatarMenu", () => {
       expect(mockSettings).toHaveBeenCalled();
     });
   });
+
+  it("renders avatar with var(--accent) background, not user.color", () => {
+    const { container } = render(<UserAvatarMenu user={mockUser} onLogout={mockLogout} />);
+    const avatar = container.querySelector(".user-avatar");
+    expect(avatar).toHaveStyle({ backgroundColor: "var(--accent)" });
+  });
 });

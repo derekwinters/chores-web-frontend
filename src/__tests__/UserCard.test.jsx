@@ -135,6 +135,18 @@ describe("UserCard", () => {
     expect(dueSoonHeaders.length).toBeGreaterThan(0);
   });
 
+  it("renders progress bars with var(--accent) color", () => {
+    const { container } = wrap(
+      <UserCard person={PERSON} chores={[]} people={PEOPLE} summary={SUMMARY} />
+    );
+    // ProgressBar inner div has background style set to the color prop
+    const progressFills = Array.from(container.querySelectorAll(".uc-points-col div div"));
+    expect(progressFills.length).toBeGreaterThan(0);
+    progressFills.forEach((fill) => {
+      expect(fill).toHaveStyle({ background: "var(--accent)" });
+    });
+  });
+
   it("shows success color for points ahead of goal (>0.8)", () => {
     const aheadSummary = { person: "Alice", points_7d: 20, points_30d: 25 };
     const personWithGoal = { ...PERSON, goal_7d: 20, goal_30d: 30 };

@@ -1,11 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
-import { getPersonColor } from "../utils/personColors";
 import "./UserAvatarMenu.css";
 
 export default function UserAvatarMenu({ user, onLogout, onPreferences, onSettings, isAdmin = false }) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef(null);
-  const color = user.color || getPersonColor(user.name);
 
   const handlePreferences = () => {
     setIsOpen(false);
@@ -46,7 +44,7 @@ export default function UserAvatarMenu({ user, onLogout, onPreferences, onSettin
       >
         <div
           className="user-avatar"
-          style={{ backgroundColor: color }}
+          style={{ backgroundColor: 'var(--accent)' }}
         >
           {user.name.charAt(0).toUpperCase()}
         </div>

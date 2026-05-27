@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Avatar from "./Avatar";
 import ProgressBar from "./ProgressBar";
-import { getPersonColor } from "../utils/personColors";
 import { getTrendStatus, getTrendColor } from "../utils/trendStatus";
 import { UNASSIGNED_FILTER_VALUE } from "../utils/choreAssignee";
 import { getConfig } from "../api/client";
@@ -30,7 +29,6 @@ export default function UserCard({ person, chores, people, summary }) {
     })();
   }, []);
 
-  const color = person.color || getPersonColor(person.name);
   const goal7d = person.goal_7d ?? 12;
   const goal30d = person.goal_30d ?? 50;
   const pts7 = summary?.points_7d ?? 0;
@@ -64,7 +62,7 @@ export default function UserCard({ person, chores, people, summary }) {
     <div className="user-card">
       <div className="uc-header">
         <div className="uc-identity">
-          <Avatar name={person.name} size={44} color={color} />
+          <Avatar name={person.name} size={44} />
           <span className="uc-name">{person.name}</span>
         </div>
       </div>
@@ -73,13 +71,13 @@ export default function UserCard({ person, chores, people, summary }) {
         <div className="uc-points-col">
           <div className="uc-points-label">Last 7 Days</div>
           <div className="uc-points-value"><span style={{ color: color7d }}>{pts7}</span><span className="uc-pts-unit">pts</span></div>
-          <ProgressBar value={pts7} max={goal7d} color={color} />
+          <ProgressBar value={pts7} max={goal7d} color="var(--accent)" />
           <div className="uc-goal-label">Goal: {goal7d} pts</div>
         </div>
         <div className="uc-points-col">
           <div className="uc-points-label">Last 30 Days</div>
           <div className="uc-points-value"><span style={{ color: color30d }}>{pts30}</span><span className="uc-pts-unit">pts</span></div>
-          <ProgressBar value={pts30} max={goal30d} color={color} />
+          <ProgressBar value={pts30} max={goal30d} color="var(--accent)" />
           <div className="uc-goal-label">Goal: {goal30d} pts</div>
         </div>
       </div>

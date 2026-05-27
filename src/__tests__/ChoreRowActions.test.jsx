@@ -168,3 +168,27 @@ describe("ChoreRowActions — soon mode", () => {
     await waitFor(() => expect(client.markDueChore).toHaveBeenCalledWith("vacuum"));
   });
 });
+
+describe("ChoreRowActions — assignee dot color", () => {
+  beforeEach(() => {
+    vi.resetAllMocks();
+    client.completeChore.mockResolvedValue({ ...CHORE, state: "complete" });
+  });
+
+  it("assignee dot uses var(--accent) when person is set", () => {
+    const { container } = wrap(
+      <ChoreRowActions chore={CHORE} person="Alice" people={PEOPLE} mode="due" />
+    );
+    const dot = container.querySelector(".assignee-dot");
+    expect(dot).toHaveStyle({ background: "var(--accent)" });
+  });
+
+  it("assignee dot uses var(--text-muted) when no person (unassigned)", () => {
+    const { container } = wrap(
+      <ChoreRowActions chore={CHORE} person={null} people={PEOPLE} mode="due" />
+    );
+    // No person prop = no assignee row rendered; just verify no var(--accent) dot
+    const dot = container.querySelector(".assignee-dot");
+    expect(dot).toBeNull();
+  });
+});

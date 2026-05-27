@@ -134,4 +134,19 @@ describe("UserManagement", () => {
       expect(client.createPerson).toHaveBeenCalled();
     });
   });
+
+  it("does not show color picker in create user form", async () => {
+    wrap(<UserManagement />);
+    await waitFor(() => screen.getByTitle("Add user"));
+    fireEvent.click(screen.getByTitle("Add user"));
+    expect(screen.queryByLabelText(/color/i)).not.toBeInTheDocument();
+  });
+
+  it("does not show color picker in edit user form", async () => {
+    wrap(<UserManagement />);
+    await waitFor(() => screen.getByText("Alice"));
+    const editButtons = screen.getAllByRole("button", { name: /edit/i });
+    fireEvent.click(editButtons[0]);
+    expect(screen.queryByLabelText(/color/i)).not.toBeInTheDocument();
+  });
 });
