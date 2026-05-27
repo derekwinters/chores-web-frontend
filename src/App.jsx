@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useLayoutEffect } from "react";
+import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "./contexts/AuthContext";
-import { BrowserRouter, Routes, Route, Navigate, Link, useNavigate, useLocation } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, Routes, Route, Navigate, Link, useNavigate, useLocation } from "react-router-dom";
 import Setup from "./pages/Setup";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
@@ -175,6 +175,10 @@ function AppContent() {
 }
 
 function AuthenticatedApp() {
+  const routerRef = useRef(null);
+  if (!routerRef.current) {
+    routerRef.current = createBrowserRouter([{ path: "*", element: <AppContent /> }]);
+  }
   const [themeApplied, setThemeApplied] = useState(false);
   const { data: currentTheme, isLoading, isError } = useQuery({
     queryKey: ["current-theme"],
@@ -199,11 +203,7 @@ function AuthenticatedApp() {
     return <div className="app-loading">Loading...</div>;
   }
 
-  return (
-    <BrowserRouter>
-      <AppContent />
-    </BrowserRouter>
-  );
+  return <RouterProvider router={routerRef.current} />;
 }
 
 export default function App() {

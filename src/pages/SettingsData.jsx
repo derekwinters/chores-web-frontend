@@ -1,37 +1,64 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
+import { Link, useBlocker } from "react-router-dom";
 import { getLogRetention, setLogRetention } from "../api/client";
 import ExportImport from "../components/ExportImport";
-import { useSaveStatus } from "../hooks/useSaveStatus";
 import "./Settings.css";
 import "./AdminPanel.css";
 
 export default function SettingsData() {
   const [retentionInput, setRetentionInput] = useState("");
   const [error, setError] = useState(null);
-  const { saveStatus, saveBtnClass, triggerSaving, triggerSuccess, triggerError } = useSaveStatus();
+  const committedRef = useRef(null);
 
   const { data: retentionData, isLoading: retentionLoading } = useQuery({
     queryKey: ["log-retention"],
     queryFn: getLogRetention,
   });
 
+  // Initialize committedRef once from API data
   useEffect(() => {
-    if (retentionData?.retention_days !== undefined) {
-      setRetentionInput(String(retentionData.retention_days));
+    if (retentionData?.retention_days !== undefined && committedRef.current === null) {
+      committedRef.current = String(retentionData.retention_days);
+      setRetentionInput(committedRef.current);
     }
   }, [retentionData]);
+
+  const isDirty = committedRef.current !== null && retentionInput !== committedRef.current;
+
+  // beforeunload handler for external navigation
+  useEffect(() => {
+    if (!isDirty) return;
+    const handler = (e) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [isDirty]);
+
+  // useBlocker for in-app navigation
+  const blocker = useBlocker(isDirty);
+
+  useEffect(() => {
+    if (blocker.state === "blocked") {
+      const confirmed = window.confirm("You have unsaved changes. Leave this page?");
+      if (confirmed) {
+        blocker.proceed();
+      } else {
+        blocker.reset();
+      }
+    }
+  }, [blocker]);
 
   const retentionMutation = useMutation({
     mutationFn: (days) => setLogRetention(parseInt(days)),
     onSuccess: (data) => {
-      setRetentionInput(String(data.retention_days));
-      triggerSuccess();
+      committedRef.current = String(data.retention_days);
+      setRetentionInput(committedRef.current);
       setError(null);
     },
     onError: (err) => {
-      triggerError();
       setError(err.message || "Failed to update log retention");
     },
   });
@@ -42,7 +69,6 @@ export default function SettingsData() {
       setError("Days must be a number greater than 0");
       return;
     }
-    triggerSaving();
     retentionMutation.mutate(days);
   };
 
@@ -62,11 +88,11 @@ export default function SettingsData() {
         <div className="section-row">
           <h3>Log Retention</h3>
           <button
-            className={saveBtnClass}
+            className={isDirty ? "btn-save--dirty" : "btn-save--idle"}
             onClick={handleSaveRetention}
-            disabled={retentionMutation.isPending || retentionLoading}
+            disabled={!isDirty || retentionMutation.isPending || retentionLoading}
           >
-            {saveStatus === "saving" ? "Saving…" : saveStatus === "success" ? "Saved" : "Save"}
+            {retentionMutation.isPending ? "Saving…" : "Save"}
           </button>
         </div>
         <hr />

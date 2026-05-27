@@ -140,6 +140,20 @@
   gap: 0.5rem;
 }
 
+/* ── Save button states ──────────────────────────────────────────────────── */
+
+/* No unsaved changes: grayed out, non-interactive */
+.btn-save--idle {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* Has unsaved changes: warning/amber */
+.btn-save--dirty {
+  background: var(--warning);
+  color: var(--bg);
+}
+
 /* ── Data Management entries ─────────────────────────────────────────────── */
 
 .data-management-entry {

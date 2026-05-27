@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter, Routes, Route, Outlet } from "react-router-dom";
@@ -11,6 +11,15 @@ vi.mock("../contexts/AuthContext", () => ({
   AuthProvider: ({ children }) => children,
   useAuth: () => ({ user: { username: "admin", is_admin: true }, logout: vi.fn() }),
 }));
+
+// Mock useBlocker — MemoryRouter doesn't provide a data router context
+vi.mock("react-router-dom", async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    useBlocker: (_shouldBlock) => ({ state: "unblocked", proceed: vi.fn(), reset: vi.fn() }),
+  };
+});
 
 // Minimal layout wrapper that provides outlet context
 function LayoutWithContext({ onTitleUpdate }) {
@@ -92,20 +101,21 @@ describe("SettingsAuth", () => {
     });
   });
 
-  it("calls updateConfig when Save is clicked", async () => {
+  it("calls updateConfig when Save is clicked after a change", async () => {
     client.updateConfig.mockResolvedValue({
       title: "Family Chores",
-      auth_enabled: true,
+      auth_enabled: false,
       timezone: "UTC",
       due_soon_days: 3,
     });
     wrap();
     await waitFor(() => {
-      expect(screen.getByLabelText(/require authentication/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/require authentication/i).checked).toBe(true);
     });
+    fireEvent.click(screen.getByLabelText(/require authentication/i));
     screen.getByRole("button", { name: /^save$/i }).click();
     await waitFor(() => {
-      expect(client.updateConfig).toHaveBeenCalledWith({ auth_enabled: true });
+      expect(client.updateConfig).toHaveBeenCalledWith({ auth_enabled: false });
     });
   });
 
@@ -115,5 +125,58 @@ describe("SettingsAuth", () => {
       expect(screen.getByText("Authentication")).toBeInTheDocument();
     });
     expect(screen.queryByText("Due Soon Threshold")).not.toBeInTheDocument();
+  });
+
+  // Behavior 7: SettingsAuth dirty tracking
+  it("Save button has btn-save--idle class on initial load", async () => {
+    wrap();
+    await waitFor(() => {
+      expect(screen.getByLabelText(/require authentication/i)).toBeInTheDocument();
+    });
+    const btn = screen.getByRole("button", { name: /^save$/i });
+    expect(btn).toHaveClass("btn-save--idle");
+    expect(btn).toBeDisabled();
+  });
+
+  it("Save button gains btn-save--dirty class after checkbox change", async () => {
+    wrap();
+    await waitFor(() => {
+      expect(screen.getByLabelText(/require authentication/i).checked).toBe(true);
+    });
+    fireEvent.click(screen.getByLabelText(/require authentication/i));
+    const btn = screen.getByRole("button", { name: /^save$/i });
+    expect(btn).toHaveClass("btn-save--dirty");
+    expect(btn).not.toBeDisabled();
+  });
+
+  it("Save button returns to btn-save--idle after successful save", async () => {
+    client.updateConfig.mockResolvedValue({
+      title: "Family Chores",
+      auth_enabled: false,
+      timezone: "UTC",
+      due_soon_days: 3,
+    });
+    wrap();
+    await waitFor(() => {
+      expect(screen.getByLabelText(/require authentication/i).checked).toBe(true);
+    });
+    fireEvent.click(screen.getByLabelText(/require authentication/i));
+    fireEvent.click(screen.getByRole("button", { name: /^save$/i }));
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: /^save$/i })).toHaveClass("btn-save--idle");
+    });
+  });
+
+  it("registers beforeunload handler when dirty", async () => {
+    const addSpy = vi.spyOn(window, "addEventListener");
+    wrap();
+    await waitFor(() => {
+      expect(screen.getByLabelText(/require authentication/i)).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByLabelText(/require authentication/i));
+    await waitFor(() => {
+      const calls = addSpy.mock.calls.filter(([event]) => event === "beforeunload");
+      expect(calls.length).toBeGreaterThan(0);
+    });
   });
 });

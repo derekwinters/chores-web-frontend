@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
@@ -11,6 +11,15 @@ vi.mock("../contexts/AuthContext", () => ({
   AuthProvider: ({ children }) => children,
   useAuth: () => ({ user: { username: "admin", is_admin: true }, logout: vi.fn() }),
 }));
+
+// Mock useBlocker — MemoryRouter doesn't provide a data router context
+vi.mock("react-router-dom", async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    useBlocker: (_shouldBlock) => ({ state: "unblocked", proceed: vi.fn(), reset: vi.fn() }),
+  };
+});
 
 function wrap() {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -91,5 +100,53 @@ describe("SettingsData", () => {
     expect(
       screen.getByText(/modify or remove records for recently completed chores/i)
     ).toBeInTheDocument();
+  });
+
+  // Behavior 9: SettingsData dirty tracking (Log Retention section only)
+  it("Log Retention Save button has btn-save--idle class on initial load", async () => {
+    wrap();
+    await waitFor(() => {
+      expect(screen.getByLabelText(/keep logs for/i).value).toBe("90");
+    });
+    const btn = screen.getByRole("button", { name: /^save$/i });
+    expect(btn).toHaveClass("btn-save--idle");
+    expect(btn).toBeDisabled();
+  });
+
+  it("Log Retention Save button gains btn-save--dirty class after input change", async () => {
+    wrap();
+    await waitFor(() => {
+      expect(screen.getByLabelText(/keep logs for/i).value).toBe("90");
+    });
+    fireEvent.change(screen.getByLabelText(/keep logs for/i), { target: { value: "30" } });
+    const btn = screen.getByRole("button", { name: /^save$/i });
+    expect(btn).toHaveClass("btn-save--dirty");
+    expect(btn).not.toBeDisabled();
+  });
+
+  it("Log Retention Save button returns to btn-save--idle after successful save", async () => {
+    client.setLogRetention.mockResolvedValue({ retention_days: 30 });
+    wrap();
+    await waitFor(() => {
+      expect(screen.getByLabelText(/keep logs for/i).value).toBe("90");
+    });
+    fireEvent.change(screen.getByLabelText(/keep logs for/i), { target: { value: "30" } });
+    fireEvent.click(screen.getByRole("button", { name: /^save$/i }));
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: /^save$/i })).toHaveClass("btn-save--idle");
+    });
+  });
+
+  it("registers beforeunload handler when Log Retention is dirty", async () => {
+    const addSpy = vi.spyOn(window, "addEventListener");
+    wrap();
+    await waitFor(() => {
+      expect(screen.getByLabelText(/keep logs for/i).value).toBe("90");
+    });
+    fireEvent.change(screen.getByLabelText(/keep logs for/i), { target: { value: "30" } });
+    await waitFor(() => {
+      const calls = addSpy.mock.calls.filter(([event]) => event === "beforeunload");
+      expect(calls.length).toBeGreaterThan(0);
+    });
   });
 });

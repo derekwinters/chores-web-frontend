@@ -80,6 +80,7 @@ describe("SettingsLayout", () => {
     expect(themeLink).toHaveClass("subnav-link--active");
   });
 
+
   it("shows access denied for non-admin users", () => {
     vi.doMock("../contexts/AuthContext", () => ({
       AuthProvider: ({ children }) => children,

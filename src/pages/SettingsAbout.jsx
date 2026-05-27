@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useBlocker } from "react-router-dom";
 import {
   getConfig,
   getUpdateCheckStatus,
   triggerUpdateCheck,
   configureUpdateChecking,
 } from "../api/client";
-import { useSaveStatus } from "../hooks/useSaveStatus";
 import "./Settings.css";
 import "./AdminPanel.css";
 
@@ -16,21 +16,54 @@ export default function SettingsAbout() {
   const [updateCheckEnabledInput, setUpdateCheckEnabledInput] = useState(true);
   const [updateCheckIntervalInput, setUpdateCheckIntervalInput] = useState(24);
   const [error, setError] = useState(null);
-  const { saveStatus, saveBtnClass, triggerSaving, triggerSuccess, triggerError } = useSaveStatus();
+  const committedRef = useRef(null);
 
   const { data: config } = useQuery({
     queryKey: ["config"],
     queryFn: getConfig,
   });
 
+  // Initialize committedRef once from API data
   useEffect(() => {
-    if (config) {
-      if (config.update_check_enabled !== undefined)
-        setUpdateCheckEnabledInput(config.update_check_enabled);
-      if (config.update_check_interval !== undefined)
-        setUpdateCheckIntervalInput(config.update_check_interval);
+    if (config && committedRef.current === null) {
+      committedRef.current = {
+        enabled: config.update_check_enabled ?? true,
+        interval: config.update_check_interval ?? 24,
+      };
+      setUpdateCheckEnabledInput(committedRef.current.enabled);
+      setUpdateCheckIntervalInput(committedRef.current.interval);
     }
   }, [config]);
+
+  const isDirty =
+    committedRef.current !== null &&
+    (updateCheckEnabledInput !== committedRef.current.enabled ||
+      String(updateCheckIntervalInput) !== String(committedRef.current.interval));
+
+  // beforeunload handler for external navigation
+  useEffect(() => {
+    if (!isDirty) return;
+    const handler = (e) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [isDirty]);
+
+  // useBlocker for in-app navigation
+  const blocker = useBlocker(isDirty);
+
+  useEffect(() => {
+    if (blocker.state === "blocked") {
+      const confirmed = window.confirm("You have unsaved changes. Leave this page?");
+      if (confirmed) {
+        blocker.proceed();
+      } else {
+        blocker.reset();
+      }
+    }
+  }, [blocker]);
 
   const {
     data: updateCheckStatus,
@@ -48,14 +81,16 @@ export default function SettingsAbout() {
         parseInt(updateCheckIntervalInput)
       ),
     onSuccess: (data) => {
-      setUpdateCheckEnabledInput(data.check_enabled);
-      setUpdateCheckIntervalInput(data.check_interval_hours);
+      committedRef.current = {
+        enabled: data.check_enabled,
+        interval: data.check_interval_hours,
+      };
+      setUpdateCheckEnabledInput(committedRef.current.enabled);
+      setUpdateCheckIntervalInput(committedRef.current.interval);
       queryClient.invalidateQueries({ queryKey: ["config"] });
-      triggerSuccess();
       setError(null);
     },
     onError: (err) => {
-      triggerError();
       setError(err.message || "Failed to update update check settings");
     },
   });
@@ -76,7 +111,6 @@ export default function SettingsAbout() {
       setError("Update check interval must be at least 1 hour");
       return;
     }
-    triggerSaving();
     updateCheckConfigMutation.mutate();
   };
 
@@ -129,11 +163,11 @@ export default function SettingsAbout() {
         <div className="section-row">
           <h3>Update Checker</h3>
           <button
-            className={saveBtnClass}
+            className={isDirty ? "btn-save--dirty" : "btn-save--idle"}
             onClick={handleSaveUpdateCheckConfig}
-            disabled={updateCheckConfigMutation.isPending || updateCheckLoading}
+            disabled={!isDirty || updateCheckConfigMutation.isPending || updateCheckLoading}
           >
-            {saveStatus === "saving" ? "Saving…" : saveStatus === "success" ? "Saved" : "Save Settings"}
+            {updateCheckConfigMutation.isPending ? "Saving…" : "Save Settings"}
           </button>
         </div>
         <hr />

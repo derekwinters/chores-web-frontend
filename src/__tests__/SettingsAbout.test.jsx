@@ -12,6 +12,15 @@ vi.mock("../contexts/AuthContext", () => ({
   useAuth: () => ({ user: { username: "admin", is_admin: true }, logout: vi.fn() }),
 }));
 
+// Mock useBlocker — MemoryRouter doesn't provide a data router context
+vi.mock("react-router-dom", async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    useBlocker: (_shouldBlock) => ({ state: "unblocked", proceed: vi.fn(), reset: vi.fn() }),
+  };
+});
+
 function wrap() {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
@@ -136,12 +145,16 @@ describe("SettingsAbout", () => {
     });
   });
 
-  it("calls configureUpdateChecking when Save Settings is clicked", async () => {
+  it("calls configureUpdateChecking when Save Settings is clicked after a change", async () => {
     client.configureUpdateChecking.mockResolvedValue({
-      check_enabled: true,
+      check_enabled: false,
       check_interval_hours: 24,
     });
     wrap();
+    await waitFor(() => {
+      expect(screen.getByLabelText(/enable update checking/i).checked).toBe(true);
+    });
+    fireEvent.click(screen.getByLabelText(/enable update checking/i));
     await waitFor(() => {
       const btn = screen.getByRole("button", { name: /save settings/i });
       expect(btn).not.toBeDisabled();
@@ -181,6 +194,68 @@ describe("SettingsAbout", () => {
       expect(
         screen.getByText(/update check interval must be at least 1 hour/i)
       ).toBeInTheDocument();
+    });
+  });
+
+  // Behavior 10: SettingsAbout dirty tracking
+  it("Save Settings button has btn-save--idle class on initial load", async () => {
+    wrap();
+    await waitFor(() => {
+      expect(screen.getByLabelText(/enable update checking/i)).toBeInTheDocument();
+    });
+    const btn = screen.getByRole("button", { name: /save settings/i });
+    expect(btn).toHaveClass("btn-save--idle");
+    expect(btn).toBeDisabled();
+  });
+
+  it("Save Settings button gains btn-save--dirty class after checkbox change", async () => {
+    wrap();
+    await waitFor(() => {
+      expect(screen.getByLabelText(/enable update checking/i).checked).toBe(true);
+    });
+    fireEvent.click(screen.getByLabelText(/enable update checking/i));
+    const btn = screen.getByRole("button", { name: /save settings/i });
+    expect(btn).toHaveClass("btn-save--dirty");
+    expect(btn).not.toBeDisabled();
+  });
+
+  it("Save Settings button gains btn-save--dirty class after interval change", async () => {
+    wrap();
+    await waitFor(() => {
+      expect(screen.getByLabelText(/check interval/i).value).toBe("24");
+    });
+    fireEvent.change(screen.getByLabelText(/check interval/i), { target: { value: "12" } });
+    const btn = screen.getByRole("button", { name: /save settings/i });
+    expect(btn).toHaveClass("btn-save--dirty");
+    expect(btn).not.toBeDisabled();
+  });
+
+  it("Save Settings button returns to btn-save--idle after successful save", async () => {
+    client.configureUpdateChecking.mockResolvedValue({
+      check_enabled: false,
+      check_interval_hours: 24,
+    });
+    wrap();
+    await waitFor(() => {
+      expect(screen.getByLabelText(/enable update checking/i).checked).toBe(true);
+    });
+    fireEvent.click(screen.getByLabelText(/enable update checking/i));
+    fireEvent.click(screen.getByRole("button", { name: /save settings/i }));
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: /save settings/i })).toHaveClass("btn-save--idle");
+    });
+  });
+
+  it("registers beforeunload handler when dirty", async () => {
+    const addSpy = vi.spyOn(window, "addEventListener");
+    wrap();
+    await waitFor(() => {
+      expect(screen.getByLabelText(/enable update checking/i)).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByLabelText(/enable update checking/i));
+    await waitFor(() => {
+      const calls = addSpy.mock.calls.filter(([event]) => event === "beforeunload");
+      expect(calls.length).toBeGreaterThan(0);
     });
   });
 });

@@ -20,6 +20,15 @@ vi.mock("../contexts/AuthContext", () => ({
   }),
 }));
 
+// Mock useBlocker — BrowserRouter doesn't provide a data router context
+vi.mock("react-router-dom", async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    useBlocker: (_shouldBlock) => ({ state: "unblocked", proceed: vi.fn(), reset: vi.fn() }),
+  };
+});
+
 function wrap(ui) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>);

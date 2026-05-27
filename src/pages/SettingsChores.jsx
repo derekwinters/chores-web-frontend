@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useBlocker } from "react-router-dom";
 import { getConfig, updateConfig } from "../api/client";
-import { useSaveStatus } from "../hooks/useSaveStatus";
 import "./Settings.css";
 import "./AdminPanel.css";
 
@@ -10,29 +10,57 @@ export default function SettingsChores() {
 
   const [dueSoonDaysInput, setDueSoonDaysInput] = useState("");
   const [error, setError] = useState(null);
-  const { saveStatus, saveBtnClass, triggerSaving, triggerSuccess, triggerError } = useSaveStatus();
+  const committedRef = useRef(null);
 
   const { data: config, isLoading: configLoading } = useQuery({
     queryKey: ["config"],
     queryFn: getConfig,
   });
 
+  // Initialize committedRef once from API data
   useEffect(() => {
-    if (config) {
-      if (config.due_soon_days !== undefined) setDueSoonDaysInput(String(config.due_soon_days));
+    if (config && committedRef.current === null) {
+      committedRef.current = String(config.due_soon_days ?? "");
+      setDueSoonDaysInput(committedRef.current);
     }
   }, [config]);
+
+  const isDirty = committedRef.current !== null && dueSoonDaysInput !== committedRef.current;
+
+  // beforeunload handler for external navigation
+  useEffect(() => {
+    if (!isDirty) return;
+    const handler = (e) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [isDirty]);
+
+  // useBlocker for in-app navigation
+  const blocker = useBlocker(isDirty);
+
+  useEffect(() => {
+    if (blocker.state === "blocked") {
+      const confirmed = window.confirm("You have unsaved changes. Leave this page?");
+      if (confirmed) {
+        blocker.proceed();
+      } else {
+        blocker.reset();
+      }
+    }
+  }, [blocker]);
 
   const dueSoonDaysMutation = useMutation({
     mutationFn: (days) => updateConfig({ due_soon_days: parseInt(days) }),
     onSuccess: (data) => {
-      setDueSoonDaysInput(String(data.due_soon_days));
+      committedRef.current = String(data.due_soon_days);
+      setDueSoonDaysInput(committedRef.current);
       queryClient.invalidateQueries({ queryKey: ["config"] });
-      triggerSuccess();
       setError(null);
     },
     onError: (err) => {
-      triggerError();
       setError(err.message || "Failed to update due soon threshold");
     },
   });
@@ -43,7 +71,6 @@ export default function SettingsChores() {
       setError("Due soon threshold must be between 1 and 365 days");
       return;
     }
-    triggerSaving();
     dueSoonDaysMutation.mutate(days);
   };
 
@@ -57,11 +84,11 @@ export default function SettingsChores() {
         <div className="section-row">
           <h3>Due Soon Threshold</h3>
           <button
-            className={saveBtnClass}
+            className={isDirty ? "btn-save--dirty" : "btn-save--idle"}
             onClick={handleSaveDueSoonDays}
-            disabled={dueSoonDaysMutation.isPending}
+            disabled={!isDirty || dueSoonDaysMutation.isPending}
           >
-            {saveStatus === "saving" ? "Saving…" : saveStatus === "success" ? "Saved" : "Save"}
+            {dueSoonDaysMutation.isPending ? "Saving…" : "Save"}
           </button>
         </div>
         <hr />

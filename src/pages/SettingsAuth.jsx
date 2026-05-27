@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useOutletContext } from "react-router-dom";
+import { useOutletContext, useBlocker } from "react-router-dom";
 import { getConfig, updateConfig } from "../api/client";
-import { useSaveStatus } from "../hooks/useSaveStatus";
 import "./Settings.css";
 import "./AdminPanel.css";
 
@@ -12,35 +11,63 @@ export default function SettingsAuth() {
 
   const [authEnabled, setAuthEnabled] = useState(true);
   const [error, setError] = useState(null);
-  const { saveStatus, saveBtnClass, triggerSaving, triggerSuccess, triggerError } = useSaveStatus();
+  const committedRef = useRef(null);
 
   const { data: config, isLoading: configLoading } = useQuery({
     queryKey: ["config"],
     queryFn: getConfig,
   });
 
+  // Initialize committedRef once from API data
   useEffect(() => {
-    if (config) {
-      if (config.auth_enabled !== undefined) setAuthEnabled(config.auth_enabled);
+    if (config && committedRef.current === null) {
+      committedRef.current = config.auth_enabled ?? true;
+      setAuthEnabled(committedRef.current);
     }
   }, [config]);
+
+  const isDirty = committedRef.current !== null && authEnabled !== committedRef.current;
+
+  // beforeunload handler for external navigation
+  useEffect(() => {
+    if (!isDirty) return;
+    const handler = (e) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [isDirty]);
+
+  // useBlocker for in-app navigation
+  const blocker = useBlocker(isDirty);
+
+  useEffect(() => {
+    if (blocker.state === "blocked") {
+      const confirmed = window.confirm("You have unsaved changes. Leave this page?");
+      if (confirmed) {
+        blocker.proceed();
+      } else {
+        blocker.reset();
+      }
+    }
+  }, [blocker]);
 
   const authMutation = useMutation({
     mutationFn: (data) => updateConfig(data),
     onSuccess: (data) => {
+      committedRef.current = data.auth_enabled ?? authEnabled;
+      setAuthEnabled(committedRef.current);
       if (data.title) onTitleUpdate?.(data.title);
       queryClient.invalidateQueries({ queryKey: ["config"] });
-      triggerSuccess();
       setError(null);
     },
     onError: (err) => {
-      triggerError();
       setError(err.message || "Failed to update settings");
     },
   });
 
   const handleSave = () => {
-    triggerSaving();
     authMutation.mutate({ auth_enabled: authEnabled });
   };
 
@@ -54,11 +81,11 @@ export default function SettingsAuth() {
         <div className="section-row">
           <h3>Authentication</h3>
           <button
-            className={saveBtnClass}
+            className={isDirty ? "btn-save--dirty" : "btn-save--idle"}
             onClick={handleSave}
-            disabled={authMutation.isPending}
+            disabled={!isDirty || authMutation.isPending}
           >
-            {saveStatus === "saving" ? "Saving…" : saveStatus === "success" ? "Saved" : "Save"}
+            {authMutation.isPending ? "Saving…" : "Save"}
           </button>
         </div>
         <hr />
