@@ -194,6 +194,46 @@ describe("ExportImport", () => {
     });
   });
 
+  it("renders file-input-label in section-right, not section-left", () => {
+    const { container } = wrap(<ExportImport />);
+    const importSection = container.querySelector(".import-section");
+    const sectionLeft = importSection.querySelector(".section-left");
+    const sectionRight = importSection.querySelector(".section-right");
+
+    expect(sectionRight.querySelector(".file-input-label")).toBeInTheDocument();
+    expect(sectionLeft.querySelector(".file-input-label")).not.toBeInTheDocument();
+  });
+
+  it("Proceed with Import button is not inside section-body when importData is set", async () => {
+    const { container } = wrap(<ExportImport />);
+    const fileInput = document.querySelector('input[type="file"]');
+
+    const file = new File([JSON.stringify(mockExportData)], "backup.json", { type: "application/json" });
+    fireEvent.change(fileInput, { target: { files: [file] } });
+
+    await waitFor(() => {
+      const sectionBody = container.querySelector(".import-section .section-body");
+      const proceedBtn = screen.getByText("Proceed with Import");
+      expect(sectionBody.contains(proceedBtn)).toBe(false);
+    });
+  });
+
+  it("Proceed with Import button renders below section-body when importData is set", async () => {
+    const { container } = wrap(<ExportImport />);
+    const fileInput = document.querySelector('input[type="file"]');
+
+    const file = new File([JSON.stringify(mockExportData)], "backup.json", { type: "application/json" });
+    fireEvent.change(fileInput, { target: { files: [file] } });
+
+    await waitFor(() => {
+      const importSection = container.querySelector(".import-section");
+      const sectionBody = importSection.querySelector(".section-body");
+      const proceedBtn = screen.getByText("Proceed with Import");
+      expect(sectionBody.contains(proceedBtn)).toBe(false);
+      expect(importSection.contains(proceedBtn)).toBe(true);
+    });
+  });
+
   it("can cancel import confirmation", async () => {
     wrap(<ExportImport />);
     const fileInput = document.querySelector('input[type="file"]');

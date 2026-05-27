@@ -107,24 +107,28 @@ export default function ExportImport() {
       <div className="import-section">
         <h4>Import Data</h4>
         {!confirmImport ? (
-          <div className="section-body">
-            <div className="section-left">
-              <p className="section-description">Upload a backup file to restore data. This will replace all existing chores, people, and settings.</p>
-              <label htmlFor="import-file" className="file-input-label">
-                <input
-                  id="import-file"
-                  type="file"
-                  accept=".json"
-                  onChange={handleFileChange}
-                  disabled={importMutation.isPending}
-                />
-                <span className="file-input-button">
-                  {importFile ? `Selected: ${importFile.name}` : "Choose File"}
-                </span>
-              </label>
+          <>
+            <div className="section-body">
+              <div className="section-left">
+                <p className="section-description">Upload a backup file to restore data. This will replace all existing chores, people, and settings.</p>
+              </div>
+              <div className="section-right">
+                <label htmlFor="import-file" className="file-input-label">
+                  <input
+                    id="import-file"
+                    type="file"
+                    accept=".json"
+                    onChange={handleFileChange}
+                    disabled={importMutation.isPending}
+                  />
+                  <span className="file-input-button">
+                    {importFile ? `Selected: ${importFile.name}` : "Choose File"}
+                  </span>
+                </label>
+              </div>
             </div>
-            <div className="section-right">
-              {importData && (
+            {importData && (
+              <div className="confirm-actions">
                 <button
                   className="btn-primary export-import-btn"
                   onClick={() => setConfirmImport(true)}
@@ -132,9 +136,9 @@ export default function ExportImport() {
                 >
                   Proceed with Import
                 </button>
-              )}
-            </div>
-          </div>
+              </div>
+            )}
+          </>
         ) : (
           <div className="import-confirm">
             <div className="confirm-warning">
