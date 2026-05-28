@@ -178,7 +178,7 @@ export default function Log() {
     return f;
   })();
 
-  const { data: logEntries = [], isLoading: logLoading } = useQuery({
+  const { data: logEntries = [], isLoading: logLoading, isError, error } = useQuery({
     queryKey: ["log", filters],
     queryFn: () => getLog(filters),
   });
@@ -303,10 +303,14 @@ export default function Log() {
         </div>
       )}
 
+      {isError && (
+        <div className="error-state">{error.message}</div>
+      )}
+
       <div className="log-entries">
         {logLoading ? (
           <div className="loading">Loading log…</div>
-        ) : logEntries.length === 0 ? (
+        ) : isError ? null : logEntries.length === 0 ? (
           <div className="empty-state">No log entries match your filters.</div>
         ) : (
           <>

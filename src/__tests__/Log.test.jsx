@@ -555,6 +555,35 @@ describe("Log", () => {
     });
   });
 
+  describe("Error state", () => {
+    it("shows error message when log fetch fails", async () => {
+      client.getLog.mockRejectedValue(new Error("Failed to load log"));
+      wrap(<Log />);
+      await waitFor(() => {
+        expect(screen.getByText("Failed to load log")).toBeInTheDocument();
+      });
+    });
+
+    it("does not hide filters when error state shows", async () => {
+      client.getLog.mockRejectedValue(new Error("Failed to load log"));
+      wrap(<Log />);
+      await waitFor(() => {
+        expect(screen.getByText("Failed to load log")).toBeInTheDocument();
+      });
+      fireEvent.click(screen.getByRole("button", { name: /show filters/i }));
+      expect(screen.getByLabelText(/filter by person/i)).toBeInTheDocument();
+    });
+
+    it("does not show empty state message when error occurs", async () => {
+      client.getLog.mockRejectedValue(new Error("Failed to load log"));
+      wrap(<Log />);
+      await waitFor(() => {
+        expect(screen.getByText("Failed to load log")).toBeInTheDocument();
+      });
+      expect(screen.queryByText(/no log entries match your filters/i)).not.toBeInTheDocument();
+    });
+  });
+
   describe("Person log entries (UserLog unified view)", () => {
     it("shows target type 'user' badge in main row for entries whose chore_name starts with 'Person:'", async () => {
       const personEntry = {

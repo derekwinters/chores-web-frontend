@@ -286,4 +286,115 @@ describe("App", () => {
       expect(screen.getByRole("button", { name: /logout/i })).toBeInTheDocument();
     });
   });
+
+  describe("sidebar resize behavior", () => {
+    it("opens sidebar when resizing from mobile to desktop", async () => {
+      // Start on mobile: matchMedia returns matches=true
+      let changeHandler;
+      window.matchMedia = vi.fn((query) => ({
+        matches: true,
+        addEventListener: vi.fn((event, handler) => {
+          if (event === "change") changeHandler = handler;
+        }),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      }));
+
+      wrap(<App />);
+
+      // Wait for app to render (sidebar starts closed on mobile)
+      await waitFor(() => {
+        expect(document.querySelector(".app-sidebar")).toHaveClass("closed");
+      });
+
+      // Simulate crossing to desktop (matches becomes false)
+      changeHandler({ matches: false });
+
+      await waitFor(() => {
+        expect(document.querySelector(".app-sidebar")).toHaveClass("open");
+      });
+    });
+
+    it("closes sidebar when resizing from desktop to mobile", async () => {
+      // Start on desktop: matchMedia returns matches=false
+      let changeHandler;
+      window.matchMedia = vi.fn((query) => ({
+        matches: false,
+        addEventListener: vi.fn((event, handler) => {
+          if (event === "change") changeHandler = handler;
+        }),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      }));
+
+      wrap(<App />);
+
+      // Wait for app to render (sidebar starts open on desktop)
+      await waitFor(() => {
+        expect(document.querySelector(".app-sidebar")).toHaveClass("open");
+      });
+
+      // Simulate crossing to mobile (matches becomes true)
+      changeHandler({ matches: true });
+
+      await waitFor(() => {
+        expect(document.querySelector(".app-sidebar")).toHaveClass("closed");
+      });
+    });
+
+    it("initializes sidebar as closed on mobile viewport", async () => {
+      // matchMedia returns matches=true (mobile)
+      window.matchMedia = vi.fn((query) => ({
+        matches: true,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      }));
+
+      wrap(<App />);
+
+      await waitFor(() => {
+        expect(document.querySelector(".app-sidebar")).toHaveClass("closed");
+      });
+    });
+
+    it("does not write to localStorage when sidebar collapses on mobile", async () => {
+      // Start on desktop
+      let changeHandler;
+      window.matchMedia = vi.fn((query) => ({
+        matches: false,
+        addEventListener: vi.fn((event, handler) => {
+          if (event === "change") changeHandler = handler;
+        }),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      }));
+
+      localStorage.setItem("sidebarOpen", "true");
+
+      wrap(<App />);
+
+      await waitFor(() => {
+        expect(document.querySelector(".app-sidebar")).toHaveClass("open");
+      });
+
+      // Switch to mobile context so matchMedia now returns matches=true
+      window.matchMedia = vi.fn((query) => ({
+        matches: true,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      }));
+
+      // Simulate resize to mobile
+      changeHandler({ matches: true });
+
+      await waitFor(() => {
+        expect(document.querySelector(".app-sidebar")).toHaveClass("closed");
+      });
+
+      // localStorage should NOT have been overwritten with "false" by the mobile collapse
+      expect(localStorage.getItem("sidebarOpen")).toBe("true");
+    });
+  });
 });

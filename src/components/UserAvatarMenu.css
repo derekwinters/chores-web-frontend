@@ -57,6 +57,16 @@
     width: auto;
     padding: 0;
   }
+
+  .topnav-user .avatar-dropdown {
+    top: 100%;
+    bottom: auto;
+    right: 0;
+    left: auto;
+    margin-top: 4px;
+    margin-bottom: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
 }
 
 .avatar-dropdown {

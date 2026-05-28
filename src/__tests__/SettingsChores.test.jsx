@@ -40,6 +40,7 @@ describe("SettingsChores", () => {
       auth_enabled: true,
       timezone: "UTC",
       due_soon_days: 3,
+      due_time_hour: 6,
     });
   });
 
@@ -47,10 +48,10 @@ describe("SettingsChores", () => {
     vi.restoreAllMocks();
   });
 
-  it("renders the Due Soon Threshold section heading", async () => {
+  it("renders the Chore Settings section heading", async () => {
     wrap();
     await waitFor(() => {
-      expect(screen.getByText("Due Soon Threshold")).toBeInTheDocument();
+      expect(screen.getByText("Chore Settings")).toBeInTheDocument();
     });
   });
 
@@ -68,6 +69,7 @@ describe("SettingsChores", () => {
       auth_enabled: true,
       timezone: "UTC",
       due_soon_days: 7,
+      due_time_hour: 6,
     });
     wrap();
     await waitFor(() => {
@@ -76,28 +78,85 @@ describe("SettingsChores", () => {
     });
   });
 
-  it("calls updateConfig when Save is clicked after a change", async () => {
+  it("renders due hour dropdown pre-populated from config", async () => {
+    wrap();
+    await waitFor(() => {
+      const select = screen.getByLabelText(/mark chores due at/i);
+      expect(select.value).toBe("6");
+    });
+  });
+
+  it("renders due hour dropdown with 24 options", async () => {
+    wrap();
+    await waitFor(() => {
+      const select = screen.getByLabelText(/mark chores due at/i);
+      expect(select.options.length).toBe(24);
+    });
+  });
+
+  it("reflects different due_time_hour values from config", async () => {
+    client.getConfig.mockResolvedValue({
+      title: "Family Chores",
+      auth_enabled: true,
+      timezone: "UTC",
+      due_soon_days: 3,
+      due_time_hour: 14,
+    });
+    wrap();
+    await waitFor(() => {
+      const select = screen.getByLabelText(/mark chores due at/i);
+      expect(select.value).toBe("14");
+    });
+  });
+
+  it("renders 12 AM for hour 0", async () => {
+    wrap();
+    await waitFor(() => {
+      const select = screen.getByLabelText(/mark chores due at/i);
+      expect(select.options[0].text).toBe("12 AM");
+    });
+  });
+
+  it("renders 12 PM for hour 12", async () => {
+    wrap();
+    await waitFor(() => {
+      const select = screen.getByLabelText(/mark chores due at/i);
+      expect(select.options[12].text).toBe("12 PM");
+    });
+  });
+
+  it("renders 11 PM for hour 23", async () => {
+    wrap();
+    await waitFor(() => {
+      const select = screen.getByLabelText(/mark chores due at/i);
+      expect(select.options[23].text).toBe("11 PM");
+    });
+  });
+
+  it("calls updateConfig with both due_soon_days and due_time_hour when Save is clicked", async () => {
     client.updateConfig.mockResolvedValue({
       title: "Family Chores",
       auth_enabled: true,
       timezone: "UTC",
       due_soon_days: 5,
+      due_time_hour: 8,
     });
     wrap();
     await waitFor(() => {
       expect(screen.getByLabelText(/notify when due in/i).value).toBe("3");
     });
     fireEvent.change(screen.getByLabelText(/notify when due in/i), { target: { value: "5" } });
+    fireEvent.change(screen.getByLabelText(/mark chores due at/i), { target: { value: "8" } });
     screen.getByRole("button", { name: /^save$/i }).click();
     await waitFor(() => {
-      expect(client.updateConfig).toHaveBeenCalledWith({ due_soon_days: 5 });
+      expect(client.updateConfig).toHaveBeenCalledWith({ due_soon_days: 5, due_time_hour: 8 });
     });
   });
 
   it("does not render Authentication section", async () => {
     wrap();
     await waitFor(() => {
-      expect(screen.getByText("Due Soon Threshold")).toBeInTheDocument();
+      expect(screen.getByText("Chore Settings")).toBeInTheDocument();
     });
     expect(screen.queryByText("Authentication")).not.toBeInTheDocument();
   });
@@ -119,7 +178,7 @@ describe("SettingsChores", () => {
     });
   });
 
-  it("Save button gains btn-save--dirty class after input change", async () => {
+  it("Save button gains btn-save--dirty class after due_soon_days input change", async () => {
     wrap();
     await waitFor(() => {
       expect(screen.getByLabelText(/notify when due in/i).value).toBe("3");
@@ -131,12 +190,25 @@ describe("SettingsChores", () => {
     expect(btn).not.toBeDisabled();
   });
 
+  it("Save button gains btn-save--dirty class after due_time_hour dropdown change", async () => {
+    wrap();
+    await waitFor(() => {
+      expect(screen.getByLabelText(/mark chores due at/i).value).toBe("6");
+    });
+    const select = screen.getByLabelText(/mark chores due at/i);
+    fireEvent.change(select, { target: { value: "9" } });
+    const btn = screen.getByRole("button", { name: /^save$/i });
+    expect(btn).toHaveClass("btn-save--dirty");
+    expect(btn).not.toBeDisabled();
+  });
+
   it("Save button returns to btn-save--idle after successful save", async () => {
     client.updateConfig.mockResolvedValue({
       title: "Family Chores",
       auth_enabled: true,
       timezone: "UTC",
       due_soon_days: 5,
+      due_time_hour: 6,
     });
     wrap();
     await waitFor(() => {
@@ -171,6 +243,7 @@ describe("SettingsChores", () => {
       auth_enabled: true,
       timezone: "UTC",
       due_soon_days: 5,
+      due_time_hour: 6,
     });
     const removeSpy = vi.spyOn(window, "removeEventListener");
     wrap();

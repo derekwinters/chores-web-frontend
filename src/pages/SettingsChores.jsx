@@ -5,10 +5,18 @@ import { getConfig, updateConfig } from "../api/client";
 import "./Settings.css";
 import "./AdminPanel.css";
 
+const DUE_HOUR_LABELS = [
+  "12 AM", "1 AM", "2 AM", "3 AM", "4 AM", "5 AM",
+  "6 AM", "7 AM", "8 AM", "9 AM", "10 AM", "11 AM",
+  "12 PM", "1 PM", "2 PM", "3 PM", "4 PM", "5 PM",
+  "6 PM", "7 PM", "8 PM", "9 PM", "10 PM", "11 PM",
+];
+
 export default function SettingsChores() {
   const queryClient = useQueryClient();
 
   const [dueSoonDaysInput, setDueSoonDaysInput] = useState("");
+  const [dueTimeHour, setDueTimeHour] = useState(6);
   const [error, setError] = useState(null);
   const committedRef = useRef(null);
 
@@ -20,12 +28,19 @@ export default function SettingsChores() {
   // Initialize committedRef once from API data
   useEffect(() => {
     if (config && committedRef.current === null) {
-      committedRef.current = String(config.due_soon_days ?? "");
-      setDueSoonDaysInput(committedRef.current);
+      committedRef.current = {
+        dueSoonDays: String(config.due_soon_days ?? ""),
+        dueTimeHour: config.due_time_hour ?? 6,
+      };
+      setDueSoonDaysInput(committedRef.current.dueSoonDays);
+      setDueTimeHour(committedRef.current.dueTimeHour);
     }
   }, [config]);
 
-  const isDirty = committedRef.current !== null && dueSoonDaysInput !== committedRef.current;
+  const isDirty =
+    committedRef.current !== null &&
+    (dueSoonDaysInput !== committedRef.current.dueSoonDays ||
+      dueTimeHour !== committedRef.current.dueTimeHour);
 
   // beforeunload handler for external navigation
   useEffect(() => {
@@ -52,26 +67,33 @@ export default function SettingsChores() {
     }
   }, [blocker]);
 
-  const dueSoonDaysMutation = useMutation({
-    mutationFn: (days) => updateConfig({ due_soon_days: parseInt(days) }),
+  const saveMutation = useMutation({
+    mutationFn: (data) => updateConfig(data),
     onSuccess: (data) => {
-      committedRef.current = String(data.due_soon_days);
-      setDueSoonDaysInput(committedRef.current);
+      committedRef.current = {
+        dueSoonDays: String(data.due_soon_days),
+        dueTimeHour: data.due_time_hour,
+      };
+      setDueSoonDaysInput(committedRef.current.dueSoonDays);
+      setDueTimeHour(committedRef.current.dueTimeHour);
       queryClient.invalidateQueries({ queryKey: ["config"] });
       setError(null);
     },
     onError: (err) => {
-      setError(err.message || "Failed to update due soon threshold");
+      setError(err.message || "Failed to update settings");
     },
   });
 
-  const handleSaveDueSoonDays = () => {
+  const handleSave = () => {
     const days = parseInt(dueSoonDaysInput);
     if (isNaN(days) || days < 1 || days > 365) {
       setError("Due soon threshold must be between 1 and 365 days");
       return;
     }
-    dueSoonDaysMutation.mutate(days);
+    saveMutation.mutate({
+      due_soon_days: days,
+      due_time_hour: dueTimeHour,
+    });
   };
 
   if (configLoading) return <div className="loading">Loading settings…</div>;
@@ -82,13 +104,13 @@ export default function SettingsChores() {
 
       <section className="settings-section">
         <div className="section-row">
-          <h3>Due Soon Threshold</h3>
+          <h3>Chore Settings</h3>
           <button
             className={isDirty ? "btn-save--dirty" : "btn-save--idle"}
-            onClick={handleSaveDueSoonDays}
-            disabled={!isDirty || dueSoonDaysMutation.isPending}
+            onClick={handleSave}
+            disabled={!isDirty || saveMutation.isPending}
           >
-            {dueSoonDaysMutation.isPending ? "Saving…" : "Save"}
+            {saveMutation.isPending ? "Saving…" : "Save"}
           </button>
         </div>
         <hr />
@@ -106,10 +128,25 @@ export default function SettingsChores() {
                 max="365"
                 value={dueSoonDaysInput}
                 onChange={(e) => setDueSoonDaysInput(e.target.value)}
-                disabled={dueSoonDaysMutation.isPending}
+                disabled={saveMutation.isPending}
               />
               <span>days</span>
             </div>
+          </div>
+          <div className="setting-group">
+            <label htmlFor="due-time-hour">Mark chores due at</label>
+            <select
+              id="due-time-hour"
+              value={dueTimeHour}
+              onChange={(e) => setDueTimeHour(parseInt(e.target.value))}
+              disabled={saveMutation.isPending}
+            >
+              {DUE_HOUR_LABELS.map((label, hour) => (
+                <option key={hour} value={hour}>
+                  {label}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
       </section>

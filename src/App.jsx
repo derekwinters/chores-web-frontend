@@ -24,6 +24,8 @@ import { MdDashboard, MdCheckCircle, MdPeople, MdHistory, MdSettings, MdMenu } f
 import { applyTheme, DEFAULT_THEME_COLORS } from "./utils/theme";
 import "./App.css";
 
+const MOBILE_BREAKPOINT = 768;
+
 const PAGES = [
   { key: "dashboard", path: "/", label: "Board", Icon: MdDashboard },
   { key: "chores", path: "/chores", label: "Chores", Icon: MdCheckCircle },
@@ -33,6 +35,8 @@ const PAGES = [
 
 function AppContent() {
   const [sidebarOpen, setSidebarOpen] = useState(() => {
+    const isMobile = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT}px)`).matches;
+    if (isMobile) return false;
     const saved = localStorage.getItem("sidebarOpen");
     return saved === null ? true : saved === "true";
   });
@@ -55,8 +59,19 @@ function AppContent() {
   });
 
   useEffect(() => {
-    localStorage.setItem("sidebarOpen", sidebarOpen);
+    if (!window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT}px)`).matches) {
+      localStorage.setItem("sidebarOpen", sidebarOpen);
+    }
   }, [sidebarOpen]);
+
+  useEffect(() => {
+    const mq = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT}px)`);
+    const handleChange = (e) => {
+      setSidebarOpen(!e.matches);
+    };
+    mq.addEventListener("change", handleChange);
+    return () => mq.removeEventListener("change", handleChange);
+  }, []);
 
   useEffect(() => {
     if (config?.title) {
@@ -65,7 +80,7 @@ function AppContent() {
   }, [config]);
 
   useEffect(() => {
-    const isMobile = window.innerWidth <= 768;
+    const isMobile = window.innerWidth <= MOBILE_BREAKPOINT;
     if (!isMobile) return;
 
     const mainElement = document.querySelector(".app-main");
@@ -82,7 +97,7 @@ function AppContent() {
   }, [lastScrollY]);
 
   useEffect(() => {
-    const isMobile = window.innerWidth <= 768;
+    const isMobile = window.innerWidth <= MOBILE_BREAKPOINT;
     if (!isMobile) return;
     setSidebarOpen(false);
   }, [location.pathname]);

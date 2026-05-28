@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { readFileSync } from "fs";
+import { resolve } from "path";
 import UserAvatarMenu from "../components/UserAvatarMenu";
 
 describe("UserAvatarMenu", () => {
@@ -117,5 +119,45 @@ describe("UserAvatarMenu", () => {
     const { container } = render(<UserAvatarMenu user={mockUser} onLogout={mockLogout} />);
     const avatar = container.querySelector(".user-avatar");
     expect(avatar).toHaveStyle({ backgroundColor: "var(--accent)" });
+  });
+
+  describe("topnav dropdown direction override", () => {
+    const cssPath = resolve(__dirname, "../components/UserAvatarMenu.css");
+    const css = readFileSync(cssPath, "utf8");
+    const topnavBlock = (() => {
+      const match = css.match(/\.topnav-user\s+\.avatar-dropdown\s*\{([^}]*)\}/);
+      return match ? match[1] : "";
+    })();
+
+    it("has a .topnav-user .avatar-dropdown CSS override block", () => {
+      expect(topnavBlock).not.toBe("");
+    });
+
+    it("overrides dropdown to open downward (top: 100%, bottom: auto)", () => {
+      expect(topnavBlock).toMatch(/top\s*:\s*100%/);
+      expect(topnavBlock).toMatch(/bottom\s*:\s*auto/);
+    });
+
+    it("overrides dropdown to align right (right: 0, left: auto)", () => {
+      expect(topnavBlock).toMatch(/right\s*:\s*0/);
+      expect(topnavBlock).toMatch(/left\s*:\s*auto/);
+    });
+
+    it("sets margin-top: 4px and margin-bottom: 0 for correct spacing", () => {
+      expect(topnavBlock).toMatch(/margin-top\s*:\s*4px/);
+      expect(topnavBlock).toMatch(/margin-bottom\s*:\s*0/);
+    });
+
+    it("flips box-shadow direction for downward opening", () => {
+      expect(topnavBlock).toMatch(/box-shadow\s*:\s*0\s+4px\s+12px\s+rgba\(0,\s*0,\s*0,\s*0\.3\)/);
+    });
+
+    it("renders .avatar-dropdown element when dropdown is open", async () => {
+      const { container } = render(<UserAvatarMenu user={mockUser} onLogout={mockLogout} />);
+      fireEvent.click(screen.getByRole("button", { name: /admin user menu/i }));
+      await waitFor(() => {
+        expect(container.querySelector(".avatar-dropdown")).toBeInTheDocument();
+      });
+    });
   });
 });
