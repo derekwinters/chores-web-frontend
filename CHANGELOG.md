@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.8.0](https://github.com/derekwinters/chores-web/compare/v1.7.0...v1.8.0) (2026-05-28)
+
+
+### Features
+
+* add due_time_hour setting to schedule overdue-chore transition ([#205](https://github.com/derekwinters/chores-web/issues/205)) ([32880b8](https://github.com/derekwinters/chores-web/commit/32880b8ff0afd28c9e15509e700dcdf081afa55a))
+* add structured error handling to all write endpoints ([#195](https://github.com/derekwinters/chores-web/issues/195)) ([32880b8](https://github.com/derekwinters/chores-web/commit/32880b8ff0afd28c9e15509e700dcdf081afa55a))
+* **frontend:** move choose file button to section-right ([#217](https://github.com/derekwinters/chores-web/issues/217)) ([#288](https://github.com/derekwinters/chores-web/issues/288)) ([206d66f](https://github.com/derekwinters/chores-web/commit/206d66f59061fc967da857cd5ca01db3c0ea6c81))
+* milestone 1.8.0 implementation ([#292](https://github.com/derekwinters/chores-web/issues/292)) ([32880b8](https://github.com/derekwinters/chores-web/commit/32880b8ff0afd28c9e15509e700dcdf081afa55a))
+* reorganize settings into tabbed layout ([#186](https://github.com/derekwinters/chores-web/issues/186)) ([#286](https://github.com/derekwinters/chores-web/issues/286)) ([30173f9](https://github.com/derekwinters/chores-web/commit/30173f962167f6c6b24fdc0a860ce3e3025790b8))
+
+
+### Bug Fixes
+
+* align settings sidebar HR with heading and nav links ([#199](https://github.com/derekwinters/chores-web/issues/199)) ([32880b8](https://github.com/derekwinters/chores-web/commit/32880b8ff0afd28c9e15509e700dcdf081afa55a))
+* dropdown opens downward in mobile topnav ([#216](https://github.com/derekwinters/chores-web/issues/216)) ([32880b8](https://github.com/derekwinters/chores-web/commit/32880b8ff0afd28c9e15509e700dcdf081afa55a))
+* restore sidebar state on viewport resize ([#181](https://github.com/derekwinters/chores-web/issues/181)) ([32880b8](https://github.com/derekwinters/chores-web/commit/32880b8ff0afd28c9e15509e700dcdf081afa55a))
+* show error message on log fetch failure ([#204](https://github.com/derekwinters/chores-web/issues/204)) ([32880b8](https://github.com/derekwinters/chores-web/commit/32880b8ff0afd28c9e15509e700dcdf081afa55a))
+
+
+### Documentation
+
+* add release notes blog post for v1.8.0 ([#289](https://github.com/derekwinters/chores-web/issues/289)) ([32880b8](https://github.com/derekwinters/chores-web/commit/32880b8ff0afd28c9e15509e700dcdf081afa55a))
+
 ## [1.7.0](https://github.com/derekwinters/chores-web/compare/v1.6.0...v1.7.0) (2026-05-26)
 
 
