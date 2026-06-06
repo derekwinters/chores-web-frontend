@@ -7,6 +7,10 @@ const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const WEEKDAY_MAP = { Mon: 0, Tue: 1, Wed: 2, Thu: 3, Fri: 4, Sat: 5, Sun: 6 };
 const ORDINALS = ["1st", "2nd", "3rd", "4th", "5th"];
 const FIBONACCI = [1, 2, 3, 5, 8, 13];
+const MONTHS = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
 
 function emptyState() {
   return {
@@ -20,6 +24,12 @@ function emptyState() {
     day_of_month: "1",
     nth_week: "1",
     nth_weekday: "0",
+    // yearly fields
+    yearly_month: "4",
+    yearly_mode: "day",   // "day" | "nth"
+    yearly_day_of_month: "15",
+    yearly_nth_week: "1",
+    yearly_nth_weekday: "0",
     // interval fields
     interval_days: "7",
     // constraints
@@ -70,6 +80,16 @@ function choreToState(chore) {
     }
   } else if (chore.schedule_type === "interval") {
     s.interval_days = String(cfg.days ?? 7);
+  } else if (chore.schedule_type === "yearly") {
+    s.yearly_month = String(cfg.month ?? 4);
+    if (cfg.weekday_occurrence) {
+      s.yearly_mode = "nth";
+      s.yearly_nth_week = String(cfg.weekday_occurrence.week ?? 1);
+      s.yearly_nth_weekday = String(cfg.weekday_occurrence.weekday ?? 0);
+    } else {
+      s.yearly_mode = "day";
+      s.yearly_day_of_month = String(cfg.day_of_month ?? 15);
+    }
   }
 
   // Parse conditions
@@ -103,6 +123,21 @@ function stateToPayload(s, { isEditing = false } = {}) {
       };
     } else {
       schedule_config = { day_of_month: parseInt(s.day_of_month) };
+    }
+  } else if (s.schedule_type === "yearly") {
+    if (s.yearly_mode === "nth") {
+      schedule_config = {
+        month: parseInt(s.yearly_month),
+        weekday_occurrence: {
+          week: parseInt(s.yearly_nth_week),
+          weekday: parseInt(s.yearly_nth_weekday),
+        },
+      };
+    } else {
+      schedule_config = {
+        month: parseInt(s.yearly_month),
+        day_of_month: parseInt(s.yearly_day_of_month),
+      };
     }
   } else {
     schedule_config = { days: parseInt(s.interval_days) };
@@ -426,7 +461,7 @@ export default function ChoreForm({ initial, people, onSubmit, onCancel, onSaveS
       <div className="form-row">
         <label>Schedule</label>
         <div className="radio-group">
-          {["weekly", "monthly", "interval"].map((t) => (
+          {["weekly", "monthly", "yearly", "interval"].map((t) => (
             <label key={t} className="radio-label">
               <input
                 type="radio"
@@ -514,6 +549,56 @@ export default function ChoreForm({ initial, people, onSubmit, onCancel, onSaveS
         </>
       )}
 
+      {/* Yearly sub-fields */}
+      {s.schedule_type === "yearly" && (
+        <>
+          <div className="form-row">
+            <label>Month</label>
+            <select value={s.yearly_month} onChange={(e) => set("yearly_month", e.target.value)}>
+              {MONTHS.map((m, i) => (
+                <option key={i} value={i + 1}>{m}</option>
+              ))}
+            </select>
+          </div>
+          <div className="form-row">
+            <label>Mode</label>
+            <div className="radio-group">
+              <label className="radio-label">
+                <input type="radio" checked={s.yearly_mode === "day"}
+                  onChange={() => set("yearly_mode", "day")} /> Day of month
+              </label>
+              <label className="radio-label">
+                <input type="radio" checked={s.yearly_mode === "nth"}
+                  onChange={() => set("yearly_mode", "nth")} /> Nth weekday
+              </label>
+            </div>
+          </div>
+          {s.yearly_mode === "day" ? (
+            <div className="form-row">
+              <label>Day</label>
+              <select value={s.yearly_day_of_month} onChange={(e) => set("yearly_day_of_month", e.target.value)}>
+                {Array.from({ length: 28 }, (_, i) => i + 1).map((d) => (
+                  <option key={d} value={d}>{d}</option>
+                ))}
+                <option value="-1">Last day</option>
+              </select>
+            </div>
+          ) : (
+            <div className="form-row">
+              <label>Occurrence</label>
+              <div className="inline-selects">
+                <select value={s.yearly_nth_week} onChange={(e) => set("yearly_nth_week", e.target.value)}>
+                  {ORDINALS.map((o, i) => <option key={i} value={i + 1}>{o}</option>)}
+                </select>
+                <select value={s.yearly_nth_weekday} onChange={(e) => set("yearly_nth_weekday", e.target.value)}>
+                  {DAYS.map((d, i) => <option key={i} value={i}>{d}</option>)}
+                </select>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
       {/* Interval sub-fields */}
       {s.schedule_type === "interval" && (
         <div className="form-row">
@@ -528,7 +613,9 @@ export default function ChoreForm({ initial, people, onSubmit, onCancel, onSaveS
         </div>
       )}
 
-        {/* Constraints */}
+        {/* Constraints — not applicable to yearly schedules */}
+      {s.schedule_type !== "yearly" && (
+        <>
         <div className="form-constraints-header">
           <button
             type="button"
@@ -608,6 +695,8 @@ export default function ChoreForm({ initial, people, onSubmit, onCancel, onSaveS
               </div>
             </div>
           )}
+        </>
+      )}
         </>
       )}
       </div>

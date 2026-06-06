@@ -52,6 +52,22 @@ describe("SettingsAuth", () => {
     });
   });
 
+  it("renders the Auth page heading", async () => {
+    wrap();
+    await waitFor(() => {
+      expect(screen.getByRole("heading", { level: 2, name: "Auth" })).toBeInTheDocument();
+    });
+  });
+
+  it("renders an Auth Event Log link after the Authentication section", async () => {
+    wrap();
+    await waitFor(() => {
+      expect(screen.getByRole("link", { name: /auth event log/i })).toBeInTheDocument();
+    });
+    const link = screen.getByRole("link", { name: /auth event log/i });
+    expect(link).toHaveAttribute("href", "/settings/auth/log");
+  });
+
   it("renders the Authentication section heading", async () => {
     wrap();
     await waitFor(() => {

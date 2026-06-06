@@ -57,7 +57,7 @@ describe("Auth End-to-End Flow", () => {
   it("completes login flow: shows login -> authenticate -> shows app", async () => {
     authUtils.getToken.mockReturnValue(null);
     client.getSetupStatus.mockResolvedValue({ setup_needed: false });
-    client.login.mockResolvedValue({
+    client.loginWithResetSupport.mockResolvedValue({
       access_token: "test_token",
       user: { username: "admin", is_admin: true },
     });
@@ -82,9 +82,9 @@ describe("Auth End-to-End Flow", () => {
     fireEvent.change(passwordInput, { target: { value: "password" } });
     fireEvent.click(submitButton);
 
-    // 2. Verify login was called
+    // 2. Verify loginWithResetSupport was called
     await waitFor(() => {
-      expect(client.login).toHaveBeenCalledWith("admin", "password");
+      expect(client.loginWithResetSupport).toHaveBeenCalledWith("admin", "password");
     });
   });
 
@@ -126,7 +126,7 @@ describe("Auth End-to-End Flow", () => {
   it("handles invalid login credentials", async () => {
     authUtils.getToken.mockReturnValue(null);
     client.getSetupStatus.mockResolvedValue({ setup_needed: false });
-    client.login.mockRejectedValue(new Error("Invalid username or password"));
+    client.loginWithResetSupport.mockRejectedValue(new Error("Invalid username or password"));
 
     render(
       <AuthProvider>
@@ -159,7 +159,7 @@ describe("Auth End-to-End Flow", () => {
     const mockSetToken = vi.fn();
     authUtils.setToken = mockSetToken;
 
-    client.login.mockResolvedValue({
+    client.loginWithResetSupport.mockResolvedValue({
       access_token: "test_token",
       user: { username: "admin", is_admin: true },
     });
@@ -182,9 +182,9 @@ describe("Auth End-to-End Flow", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: /sign in/i }));
 
-    // Token storage is handled in the context, verify login was called
+    // Token storage is handled in the context, verify loginWithResetSupport was called
     await waitFor(() => {
-      expect(client.login).toHaveBeenCalled();
+      expect(client.loginWithResetSupport).toHaveBeenCalled();
     });
   });
 });

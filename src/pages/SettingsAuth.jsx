@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useOutletContext, useBlocker } from "react-router-dom";
+import { useOutletContext, useBlocker, Link } from "react-router-dom";
 import { getConfig, updateConfig } from "../api/client";
 import "./Settings.css";
 import "./AdminPanel.css";
@@ -75,6 +75,7 @@ export default function SettingsAuth() {
 
   return (
     <div className="settings-page">
+      <h2>Auth</h2>
       {error && <div className="error-message">{error}</div>}
 
       <section className="settings-section">
@@ -107,6 +108,16 @@ export default function SettingsAuth() {
                 : "App is accessible without authentication"}
             </p>
           </div>
+        </div>
+      </section>
+
+      <section className="settings-section">
+        <div className="section-row">
+          <h3>Auth Event Log</h3>
+        </div>
+        <hr />
+        <div className="section-content">
+          <Link to="/settings/auth/log">View Auth Event Log →</Link>
         </div>
       </section>
     </div>
