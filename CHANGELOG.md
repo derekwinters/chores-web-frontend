@@ -1,5 +1,24 @@
 # Changelog
 
+## [2.0.0](https://github.com/derekwinters/chores-web/compare/v1.8.0...v2.0.0) (2026-06-06)
+
+
+### chore
+
+* release 2.0.0 ([74e5d45](https://github.com/derekwinters/chores-web/commit/74e5d458b34820bdd988fa426067cc7cedda1360))
+
+
+### Features
+
+* add audit logging for auth events ([#295](https://github.com/derekwinters/chores-web/issues/295)) ([74e5d45](https://github.com/derekwinters/chores-web/commit/74e5d458b34820bdd988fa426067cc7cedda1360))
+* add milestone implementation orchestrator ([#296](https://github.com/derekwinters/chores-web/issues/296)) ([#297](https://github.com/derekwinters/chores-web/issues/297)) ([d9a1ebf](https://github.com/derekwinters/chores-web/commit/d9a1ebf5b4f6c59e63797e19cbda7e612ae1b0e4))
+* add yearly schedule type for recurring chores ([#130](https://github.com/derekwinters/chores-web/issues/130)) ([74e5d45](https://github.com/derekwinters/chores-web/commit/74e5d458b34820bdd988fa426067cc7cedda1360))
+* define and enforce API contracts with versioning and OpenAPI snapshot ([#6](https://github.com/derekwinters/chores-web/issues/6)) ([74e5d45](https://github.com/derekwinters/chores-web/commit/74e5d458b34820bdd988fa426067cc7cedda1360))
+* implement password encryption/hashing with bcrypt ([#2](https://github.com/derekwinters/chores-web/issues/2)) ([74e5d45](https://github.com/derekwinters/chores-web/commit/74e5d458b34820bdd988fa426067cc7cedda1360))
+* improve auth log page UX with Log component patterns ([#300](https://github.com/derekwinters/chores-web/issues/300)) ([74e5d45](https://github.com/derekwinters/chores-web/commit/74e5d458b34820bdd988fa426067cc7cedda1360))
+* Milestone 2.0.0 ([#299](https://github.com/derekwinters/chores-web/issues/299)) ([74e5d45](https://github.com/derekwinters/chores-web/commit/74e5d458b34820bdd988fa426067cc7cedda1360))
+* move JWT secret to required environment variable ([#294](https://github.com/derekwinters/chores-web/issues/294)) ([74e5d45](https://github.com/derekwinters/chores-web/commit/74e5d458b34820bdd988fa426067cc7cedda1360))
+
 ## [1.8.0](https://github.com/derekwinters/chores-web/compare/v1.7.0...v1.8.0) (2026-05-28)
 
 
