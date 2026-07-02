@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.1](https://github.com/derekwinters/chores-web/compare/v2.0.0...v2.0.1) (2026-07-02)
+
+
+### Bug Fixes
+
+* pin fastapi &lt;0.137.0 to avoid crash w/ starlette-prometheus ([#304](https://github.com/derekwinters/chores-web/issues/304)) ([0a16e6c](https://github.com/derekwinters/chores-web/commit/0a16e6c7c217fedd1c957a9a66dfc5511835fac3)), closes [#303](https://github.com/derekwinters/chores-web/issues/303)
+
 ## [2.0.0](https://github.com/derekwinters/chores-web/compare/v1.8.0...v2.0.0) (2026-06-06)
 
 
