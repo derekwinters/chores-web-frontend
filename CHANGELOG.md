@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.1.0](https://github.com/derekwinters/chores-web-frontend/compare/v2.0.1...v2.1.0) (2026-07-09)
+
+
+### Features
+
+* bootstrap standalone frontend repository ([b02f89c](https://github.com/derekwinters/chores-web-frontend/commit/b02f89c77ad2d94685f63b6bcae5d378cdbe3d76))
+
+
+### CI/CD
+
+* grant packages permission to docker-build job ([1b40858](https://github.com/derekwinters/chores-web-frontend/commit/1b40858882477c08e95e6cd51d2e25f5fbe91462))
+
 ## [2.0.1](https://github.com/derekwinters/chores-web/compare/v2.0.0...v2.0.1) (2026-07-02)
 
 
