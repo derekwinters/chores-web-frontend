@@ -1,5 +1,21 @@
 # Changelog
 
+## [2.2.0](https://github.com/derekwinters/chores-web-frontend/compare/v2.1.0...v2.2.0) (2026-07-10)
+
+
+### Features
+
+* adopt component tokens and Android-preferred design ([#28](https://github.com/derekwinters/chores-web-frontend/issues/28)) ([2051ca3](https://github.com/derekwinters/chores-web-frontend/commit/2051ca3a03aa954a2cba07fe62617d12635d45db))
+* consume @derekwinters/design-tokens for the CSS custom-property layer ([#26](https://github.com/derekwinters/chores-web-frontend/issues/26)) ([113253e](https://github.com/derekwinters/chores-web-frontend/commit/113253ea5579656985890f65481cfb773972581e))
+* Storybook catalog + Playwright visual regression ([#29](https://github.com/derekwinters/chores-web-frontend/issues/29)) ([b1d027a](https://github.com/derekwinters/chores-web-frontend/commit/b1d027ab2ff3a182323598a59bbbccf2e481c631))
+
+
+### CI/CD
+
+* add dependabot configuration ([#2](https://github.com/derekwinters/chores-web-frontend/issues/2)) ([655c897](https://github.com/derekwinters/chores-web-frontend/commit/655c8970037ca1a7b639449da086a2bd51bd1927))
+* composite visual gallery on PRs (web + android side by side) ([#30](https://github.com/derekwinters/chores-web-frontend/issues/30)) ([a4c047d](https://github.com/derekwinters/chores-web-frontend/commit/a4c047d1774171dcacc1fc796e1fe2627e4bcd88))
+* group dependabot updates and add 14-day cooldown ([#20](https://github.com/derekwinters/chores-web-frontend/issues/20)) ([c79db52](https://github.com/derekwinters/chores-web-frontend/commit/c79db522466ef200acc6ea31a4c5c38548a58029))
+
 ## [2.1.0](https://github.com/derekwinters/chores-web-frontend/compare/v2.0.1...v2.1.0) (2026-07-09)
 
 
