@@ -2,3 +2,5 @@ node_modules/
 dist/
 coverage/
 .env
+storybook-static/
+.visual-diffs/
