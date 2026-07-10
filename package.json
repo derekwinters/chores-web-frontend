@@ -10,6 +10,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@derekwinters/design-tokens": "https://github.com/derekwinters/chores-web-design-tokens/releases/download/design-tokens-v0.2.2/derekwinters-design-tokens-0.2.2.tgz",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/material": "^9.0.0",

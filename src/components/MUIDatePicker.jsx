@@ -4,6 +4,21 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import dayjs from "dayjs";
+import { color as tokenColor } from "@derekwinters/design-tokens";
+
+// Fallbacks (used before the runtime theme resolves) come from the token
+// package's dark set — the same values tokens.css puts on :root — so this
+// bridge can never drift from the CSS layer.
+const FALLBACK = {
+  surface: tokenColor.dark.surface,
+  surface2: tokenColor.dark.surface2,
+  border: "var(--border)", // legacy var; no border color token (see index.css)
+  text: tokenColor.dark.text,
+  textMuted: tokenColor.dark["text-muted"],
+  accent: tokenColor.dark.accent,
+  accentBtn: tokenColor.dark.primary,
+  accentBg: "var(--accent-bg)",
+};
 
 // Get theme colors from CSS variables with fallbacks
 const getThemeColors = () => {
@@ -14,21 +29,22 @@ const getThemeColors = () => {
   };
 
   return {
-    surface: getVar("--surface", "#16202e"),
-    surface2: getVar("--surface2", "#1e2d40"),
-    border: getVar("--border", "#2c3f58"),
-    text: getVar("--text", "#dce8f5"),
-    textMuted: getVar("--text-muted", "#7899b8"),
-    accent: getVar("--accent", "#73B1DD"),
-    accentBtn: getVar("--accent-btn", "#3574B3"),
-    accentBg: getVar("--accent-bg", "rgba(115,177,221,0.1)"),
+    surface: getVar("--surface", FALLBACK.surface),
+    surface2: getVar("--surface2", FALLBACK.surface2),
+    border: getVar("--border", FALLBACK.border),
+    text: getVar("--text", FALLBACK.text),
+    textMuted: getVar("--text-muted", FALLBACK.textMuted),
+    accent: getVar("--accent", FALLBACK.accent),
+    accentBtn: getVar("--accent-btn", FALLBACK.accentBtn),
+    accentBg: getVar("--accent-bg", FALLBACK.accentBg),
   };
 };
 
 // Determine if current theme is light or dark based on background luminance
 const getThemeMode = () => {
   const root = document.documentElement;
-  const bgColor = getComputedStyle(root).getPropertyValue("--bg").trim() || "#080c14";
+  const bgColor =
+    getComputedStyle(root).getPropertyValue("--bg").trim() || tokenColor.dark.background;
 
   // Parse hex color to RGB
   const hex = bgColor.replace("#", "");
