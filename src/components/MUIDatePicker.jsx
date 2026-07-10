@@ -12,12 +12,10 @@ import { color as tokenColor } from "@derekwinters/design-tokens";
 const FALLBACK = {
   surface: tokenColor.dark.surface,
   surface2: tokenColor.dark.surface2,
-  border: "var(--border)", // legacy var; no border color token (see index.css)
   text: tokenColor.dark.text,
   textMuted: tokenColor.dark["text-muted"],
   accent: tokenColor.dark.accent,
   accentBtn: tokenColor.dark.primary,
-  accentBg: "var(--accent-bg)",
 };
 
 // Get theme colors from CSS variables with fallbacks
@@ -31,12 +29,12 @@ const getThemeColors = () => {
   return {
     surface: getVar("--surface", FALLBACK.surface),
     surface2: getVar("--surface2", FALLBACK.surface2),
-    border: getVar("--border", FALLBACK.border),
+    // borderless design (#24): outlined components use text-muted (M3 outline)
+    border: getVar("--text-muted", FALLBACK.textMuted),
     text: getVar("--text", FALLBACK.text),
     textMuted: getVar("--text-muted", FALLBACK.textMuted),
     accent: getVar("--accent", FALLBACK.accent),
-    accentBtn: getVar("--accent-btn", FALLBACK.accentBtn),
-    accentBg: getVar("--accent-bg", FALLBACK.accentBg),
+    accentBtn: getVar("--primary", FALLBACK.accentBtn),
   };
 };
 
@@ -86,7 +84,6 @@ const createCustomTheme = () => {
             "& .MuiPaper-root": {
               backgroundColor: colors.surface,
               color: colors.text,
-              border: `1px solid ${colors.border}`,
             },
             "& .MuiIconButton-root": {
               color: colors.text,
@@ -99,7 +96,6 @@ const createCustomTheme = () => {
           root: {
             color: colors.text,
             backgroundColor: colors.surface,
-            borderBottom: `1px solid ${colors.border}`,
             "& .MuiIconButton-root": {
               color: colors.text,
             },
@@ -167,7 +163,7 @@ const createCustomTheme = () => {
                 borderColor: colors.border,
               },
               "&:hover fieldset": {
-                borderColor: colors.textMuted,
+                borderColor: colors.text,
               },
               "&.Mui-focused fieldset": {
                 borderColor: colors.accent,

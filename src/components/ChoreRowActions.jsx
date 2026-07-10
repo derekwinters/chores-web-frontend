@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { MdCheckCircle, MdSkipNext, MdAlarm } from "react-icons/md";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { completeChore, skipChore, reassignChore, markDueChore } from "../api/client";
 import CompleteWithActorModal from "./CompleteWithActorModal";
@@ -113,17 +114,17 @@ export default function ChoreRowActions({ chore, person, people, mode }) {
 
           {mode === "due" && (
             <>
-              <button className="btn-primary btn-xs" disabled={busy || justDone} onClick={handleCompleteClick}>
-                Complete
+              <button className="icon-action success" disabled={busy || justDone} onClick={handleCompleteClick} aria-label={`Complete ${chore.name}`} title="Complete">
+                <MdCheckCircle />
               </button>
-              <button className="btn-secondary btn-xs" disabled={busy} onClick={() => skip.mutate()}>
-                Skip
+              <button className="icon-action" disabled={busy} onClick={() => skip.mutate()} aria-label={`Skip ${chore.name}`} title="Skip">
+                <MdSkipNext />
               </button>
             </>
           )}
           {mode === "soon" && (
-            <button className="btn-secondary btn-xs" disabled={busy} onClick={() => markDue.mutate()}>
-              Mark due
+            <button className="icon-action" disabled={busy} onClick={() => markDue.mutate()} aria-label={`Mark ${chore.name} due`} title="Mark due">
+              <MdAlarm />
             </button>
           )}
           {people.length > 1 && (

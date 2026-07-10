@@ -49,21 +49,22 @@ describe("ChoreRowActions — due mode", () => {
     expect(screen.getByText("2d overdue")).toBeInTheDocument();
   });
 
-  it("shows Complete and Skip buttons", () => {
+  it("shows Complete and Skip icon buttons", () => {
+    // #24: text buttons became flat icon-only buttons — query by accessible name
     wrap(<ChoreRowActions chore={CHORE} person="Alice" people={PEOPLE} mode="due" />);
-    expect(screen.getByText("Complete")).toBeInTheDocument();
-    expect(screen.getByText("Skip")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /complete vacuum/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /skip vacuum/i })).toBeInTheDocument();
   });
 
   it("calls completeChore with person on Complete", async () => {
     wrap(<ChoreRowActions chore={CHORE} person="Alice" people={PEOPLE} mode="due" />);
-    fireEvent.click(screen.getByText("Complete"));
+    fireEvent.click(screen.getByRole("button", { name: /complete vacuum/i }));
     await waitFor(() => expect(client.completeChore).toHaveBeenCalledWith("vacuum", "Alice"));
   });
 
   it("calls skipChore on Skip", async () => {
     wrap(<ChoreRowActions chore={CHORE} person="Alice" people={PEOPLE} mode="due" />);
-    fireEvent.click(screen.getByText("Skip"));
+    fireEvent.click(screen.getByRole("button", { name: /skip vacuum/i }));
     await waitFor(() => expect(client.skipChore).toHaveBeenCalledWith("vacuum"));
   });
 
@@ -85,7 +86,7 @@ describe("ChoreRowActions — due mode", () => {
 
   it("complete button null person when no person provided", async () => {
     wrap(<ChoreRowActions chore={CHORE} person={null} people={[]} mode="due" />);
-    fireEvent.click(screen.getByText("Complete"));
+    fireEvent.click(screen.getByRole("button", { name: /complete vacuum/i }));
     await waitFor(() => expect(client.completeChore).toHaveBeenCalledWith("vacuum", null));
   });
 
@@ -96,14 +97,14 @@ describe("ChoreRowActions — due mode", () => {
 
     it("shows actor modal instead of completing directly when current_assignee is null", async () => {
       wrap(<ChoreRowActions chore={UNASSIGNED_CHORE} person={null} people={PEOPLE} mode="due" />);
-      fireEvent.click(screen.getByText("Complete"));
+      fireEvent.click(screen.getByRole("button", { name: /complete bathroom/i }));
       await waitFor(() => expect(screen.getByText(/who completed/i)).toBeInTheDocument());
       expect(client.completeChore).not.toHaveBeenCalled();
     });
 
     it("calls completeChore with selected username when modal is confirmed", async () => {
       wrap(<ChoreRowActions chore={UNASSIGNED_CHORE} person={null} people={PEOPLE} mode="due" />);
-      fireEvent.click(screen.getByText("Complete"));
+      fireEvent.click(screen.getByRole("button", { name: /complete bathroom/i }));
       await waitFor(() => expect(screen.getByText(/who completed/i)).toBeInTheDocument());
 
       // Select Alice in the modal
@@ -117,7 +118,7 @@ describe("ChoreRowActions — due mode", () => {
 
     it("does not call completeChore when modal is cancelled", async () => {
       wrap(<ChoreRowActions chore={UNASSIGNED_CHORE} person={null} people={PEOPLE} mode="due" />);
-      fireEvent.click(screen.getByText("Complete"));
+      fireEvent.click(screen.getByRole("button", { name: /complete bathroom/i }));
       await waitFor(() => expect(screen.getByText(/who completed/i)).toBeInTheDocument());
 
       fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
@@ -127,7 +128,7 @@ describe("ChoreRowActions — due mode", () => {
 
     it("modal shows all people by name", async () => {
       wrap(<ChoreRowActions chore={UNASSIGNED_CHORE} person={null} people={PEOPLE} mode="due" />);
-      fireEvent.click(screen.getByText("Complete"));
+      fireEvent.click(screen.getByRole("button", { name: /complete bathroom/i }));
       await waitFor(() => expect(screen.getByText(/who completed/i)).toBeInTheDocument());
 
       expect(screen.getAllByText("Alice").length).toBeGreaterThan(0);
@@ -137,7 +138,7 @@ describe("ChoreRowActions — due mode", () => {
     it("does not show modal for chore with an assignee", async () => {
       const assignedChore = { ...CHORE, current_assignee: "alice" };
       wrap(<ChoreRowActions chore={assignedChore} person="Alice" people={PEOPLE} mode="due" />);
-      fireEvent.click(screen.getByText("Complete"));
+      fireEvent.click(screen.getByRole("button", { name: /complete vacuum/i }));
       await waitFor(() => expect(client.completeChore).toHaveBeenCalled());
       expect(screen.queryByText(/who completed/i)).not.toBeInTheDocument();
     });
@@ -150,11 +151,11 @@ describe("ChoreRowActions — soon mode", () => {
     client.markDueChore.mockResolvedValue({ ...CHORE, state: "due" });
   });
 
-  it("shows Mark due button instead of Complete/Skip", () => {
+  it("shows Mark due icon button instead of Complete/Skip", () => {
     wrap(<ChoreRowActions chore={CHORE} person="Alice" people={PEOPLE} mode="soon" />);
-    expect(screen.getByText("Mark due")).toBeInTheDocument();
-    expect(screen.queryByText("Complete")).not.toBeInTheDocument();
-    expect(screen.queryByText("Skip")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /mark vacuum due/i })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /complete vacuum/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /skip vacuum/i })).not.toBeInTheDocument();
   });
 
   it("shows next_due date", () => {
@@ -164,7 +165,7 @@ describe("ChoreRowActions — soon mode", () => {
 
   it("calls markDueChore on Mark due click", async () => {
     wrap(<ChoreRowActions chore={CHORE} person="Alice" people={PEOPLE} mode="soon" />);
-    fireEvent.click(screen.getByText("Mark due"));
+    fireEvent.click(screen.getByRole("button", { name: /mark vacuum due/i }));
     await waitFor(() => expect(client.markDueChore).toHaveBeenCalledWith("vacuum"));
   });
 });

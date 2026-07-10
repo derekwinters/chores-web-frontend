@@ -1,7 +1,7 @@
 .dashboard {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem; /* iteration-4 (#24) */
+  gap: var(--space-lg);
   max-width: 1600px;
   margin: 0 auto;
 }
@@ -24,8 +24,7 @@
 
 .open-section-link {
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--component-card-radius);
   padding: var(--space-xl);
   cursor: pointer;
   transition: box-shadow var(--duration-md) ease, transform var(--duration-md) ease;
@@ -35,7 +34,7 @@
 }
 
 .open-section-link:hover {
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--elevation-3);
   transform: translateY(-2px);
 }
 

@@ -264,8 +264,9 @@ describe("ChoreList", () => {
     const vacuumCard = screen.getByText("Vacuum").closest("article");
     fireEvent.click(vacuumCard);
 
-    expect(screen.getByText("Complete")).toBeInTheDocument();
-    expect(screen.getByText("Skip")).toBeInTheDocument();
+    // #24: actions are flat icon-only buttons — query by accessible name
+    expect(screen.getByRole("button", { name: /mark vacuum complete/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /skip vacuum/i })).toBeInTheDocument();
   });
 
   it("calls onComplete when Complete button clicked", async () => {
@@ -275,7 +276,7 @@ describe("ChoreList", () => {
 
     const vacuumCard = screen.getByText("Vacuum").closest("article");
     fireEvent.click(vacuumCard);
-    fireEvent.click(screen.getByText("Complete"));
+    fireEvent.click(screen.getByRole("button", { name: /mark vacuum complete/i }));
 
     expect(onComplete).toHaveBeenCalledWith(expect.objectContaining({ name: "Vacuum" }));
   });
@@ -287,7 +288,7 @@ describe("ChoreList", () => {
 
     const vacuumCard = screen.getByText("Vacuum").closest("article");
     fireEvent.click(vacuumCard);
-    fireEvent.click(screen.getByText("Skip"));
+    fireEvent.click(screen.getByRole("button", { name: /skip vacuum/i }));
 
     expect(onSkip).toHaveBeenCalledWith(expect.objectContaining({ name: "Vacuum" }));
   });

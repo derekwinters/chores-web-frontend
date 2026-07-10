@@ -5,7 +5,7 @@
   min-height: 100vh;
   background: var(--bg);
   color: var(--text);
-  font-size: 18px; /* iteration-4 (#24) */
+  font-size: var(--typography-title-large-size);
 }
 
 .app { display: flex; min-height: 100vh; }
@@ -20,23 +20,22 @@
 
 .app-sidebar {
   background: var(--surface);
-  border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   transition: width var(--duration-lg) ease;
-  width: 240px;
+  width: var(--component-nav-sidebar-width);
   height: 100dvh;
   position: fixed;
   left: 0;
   top: 0;
-  /* z-index cluster (100/99/98 here and below) is left off the --z-* scale on
-     purpose: normalizing it needs the iteration-4 (#24) modal restructure to
-     preserve stacking order. */
-  z-index: 100;
+  /* Layer map (#24): content (0) < nav sidebar/top bar (--z-nav) <
+     mobile backdrop (--z-drawer - 1) < mobile drawer (--z-drawer) <
+     modal overlays (--z-modal) < toast (--z-toast). */
+  z-index: var(--z-nav);
 }
 
 .app-sidebar.closed {
-  width: 80px;
+  width: var(--component-nav-sidebar-collapsed-width);
 }
 
 .sidebar-header {
@@ -44,7 +43,6 @@
   align-items: center;
   justify-content: space-between;
   padding: var(--space-lg) var(--space-sm);
-  border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }
 
@@ -53,10 +51,10 @@
 }
 
 .app-title {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-family-brand);
   font-size: var(--typography-brand-title-size);
-  font-weight: 700;
-  letter-spacing: -0.5px;
+  font-weight: var(--typography-brand-title-weight);
+  letter-spacing: var(--typography-brand-title-letter-spacing);
   color: var(--text);
   white-space: nowrap;
   flex: 1;
@@ -74,7 +72,7 @@
   background: transparent;
   color: var(--text-muted);
   padding: var(--space-sm);
-  font-size: 1.2rem; /* iteration-4 (#24) */
+  font-size: var(--icon-md);
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -96,12 +94,12 @@
 }
 
 .nav-btn {
-  background: var(--surface);
+  background: transparent;
   color: var(--text-muted);
-  padding: var(--space-md) var(--space-md);
+  padding: var(--component-nav-item-padding);
   font-size: var(--typography-body-medium-size);
   text-align: left;
-  border-radius: var(--radius-sm);
+  border-radius: var(--component-nav-item-radius);
   display: flex;
   align-items: center;
   gap: var(--space-md);
@@ -112,16 +110,16 @@
 
 .nav-btn:hover {
   color: var(--text);
-  background: var(--surface);
+  background: var(--surface2);
 }
 
 .nav-active {
-  background: var(--surface);
+  background: var(--surface2);
   color: var(--text);
   border: none;
-  border-radius: 0;
-  padding: var(--space-md) var(--space-lg) var(--space-md) 1.3rem; /* iteration-4 (#24) */
-  margin: 0 -0.5rem;
+  border-radius: var(--component-nav-item-radius);
+  padding: var(--component-nav-item-padding);
+  margin: 0;
   font-size: var(--typography-body-medium-size);
   display: flex;
   align-items: center;
@@ -130,7 +128,7 @@
 }
 
 .nav-icon {
-  font-size: 1.2rem; /* iteration-4 (#24) */
+  font-size: var(--icon-md);
   flex-shrink: 0;
 }
 
@@ -154,12 +152,12 @@
   flex-direction: column;
   flex: 1;
   overflow: hidden;
-  margin-left: 240px;
+  margin-left: var(--component-nav-sidebar-width);
   transition: margin-left var(--duration-lg) ease;
 }
 
 .app-sidebar.closed ~ .app-content {
-  margin-left: 80px;
+  margin-left: var(--component-nav-sidebar-collapsed-width);
 }
 
 
@@ -170,7 +168,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: var(--space-xl);
-  min-height: 44px;
+  min-height: var(--size-touch-target-min);
 }
 
 .page-header h1,
@@ -205,12 +203,11 @@
     gap: var(--space-lg);
     padding: var(--space-md) var(--space-lg);
     background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    height: 56px;
+    height: var(--component-top-bar-height);
     flex-shrink: 0;
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: var(--z-nav);
     transition: transform var(--duration-lg) ease;
   }
 
@@ -222,7 +219,7 @@
     background: transparent;
     color: var(--text-muted);
     padding: var(--space-sm);
-    font-size: 1.2rem; /* iteration-4 (#24) */
+    font-size: var(--icon-md);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -235,7 +232,7 @@
   }
 
   .topnav-title {
-    font-family: 'Playfair Display', serif;
+    font-family: var(--font-family-brand);
     font-size: var(--typography-title-medium-size);
     font-weight: 700;
     color: var(--text);
@@ -259,13 +256,13 @@
 
   .app-sidebar {
     position: fixed;
-    width: 240px;
-    height: calc(100dvh - 56px);
-    top: 56px;
+    width: var(--component-nav-sidebar-width);
+    height: calc(100dvh - var(--component-top-bar-height));
+    top: var(--component-top-bar-height);
     left: 0;
     transform: translateX(-100%);
     transition: transform var(--duration-lg) ease;
-    z-index: 99;
+    z-index: var(--z-drawer);
   }
 
   .app-sidebar.open {
@@ -273,7 +270,7 @@
   }
 
   .app-sidebar.closed {
-    width: 240px;
+    width: var(--component-nav-sidebar-width);
     transform: translateX(-100%);
   }
 
@@ -290,12 +287,13 @@
   .sidebar-backdrop {
     display: block;
     position: fixed;
-    top: 56px;
+    top: var(--component-top-bar-height);
     left: 0;
     right: 0;
     bottom: 0;
     background: var(--overlay);
-    z-index: 98;
+    /* must stay under the drawer and over content */
+    z-index: calc(var(--z-drawer) - 1);
     opacity: 0;
     pointer-events: none;
     transition: opacity var(--duration-lg) ease;
@@ -309,7 +307,7 @@
   .app-main {
     padding: var(--space-lg);
     overflow-y: auto;
-    height: calc(100vh - 56px);
+    height: calc(100vh - var(--component-top-bar-height));
   }
 
   .app-title {
@@ -327,7 +325,7 @@
 .spinner {
   width: 50px;
   height: 50px;
-  border: 4px solid rgba(255, 255, 255, 0.3); /* iteration-4 (#24): off-token spinner track color + 4px ring width */
+  border: 4px solid rgba(255, 255, 255, 0.3); /* intentional: spinner track over --bg, no token role */
   border-top-color: var(--accent);
   border-radius: var(--radius-circle);
   animation: spin var(--duration-spinner) linear infinite;

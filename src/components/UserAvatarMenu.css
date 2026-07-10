@@ -1,6 +1,5 @@
 .user-avatar-menu {
   position: relative;
-  border-top: 1px solid var(--border);
   padding: var(--space-sm) var(--space-md);
 }
 
@@ -24,8 +23,8 @@
 }
 
 .user-avatar {
-  width: 2.5rem;
-  height: 2.5rem;
+  width: var(--component-avatar-size-md);
+  height: var(--component-avatar-size-md);
   border-radius: var(--radius-circle);
   display: flex;
   align-items: center;
@@ -65,7 +64,7 @@
     left: auto;
     margin-top: var(--space-xs);
     margin-bottom: 0;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* iteration-4 (#24): one-off shadow, swap for --elevation-* */
+    box-shadow: var(--elevation-3);
   }
 }
 
@@ -75,27 +74,27 @@
   left: 0;
   right: 0;
   background: var(--surface2);
-  border: 1px solid var(--border);
   border-radius: var(--radius-xs);
   margin-bottom: var(--space-xs);
   min-width: 150px;
-  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3); /* iteration-4 (#24): one-off shadow, swap for --elevation-* */
-  z-index: 1000;
+  /* popover elevation; note: the shadow now falls downward (elevation
+     tokens have no inverted-offset variant) */
+  box-shadow: var(--elevation-3);
+  z-index: var(--z-modal);
 }
 
 .dropdown-header {
-  padding: 10px var(--space-md); /* iteration-4 (#24) */
+  padding: var(--space-md);
   font-size: var(--typography-body-medium-size);
   font-weight: 600;
   color: var(--text-muted);
-  border-bottom: 1px solid var(--border);
   text-align: center;
 }
 
 .dropdown-btn,
 .logout-btn {
   width: 100%;
-  padding: 10px var(--space-md); /* iteration-4 (#24) */
+  padding: var(--space-md);
   background: transparent;
   border: none;
   color: var(--text);

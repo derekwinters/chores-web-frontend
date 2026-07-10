@@ -4,37 +4,37 @@
   align-items: center;
   min-height: 100vh;
   background: var(--bg);
-  padding: 20px; /* iteration-4 (#24) */
+  padding: var(--space-lg);
 }
 
 .setup-card {
+  /* flat resting card (elevation.0 ruling) */
   background: var(--surface);
-  border-radius: var(--radius-sm);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); /* iteration-4 (#24): one-off shadow, swap for --elevation-* */
+  border-radius: var(--component-card-radius);
   padding: var(--space-3xl);
   width: 100%;
-  max-width: 500px;
+  max-width: var(--size-form-max);
 }
 
 .setup-card h1 {
   text-align: center;
   color: var(--text);
-  margin-bottom: 10px; /* iteration-4 (#24) */
+  margin-bottom: var(--space-sm);
   font-size: var(--typography-headline-medium-size);
 }
 
 .setup-card h2 {
   text-align: center;
   color: var(--text);
-  margin-bottom: 30px; /* iteration-4 (#24) */
-  font-size: 18px; /* iteration-4 (#24) */
+  margin-bottom: var(--space-2xl);
+  font-size: var(--typography-title-medium-size);
   font-weight: 600;
 }
 
 .setup-form {
   display: flex;
   flex-direction: column;
-  gap: 20px; /* iteration-4 (#24) */
+  gap: var(--space-lg);
 }
 
 .form-group {
@@ -50,9 +50,9 @@
 }
 
 .form-group input {
-  padding: 10px var(--space-md); /* iteration-4 (#24) */
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xs);
+  padding: var(--component-form-field-padding-y) var(--component-form-field-padding-x);
+  border: 1px solid var(--text-muted);
+  border-radius: var(--component-form-field-radius);
   background: var(--bg);
   color: var(--text);
   font-size: var(--typography-body-medium-size);
@@ -62,6 +62,7 @@
 .form-group input:focus {
   outline: none;
   border-color: var(--accent);
+  box-shadow: 0 0 0 var(--component-form-field-focus-ring-width) rgba(var(--accent-rgb), var(--component-form-field-focus-ring-alpha));
 }
 
 .form-group input:disabled {
@@ -78,10 +79,10 @@
 .error-message {
   color: var(--error);
   font-size: var(--typography-body-medium-size);
-  padding: 10px; /* iteration-4 (#24) */
+  padding: var(--space-md);
   background: rgba(var(--error-rgb), var(--alpha-tint-subtle));
   border-radius: var(--radius-xs);
-  border-left: 3px solid var(--error); /* iteration-4 (#24): 3px accent bar is off the border-width scale */
+  border-left: var(--border-width-accent-bar) solid var(--error);
 }
 
 .setup-btn {
@@ -107,7 +108,7 @@
   font-size: var(--typography-body-small-size);
   color: var(--text-muted);
   text-align: center;
-  margin-top: 20px; /* iteration-4 (#24) */
+  margin-top: var(--space-lg);
   line-height: 1.5;
 }
 

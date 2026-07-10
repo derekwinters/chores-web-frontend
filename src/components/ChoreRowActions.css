@@ -4,15 +4,13 @@
   align-items: center;
   gap: var(--space-sm);
   padding: var(--space-md) var(--space-md);
-  border-radius: var(--radius);
+  border-radius: var(--radius-md);
   background: var(--surface2);
-  border: 1px solid var(--border);
   transition: background var(--duration-md) ease;
 }
 
 .chore-row.done {
-  background: var(--accent-bg);
-  border-color: var(--accent);
+  background: rgba(var(--accent-rgb), var(--alpha-tint-subtle));
 }
 
 /* Icon box */
@@ -21,7 +19,6 @@
   height: 36px;
   border-radius: var(--radius-sm);
   background: var(--surface);
-  border: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -30,8 +27,7 @@
 }
 
 .chore-row-icon.done {
-  background: var(--accent-btn);
-  border-color: var(--accent-btn);
+  background: var(--primary);
 }
 
 .chore-icon-check {
@@ -42,7 +38,7 @@
 .chore-icon-pts {
   font-size: var(--typography-label-small-size);
   font-weight: 700;
-  color: var(--gold);
+  color: var(--points);
   letter-spacing: -0.5px;
 }
 
@@ -95,11 +91,11 @@
   flex-shrink: 0;
 }
 
-/* Buttons */
+/* Buttons — flat icon actions (.icon-action, index.css) */
 .chore-row-btns {
   display: flex;
   align-items: center;
-  gap: var(--space-xs);
+  gap: var(--component-chore-row-action-gap);
   flex-shrink: 0;
 }
 
@@ -108,13 +104,13 @@
   font-size: var(--typography-body-small-size);
 }
 
-/* Gold points badge */
+/* Points pill badge */
 .pts-badge {
-  padding: 3px var(--space-sm); /* iteration-4 (#24) */
-  border-radius: var(--radius-pill);
-  background: var(--gold-bg);
-  color: var(--gold);
-  font-size: var(--typography-label-small-size);
+  padding: var(--component-pill-badge-padding-y) var(--component-pill-badge-padding-x);
+  border-radius: var(--component-pill-badge-radius);
+  background: rgba(var(--points-rgb), var(--component-pill-badge-fill-alpha));
+  color: var(--points);
+  font-size: var(--typography-label-medium-size);
   font-weight: 600;
   white-space: nowrap;
 }
@@ -129,8 +125,8 @@
 .reassign-select-xs {
   background: var(--surface);
   color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-pill);
+  border: 1px solid var(--text-muted);
+  border-radius: var(--component-form-field-radius);
   padding: var(--space-xs) var(--space-sm);
   font-size: var(--typography-body-small-size);
   font-family: inherit;

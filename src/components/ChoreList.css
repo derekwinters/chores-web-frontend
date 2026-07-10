@@ -1,7 +1,8 @@
 .chore-list {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--space-lg);
+  /* chore-row outer vertical padding (8px per row edge = 16px between rows) */
+  gap: calc(2 * var(--component-chore-row-padding-outer-y));
 }
 
 .chore-state-spacer {
@@ -13,23 +14,6 @@
     grid-template-columns: repeat(2, 1fr);
     align-items: start;
   }
-}
-
-.chore-card {
-  background: var(--surface);
-  border: none;
-  border-radius: var(--radius-sm);
-  padding: var(--space-xl);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-lg);
-  box-shadow: var(--shadow);
-  transition: box-shadow var(--duration-md) ease, transform var(--duration-md) ease;
-}
-
-.chore-card:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
 }
 
 .chore-header {
@@ -52,8 +36,8 @@
 }
 
 .chore-state-badge {
-  padding: var(--space-xs) var(--space-md);
-  border-radius: var(--radius-pill);
+  padding: var(--component-pill-badge-padding-y) var(--component-pill-badge-padding-x);
+  border-radius: var(--component-pill-badge-radius);
   font-size: var(--typography-label-medium-size);
   font-weight: 600;
   text-transform: uppercase;
@@ -61,12 +45,12 @@
 }
 
 .chore-state-badge.due {
-  background: rgba(var(--error-rgb), var(--alpha-tint));
+  background: rgba(var(--error-rgb), var(--component-pill-badge-fill-alpha));
   color: var(--error);
 }
 
 .chore-state-badge.complete {
-  background: rgba(var(--success-rgb), var(--alpha-tint));
+  background: rgba(var(--success-rgb), var(--component-pill-badge-fill-alpha));
   color: var(--success);
 }
 
@@ -75,12 +59,7 @@
   justify-content: flex-end;
   gap: var(--space-lg);
   padding-top: var(--space-lg);
-  border-top: 1px solid transparent;
   margin-top: var(--space-lg);
-}
-
-.chore-actions.expanded {
-  border-top-color: var(--border);
 }
 
 .chore-action-link {
@@ -138,7 +117,7 @@
 }
 
 .due-icon {
-  font-size: 2.5rem; /* iteration-4 (#24) */
+  font-size: var(--icon-lg);
   color: var(--text);
   flex-shrink: 0;
   margin-top: var(--space-2xs);
@@ -194,7 +173,7 @@
 }
 
 .detail-icon {
-  font-size: 1.2rem; /* iteration-4 (#24) */
+  font-size: var(--icon-md);
   flex-shrink: 0;
   line-height: 1.4;
 }
@@ -227,7 +206,7 @@
   width: fit-content;
   padding: var(--space-xs) var(--space-sm);
   border-radius: var(--radius-pill);
-  background: rgba(var(--accent-rgb), 0.12); /* iteration-4 (#24): 0.12 alpha off the --alpha-* scale */
+  background: rgba(var(--accent-rgb), var(--alpha-tint-subtle));
   color: var(--text);
 }
 

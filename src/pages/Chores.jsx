@@ -22,10 +22,10 @@ const SELECT_CONFIG = {
     color: "var(--text)",
     backgroundColor: "var(--surface)",
     "& .MuiOutlinedInput-notchedOutline": {
-      borderColor: "var(--border)",
+      borderColor: "var(--text-muted)",
     },
     "&:hover .MuiOutlinedInput-notchedOutline": {
-      borderColor: "var(--text-muted)",
+      borderColor: "var(--text)",
     },
     "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
       borderColor: "var(--accent)",
@@ -42,10 +42,10 @@ const SELECT_CONFIG = {
             backgroundColor: "var(--surface2) !important",
           },
           "&.Mui-selected": {
-            backgroundColor: "var(--accent-bg) !important",
+            backgroundColor: "rgba(var(--accent-rgb), var(--alpha-tint-subtle)) !important",
             color: "var(--text) !important",
             "&:hover": {
-              backgroundColor: "var(--accent-bg) !important",
+              backgroundColor: "rgba(var(--accent-rgb), var(--alpha-tint-subtle)) !important",
             },
           },
         },
@@ -336,7 +336,7 @@ export default function Manage() {
               sx={{
                 ...SELECT_CONFIG.sx,
                 "& .MuiChip-root": {
-                  backgroundColor: "var(--accent-bg)",
+                  backgroundColor: "rgba(var(--accent-rgb), var(--alpha-tint-subtle))",
                   color: "var(--text)",
                   borderColor: "var(--accent)",
                 },

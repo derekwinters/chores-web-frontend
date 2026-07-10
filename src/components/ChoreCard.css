@@ -1,7 +1,9 @@
+/* Chore row — the flagship shared component (#24): flat card on the
+   chore-row component tokens, matching the Android ChoreListScreen. */
 .chore-card {
   display: flex;
   position: relative;
-  border-radius: var(--radius);
+  border-radius: var(--component-card-radius);
   border: none;
   background: var(--surface);
   cursor: pointer;
@@ -23,7 +25,7 @@
   left: 0;
   top: 0;
   bottom: 0;
-  width: 4px;
+  width: var(--component-chore-row-accent-bar-width);
   transition: background var(--duration-md);
 }
 
@@ -33,12 +35,15 @@
 .card-content {
   flex: 1;
   width: 100%;
-  padding: var(--space-md) var(--space-lg) var(--space-md) var(--space-lg);
+  padding: var(--component-chore-row-padding-inner);
+  padding-left: var(--component-chore-row-padding-inner-with-bar);
 }
 
+/* Collapsed view — Android layout: the chore name gets the dominant share,
+   secondary metadata collapses to auto-sized muted columns. */
 .collapsed-view {
   display: grid;
-  grid-template-columns: repeat(12, 1fr);
+  grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
   gap: var(--space-md);
   width: 100%;
@@ -46,7 +51,6 @@
 
 .chore-name {
   font-weight: 500;
-  grid-column: 1 / 9;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -54,18 +58,16 @@
 }
 
 .chore-assignee {
-  font-size: var(--typography-body-medium-size);
-  grid-column: 9 / 11;
-  text-align: center;
+  font-size: var(--typography-body-small-size);
+  text-align: right;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: var(--text);
+  color: var(--text-muted);
 }
 
 .chore-due-date {
-  font-size: var(--typography-body-medium-size);
-  grid-column: 11 / 13;
+  font-size: var(--typography-body-small-size);
   text-align: right;
   white-space: nowrap;
   transition: color var(--duration-md);
@@ -96,8 +98,6 @@
   grid-template-columns: 1fr 1fr;
   gap: var(--space-lg);
   padding: var(--space-md) 0;
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
 }
 
 .meta-item {
@@ -119,44 +119,10 @@
   color: var(--text);
 }
 
+/* Action row — flat icon-only buttons (.icon-action, index.css) with
+   semantic tints: complete → success, delete → error, rest → muted. */
 .expanded-actions {
   display: flex;
-  gap: var(--space-md);
-}
-
-.action-btn {
-  flex: 1;
-  padding: var(--space-sm) var(--space-md);
-  border: 1px solid var(--border);
-  background: transparent;
-  border-radius: var(--radius);
-  color: var(--text);
-  font-size: var(--typography-body-medium-size);
-  font-weight: 500;
-  cursor: pointer;
-  transition: background var(--duration-md), color var(--duration-md), border-color var(--duration-md);
-}
-
-.action-btn:hover {
-  background: var(--surface2);
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
-.action-btn.error {
-  color: var(--error);
-}
-
-.action-btn.error:hover {
-  background: rgba(var(--error-rgb), var(--alpha-tint-subtle));
-  border-color: var(--error);
-}
-
-.action-btn.success {
-  color: var(--success);
-}
-
-.action-btn.success:hover {
-  background: rgba(var(--success-rgb), var(--alpha-tint-subtle));
-  border-color: var(--success);
+  justify-content: flex-end;
+  gap: var(--component-chore-row-action-gap);
 }

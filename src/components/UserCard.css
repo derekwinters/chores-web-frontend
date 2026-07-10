@@ -1,16 +1,16 @@
+/* flat resting card (elevation.0 ruling); hover lift keeps elevation.3 */
 .user-card {
   background: var(--surface);
   border: none;
-  border-radius: var(--radius);
-  padding: 1.25rem; /* iteration-4 (#24) */
+  border-radius: var(--component-card-radius);
+  padding: var(--space-lg);
   display: flex;
   flex-direction: column;
   gap: var(--space-lg);
-  box-shadow: var(--shadow);
   transition: box-shadow var(--duration-md) ease, transform var(--duration-md) ease;
 }
 .user-card:hover {
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--elevation-3);
   transform: translateY(-2px);
 }
 
@@ -57,7 +57,7 @@
   font-size: var(--typography-body-small-size);
   font-weight: 400;
   color: var(--text-muted);
-  margin-left: 3px; /* iteration-4 (#24) */
+  margin-left: var(--space-2xs);
 }
 
 .uc-goal-label {
@@ -66,7 +66,8 @@
 }
 
 .uc-divider {
-  border-top: 1px solid var(--border);
+  height: 1px;
+  background: var(--surface2);
 }
 
 /* Due grid */
@@ -149,7 +150,7 @@
 .uc-workload-count {
   background: none;
   border: none;
-  font-size: 1.25rem; /* iteration-4 (#24) */
+  font-size: var(--typography-title-large-size);
   font-weight: 700;
   color: var(--accent);
   cursor: pointer;

@@ -1,7 +1,7 @@
 .log {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem; /* iteration-4 (#24) */
+  gap: var(--space-lg);
   max-width: 1600px;
   margin: 0 auto;
 }
@@ -24,7 +24,7 @@
 }
 
 .action-icon {
-  font-size: 1.25rem; /* iteration-4 (#24) */
+  font-size: var(--icon-md);
   flex-shrink: 0;
 }
 
@@ -38,7 +38,6 @@
   gap: var(--space-lg);
   padding: var(--space-lg);
   background: var(--surface2);
-  border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   align-items: end;
 }
@@ -59,10 +58,10 @@
 
 .filter-group select,
 .filter-group input {
-  padding: var(--space-sm);
+  padding: var(--component-form-field-padding-y) var(--component-form-field-padding-x);
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xs);
+  border: 1px solid var(--text-muted);
+  border-radius: var(--component-form-field-radius);
   color: var(--text);
   font-family: inherit;
   font-size: var(--typography-body-medium-size);
@@ -72,6 +71,7 @@
 .filter-group input:focus {
   outline: none;
   border-color: var(--accent);
+  box-shadow: 0 0 0 var(--component-form-field-focus-ring-width) rgba(var(--accent-rgb), var(--component-form-field-focus-ring-alpha));
 }
 
 .log-entries {
@@ -82,33 +82,24 @@
   width: 100%;
   border-collapse: collapse;
   background: var(--surface2);
-  border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   overflow: hidden;
   font-size: var(--typography-body-medium-size);
 }
 
 .log-table thead {
+  /* header separation via surface contrast (borderless design, #24) */
   background: var(--surface);
-  border-bottom: var(--border-width-emphasis) solid var(--border);
 }
 
 .log-table th {
-  padding: var(--space-md) 1.25rem; /* iteration-4 (#24) */
+  padding: var(--space-md) var(--space-lg);
   text-align: left;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.03em;
   font-size: var(--typography-body-small-size);
   color: var(--text-muted);
-}
-
-.log-table tbody tr {
-  border-bottom: 1px solid var(--border);
-}
-
-.log-table tbody tr:last-child {
-  border-bottom: none;
 }
 
 .log-table-row {
@@ -125,12 +116,8 @@
   outline-offset: -2px;
 }
 
-.log-table-row.expanded {
-  border-bottom: none;
-}
-
 .log-table td {
-  padding: var(--space-lg) 1.25rem; /* iteration-4 (#24) */
+  padding: var(--space-lg) var(--space-lg);
   color: var(--text);
 }
 
@@ -171,30 +158,35 @@
   padding-right: var(--space-lg);
 }
 
-/* Target type badge */
+/* Target type badge — pill-badge component tokens; decided Android mapping
+   (decision 5): person → secondary, chore → primary. --primary/--secondary
+   have no -rgb tint triplet, so the 15% fill uses color-mix. */
 .target-badge {
   display: inline-block;
-  padding: var(--space-xs) var(--space-sm);
-  border-radius: var(--radius-xs);
-  border: 1px solid var(--border);
+  padding: var(--component-pill-badge-padding-y) var(--component-pill-badge-padding-x);
+  border-radius: var(--component-pill-badge-radius);
   font-size: var(--typography-label-medium-size);
   text-transform: uppercase;
   letter-spacing: 0.03em;
   color: var(--text-muted);
+  background: color-mix(in srgb, var(--text-muted) 15%, transparent);
 }
 
-.target-badge--chore { border-color: var(--accent); color: var(--accent); }
-.target-badge--user  { border-color: var(--gold);   color: var(--gold); }
+.target-badge--chore { color: var(--primary);   background: color-mix(in srgb, var(--primary) 15%, transparent); }
+.target-badge--user  { color: var(--secondary); background: color-mix(in srgb, var(--secondary) 15%, transparent); }
 
 /* Action badge — dot prefix + filled pill */
 .action-badge {
   display: inline-flex;
   align-items: center;
   gap: var(--space-xs);
-  padding: var(--space-xs) var(--space-md);
-  border-radius: var(--radius-pill);
+  padding: var(--component-pill-badge-padding-y) var(--component-pill-badge-padding-x);
+  border-radius: var(--component-pill-badge-radius);
   font-weight: 500;
-  font-size: var(--typography-body-small-size);
+  font-size: var(--typography-label-medium-size);
+  /* fallback for unmapped actions: text-muted (no -rgb triplet → color-mix) */
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--text-muted) 15%, transparent);
 }
 
 .action-badge::before {
@@ -207,13 +199,15 @@
   flex-shrink: 0;
 }
 
-.action-badge--completed  { background: rgba(var(--success-rgb), var(--alpha-tint)); color: var(--success); }
-.action-badge--created    { background: rgba(var(--success-rgb), var(--alpha-tint)); color: var(--success); }
-.action-badge--skipped    { background: rgba(var(--warning-rgb), var(--alpha-tint)); color: var(--warning); }
-.action-badge--marked_due { background: rgba(var(--warning-rgb), var(--alpha-tint)); color: var(--warning); }
-.action-badge--deleted    { background: rgba(var(--error-rgb), var(--alpha-tint)); color: var(--error); }
-.action-badge--reassigned { background: rgba(var(--accent-rgb), var(--alpha-tint)); color: var(--accent); }
-.action-badge--updated    { background: rgba(var(--accent-rgb), var(--alpha-tint)); color: var(--accent); }
+/* Decided action-color contract (mapping matrix): completed/created →
+   success; skipped/marked_due/reassigned → warning; deleted → error;
+   everything else falls back to the text-muted base above. */
+.action-badge--completed  { background: rgba(var(--success-rgb), var(--component-pill-badge-fill-alpha)); color: var(--success); }
+.action-badge--created    { background: rgba(var(--success-rgb), var(--component-pill-badge-fill-alpha)); color: var(--success); }
+.action-badge--skipped    { background: rgba(var(--warning-rgb), var(--component-pill-badge-fill-alpha)); color: var(--warning); }
+.action-badge--marked_due { background: rgba(var(--warning-rgb), var(--component-pill-badge-fill-alpha)); color: var(--warning); }
+.action-badge--reassigned { background: rgba(var(--warning-rgb), var(--component-pill-badge-fill-alpha)); color: var(--warning); }
+.action-badge--deleted    { background: rgba(var(--error-rgb), var(--component-pill-badge-fill-alpha)); color: var(--error); }
 
 /* Detail row — expands inline below the clicked row */
 .log-detail-row {
@@ -222,7 +216,6 @@
 
 .log-detail-row td {
   padding: 0;
-  border-bottom: 1px solid var(--border);
   background: var(--surface);
 }
 
@@ -234,7 +227,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: var(--space-lg);
-  padding: var(--space-md) 1.25rem; /* iteration-4 (#24) */
+  padding: var(--space-md) var(--space-lg);
 }
 
 .detail-item {
@@ -316,7 +309,7 @@
 
   .log-table th,
   .log-table td {
-    padding: var(--space-md) 0.875rem; /* iteration-4 (#24) */
+    padding: var(--space-md) var(--space-md);
   }
 
   .log-timestamp {
@@ -334,10 +327,5 @@
 
   .log-actor {
     width: 120px;
-  }
-
-  .action-badge {
-    padding: var(--space-xs) var(--space-sm);
-    font-size: var(--typography-label-medium-size);
   }
 }

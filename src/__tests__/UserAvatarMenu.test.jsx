@@ -148,8 +148,8 @@ describe("UserAvatarMenu", () => {
       expect(topnavBlock).toMatch(/margin-bottom\s*:\s*0/);
     });
 
-    it("flips box-shadow direction for downward opening", () => {
-      expect(topnavBlock).toMatch(/box-shadow\s*:\s*0\s+4px\s+12px\s+rgba\(0,\s*0,\s*0,\s*0\.3\)/);
+    it("uses the popover elevation token for the downward shadow (#24)", () => {
+      expect(topnavBlock).toMatch(/box-shadow\s*:\s*var\(--elevation-3\)/);
     });
 
     it("renders .avatar-dropdown element when dropdown is open", async () => {
