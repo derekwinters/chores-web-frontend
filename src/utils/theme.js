@@ -1,14 +1,9 @@
-export const DEFAULT_THEME_COLORS = {
-  bg: "#f0ede6",
-  surface: "#faf8f3",
-  surface2: "#f0ede6",
-  accent: "#b8860b",
-  primary: "#8b6914",
-  secondary: "#7a7a6a",
-  success: "#558b2f",
-  warning: "#e0860b",
-  error: "#d32f2f",
-};
+import { color } from "@derekwinters/design-tokens";
+import themes from "@derekwinters/design-tokens/themes.json";
+
+// The backend's site default ("paper") from the token package — single
+// source with app/data/themes.json on the backend.
+export const DEFAULT_THEME_COLORS = themes.paper;
 
 function getBrightness(hex) {
   const r = parseInt(hex.slice(1, 3), 16);
@@ -42,14 +37,13 @@ export function applyTheme(colors) {
   syncRgb("--accent-rgb", colors.accent);
   syncRgb("--warning-rgb", colors.warning);
 
+  // Text colors come from the token sets: light values on bright
+  // backgrounds, dark-set values otherwise (same luminance rule as the
+  // Android client).
   const bgBrightness = getBrightness(colors.bg);
-  if (bgBrightness > 128) {
-    root.style.setProperty("--text", "#1a1a1a");
-    root.style.setProperty("--text-muted", "#555555");
-  } else {
-    root.style.setProperty("--text", "#dce8f5");
-    root.style.setProperty("--text-muted", "#7899b8");
-  }
+  const set = bgBrightness > 128 ? color.light : color.dark;
+  root.style.setProperty("--text", set.text);
+  root.style.setProperty("--text-muted", set["text-muted"]);
 }
 
 export function getCurrentThemeColors() {
