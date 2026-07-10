@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { MdCheckCircle, MdSkipNext, MdEdit, MdHistory, MdDelete, MdAlarm } from "react-icons/md";
 import "./ChoreCard.css";
 
 function ageLabel(age) {
@@ -95,36 +96,36 @@ export default function ChoreCard({ chore, selected, onClick, onEdit, onDelete, 
                 {choreState === "due" ? (
                   <>
                     {onComplete && (
-                      <button className="action-btn success" onClick={(e) => handleAction("complete", e)} aria-label={`Mark ${chore.name} complete`}>
-                        Complete
+                      <button className="icon-action success" onClick={(e) => handleAction("complete", e)} aria-label={`Mark ${chore.name} complete`} title="Complete">
+                        <MdCheckCircle />
                       </button>
                     )}
                     {onSkip && (
-                      <button className="action-btn" onClick={(e) => handleAction("skip", e)} aria-label={`Skip ${chore.name}`}>
-                        Skip
+                      <button className="icon-action" onClick={(e) => handleAction("skip", e)} aria-label={`Skip ${chore.name}`} title="Skip">
+                        <MdSkipNext />
                       </button>
                     )}
                   </>
                 ) : (
                   onMarkDue && (
-                    <button className="action-btn" onClick={(e) => handleAction("mark-due", e)} aria-label={`Mark ${chore.name} due now`}>
-                      Mark Due Now
+                    <button className="icon-action" onClick={(e) => handleAction("mark-due", e)} aria-label={`Mark ${chore.name} due now`} title="Mark due now">
+                      <MdAlarm />
                     </button>
                   )
                 )}
                 {onEdit && (
-                  <button className="action-btn" onClick={(e) => handleAction("edit", e)} aria-label={`Edit ${chore.name}`}>
-                    Edit
+                  <button className="icon-action" onClick={(e) => handleAction("edit", e)} aria-label={`Edit ${chore.name}`} title="Edit">
+                    <MdEdit />
                   </button>
                 )}
                 {onHistory && (
-                  <button className="action-btn" onClick={(e) => handleAction("history", e)} aria-label={`History for ${chore.name}`}>
-                    History
+                  <button className="icon-action" onClick={(e) => handleAction("history", e)} aria-label={`History for ${chore.name}`} title="History">
+                    <MdHistory />
                   </button>
                 )}
                 {onDelete && (
-                  <button className="action-btn error" onClick={(e) => handleAction("delete", e)} aria-label={`Delete ${chore.name}`}>
-                    Delete
+                  <button className="icon-action error" onClick={(e) => handleAction("delete", e)} aria-label={`Delete ${chore.name}`} title="Delete">
+                    <MdDelete />
                   </button>
                 )}
               </div>

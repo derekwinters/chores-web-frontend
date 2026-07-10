@@ -42,17 +42,16 @@
   cursor: pointer;
   transition: box-shadow var(--duration-md) ease, transform var(--duration-md) ease;
   flex: 1;
-  box-shadow: var(--shadow);
 }
 
 .theme-card:hover {
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--elevation-3);
   transform: translateY(-2px);
 }
 
 .theme-card.theme-active {
   background: var(--surface);
-  box-shadow: var(--shadow-accent-glow), var(--shadow-lg);
+  box-shadow: var(--shadow-accent-glow), var(--elevation-3);
 }
 
 .theme-preview {
@@ -67,7 +66,6 @@
   width: 30px;
   height: 30px;
   border-radius: var(--radius-xs);
-  border: 1px solid var(--border);
   flex-shrink: 0;
 }
 
@@ -112,7 +110,7 @@
 }
 
 .theme-actions .action-btn .material-icons {
-  font-size: 20px; /* iteration-4 (#24) */
+  font-size: var(--icon-md);
 }
 
 .theme-actions .action-btn:hover {
@@ -148,15 +146,13 @@
   background: var(--surface);
   border: none;
   border-radius: var(--radius-sm);
-  box-shadow: var(--shadow);
-  transition: box-shadow var(--duration-md) ease, transform var(--duration-md) ease;
 }
 
 .theme-editor input[type="text"] {
-  padding: var(--space-md);
+  padding: var(--component-form-field-padding-y) var(--component-form-field-padding-x);
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xs);
+  border: 1px solid var(--text-muted);
+  border-radius: var(--component-form-field-radius);
   color: var(--text);
   font-family: inherit;
   font-size: var(--typography-title-small-size);
@@ -165,6 +161,7 @@
 .theme-editor input[type="text"]:focus {
   outline: none;
   border-color: var(--accent);
+  box-shadow: 0 0 0 var(--component-form-field-focus-ring-width) rgba(var(--accent-rgb), var(--component-form-field-focus-ring-alpha));
 }
 
 .color-inputs {
@@ -196,10 +193,10 @@
 .color-input-row input[type="text"] {
   flex: 1;
   min-width: 0;
-  padding: var(--space-sm) var(--space-sm);
+  padding: var(--component-form-field-padding-y) var(--component-form-field-padding-x);
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xs);
+  border: 1px solid var(--text-muted);
+  border-radius: var(--component-form-field-radius);
   color: var(--text);
   font-family: monospace;
   font-size: var(--typography-body-medium-size);
@@ -208,14 +205,15 @@
 .color-input-row input[type="text"]:focus {
   outline: none;
   border-color: var(--accent);
+  box-shadow: 0 0 0 var(--component-form-field-focus-ring-width) rgba(var(--accent-rgb), var(--component-form-field-focus-ring-alpha));
 }
 
 .color-input-row input[type="color"] {
   width: 40px;
   height: 36px;
   padding: var(--space-2xs);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xs);
+  border: 1px solid var(--text-muted);
+  border-radius: var(--component-form-field-radius);
   cursor: pointer;
   flex-shrink: 0;
 }
@@ -251,15 +249,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: var(--z-modal);
 }
 
 .modal {
   background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* iteration-4 (#24): one-off shadow, swap for --elevation-* */
-  max-width: 400px;
+  border-radius: var(--component-modal-radius);
+  box-shadow: var(--elevation-3);
+  max-width: var(--size-form-max);
   width: 90%;
 }
 
@@ -267,8 +264,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-xl);
-  border-bottom: 1px solid var(--border);
+  padding: var(--component-modal-padding);
+  padding-bottom: 0;
 }
 
 .modal-header h2 {
@@ -280,13 +277,13 @@
 .modal-close {
   background: transparent;
   border: none;
-  font-size: 1.2rem; /* iteration-4 (#24) */
+  font-size: var(--typography-title-large-size);
   cursor: pointer;
   color: var(--text-muted);
 }
 
 .modal-body {
-  padding: var(--space-xl);
+  padding: var(--component-modal-padding);
   display: flex;
   flex-direction: column;
   gap: var(--space-lg);
@@ -298,10 +295,10 @@
 }
 
 .modal-body input[type="text"] {
-  padding: var(--space-md);
+  padding: var(--component-form-field-padding-y) var(--component-form-field-padding-x);
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xs);
+  border: 1px solid var(--text-muted);
+  border-radius: var(--component-form-field-radius);
   color: var(--text);
   font-family: inherit;
   font-size: var(--typography-title-small-size);
@@ -310,6 +307,7 @@
 .modal-body input[type="text"]:focus {
   outline: none;
   border-color: var(--accent);
+  box-shadow: 0 0 0 var(--component-form-field-focus-ring-width) rgba(var(--accent-rgb), var(--component-form-field-focus-ring-alpha));
 }
 
 .confirm-actions {

@@ -452,8 +452,9 @@ describe("Manage page", () => {
     fireEvent.click(vacuumCard);
 
     await waitFor(() => {
-      expect(screen.getByText("Complete")).toBeInTheDocument();
-      expect(screen.getByText("Skip")).toBeInTheDocument();
+      // #24: actions are flat icon-only buttons — query by accessible name
+      expect(screen.getByRole("button", { name: /mark vacuum complete/i })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /skip vacuum/i })).toBeInTheDocument();
     });
   });
 
@@ -465,10 +466,10 @@ describe("Manage page", () => {
     fireEvent.click(vacuumCard);
 
     await waitFor(() => {
-      expect(screen.getByText("Complete")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /mark vacuum complete/i })).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByText("Complete"));
+    fireEvent.click(screen.getByRole("button", { name: /mark vacuum complete/i }));
 
     await waitFor(() => {
       expect(client.completeChore).toHaveBeenCalled();
@@ -483,10 +484,10 @@ describe("Manage page", () => {
     fireEvent.click(vacuumCard);
 
     await waitFor(() => {
-      expect(screen.getByText("Skip")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /skip vacuum/i })).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByText("Skip"));
+    fireEvent.click(screen.getByRole("button", { name: /skip vacuum/i }));
 
     await waitFor(() => {
       expect(client.skipChore).toHaveBeenCalled();
@@ -764,8 +765,8 @@ describe("Manage page", () => {
       const bathroomCard = screen.getByText("Bathroom").closest("article");
       fireEvent.click(bathroomCard);
 
-      await waitFor(() => expect(screen.getByText("Complete")).toBeInTheDocument());
-      fireEvent.click(screen.getByText("Complete"));
+      await waitFor(() => expect(screen.getByRole("button", { name: /mark bathroom complete/i })).toBeInTheDocument());
+      fireEvent.click(screen.getByRole("button", { name: /mark bathroom complete/i }));
 
       await waitFor(() => expect(screen.getByText(/who completed/i)).toBeInTheDocument());
       expect(client.completeChore).not.toHaveBeenCalled();
@@ -778,8 +779,8 @@ describe("Manage page", () => {
       const bathroomCard = screen.getByText("Bathroom").closest("article");
       fireEvent.click(bathroomCard);
 
-      await waitFor(() => expect(screen.getByText("Complete")).toBeInTheDocument());
-      fireEvent.click(screen.getByText("Complete"));
+      await waitFor(() => expect(screen.getByRole("button", { name: /mark bathroom complete/i })).toBeInTheDocument());
+      fireEvent.click(screen.getByRole("button", { name: /mark bathroom complete/i }));
 
       await waitFor(() => expect(screen.getByText(/who completed/i)).toBeInTheDocument());
 
@@ -800,8 +801,8 @@ describe("Manage page", () => {
       const bathroomCard = screen.getByText("Bathroom").closest("article");
       fireEvent.click(bathroomCard);
 
-      await waitFor(() => expect(screen.getByText("Complete")).toBeInTheDocument());
-      fireEvent.click(screen.getByText("Complete"));
+      await waitFor(() => expect(screen.getByRole("button", { name: /mark bathroom complete/i })).toBeInTheDocument());
+      fireEvent.click(screen.getByRole("button", { name: /mark bathroom complete/i }));
 
       await waitFor(() => expect(screen.getByText(/who completed/i)).toBeInTheDocument());
       fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
@@ -817,8 +818,8 @@ describe("Manage page", () => {
       const vacuumCard = screen.getByText("Vacuum").closest("article");
       fireEvent.click(vacuumCard);
 
-      await waitFor(() => expect(screen.getByText("Complete")).toBeInTheDocument());
-      fireEvent.click(screen.getByText("Complete"));
+      await waitFor(() => expect(screen.getByRole("button", { name: /mark vacuum complete/i })).toBeInTheDocument());
+      fireEvent.click(screen.getByRole("button", { name: /mark vacuum complete/i }));
 
       await waitFor(() => expect(client.completeChore).toHaveBeenCalled());
       expect(screen.queryByText(/who completed/i)).not.toBeInTheDocument();

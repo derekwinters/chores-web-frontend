@@ -23,7 +23,8 @@
 
 .settings-subnav-rule {
   border: none;
-  border-top: 1px solid var(--border);
+  height: 1px;
+  background: var(--surface2);
   margin: 0 var(--space-lg) var(--space-sm);
 }
 

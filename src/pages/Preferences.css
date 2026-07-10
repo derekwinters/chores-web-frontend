@@ -18,7 +18,8 @@
 
 .preferences-section-rule {
   border: none;
-  border-top: 1px solid var(--border);
+  height: 1px;
+  background: var(--surface2);
   margin: 0;
 }
 
@@ -47,18 +48,17 @@
   align-items: flex-start;
   font-size: var(--typography-body-medium-size);
   color: var(--text);
-  box-shadow: var(--shadow);
 }
 
 .preferences-theme-card:hover:not(:disabled) {
   background: var(--surface2);
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--elevation-3);
   transform: translateY(-2px);
 }
 
 .preferences-theme-card.preferences-theme-active {
   background: var(--surface2);
-  box-shadow: var(--shadow-accent-glow), var(--shadow-lg);
+  box-shadow: var(--shadow-accent-glow), var(--elevation-3);
 }
 
 .preferences-theme-card:disabled {

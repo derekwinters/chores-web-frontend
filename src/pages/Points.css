@@ -12,7 +12,7 @@
   width: 100%;
   border-collapse: collapse;
   background: var(--surface);
-  border-radius: var(--radius);
+  border-radius: var(--radius-md);
   overflow: hidden;
 }
 
@@ -28,7 +28,6 @@
 
 .leaderboard td, .history-table td {
   padding: var(--space-md) var(--space-lg);
-  border-top: 1px solid var(--border);
 }
 
 .leaderboard tbody tr {
@@ -36,7 +35,7 @@
   transition: background var(--duration-xs);
 }
 .leaderboard tbody tr:hover { background: var(--surface2); }
-.leaderboard tbody tr.selected-row { background: var(--surface2); border-left: 3px solid var(--accent); } /* iteration-4 (#24): 3px accent bar is off the border-width scale */
+.leaderboard tbody tr.selected-row { background: var(--surface2); border-left: var(--border-width-accent-bar) solid var(--accent); }
 
 .history-panel { display: flex; flex-direction: column; gap: var(--space-md); }
 .history-panel h3 { font-size: var(--typography-body-large-size); color: var(--text-muted); }

@@ -20,7 +20,8 @@
 
 .settings-section hr {
   border: none;
-  border-top: 1px solid var(--border);
+  height: 1px;
+  background: var(--surface2);
   margin: 0;
 }
 
@@ -39,10 +40,10 @@
 .setting-group input[type="text"],
 .setting-group select {
   width: 100%;
-  padding: var(--space-sm) var(--space-md);
+  padding: var(--component-form-field-padding-y) var(--component-form-field-padding-x);
   background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xs);
+  border: 1px solid var(--text-muted);
+  border-radius: var(--component-form-field-radius);
   color: var(--text);
   font-family: inherit;
   font-size: var(--typography-title-small-size);
@@ -53,6 +54,7 @@
 .setting-group select:focus {
   outline: none;
   border-color: var(--accent);
+  box-shadow: 0 0 0 var(--component-form-field-focus-ring-width) rgba(var(--accent-rgb), var(--component-form-field-focus-ring-alpha));
 }
 
 .setting-description {
@@ -79,10 +81,10 @@
 
 .input-group input {
   flex: 1;
-  padding: var(--space-sm) var(--space-md);
+  padding: var(--component-form-field-padding-y) var(--component-form-field-padding-x);
   background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xs);
+  border: 1px solid var(--text-muted);
+  border-radius: var(--component-form-field-radius);
   color: var(--text);
   font-family: inherit;
   font-size: var(--typography-title-small-size);
@@ -91,6 +93,7 @@
 .input-group input:focus {
   outline: none;
   border-color: var(--accent);
+  box-shadow: 0 0 0 var(--component-form-field-focus-ring-width) rgba(var(--accent-rgb), var(--component-form-field-focus-ring-alpha));
 }
 
 .error-message {
@@ -175,8 +178,8 @@
 
 .db-table th,
 .db-table td {
+  /* grid borders dropped (#24): striping + header surface carry structure */
   padding: var(--space-sm) var(--space-md);
-  border: 1px solid var(--border);
   text-align: left;
   white-space: nowrap;
 }
@@ -235,5 +238,5 @@
   display: flex;
   gap: var(--space-md);
   justify-content: flex-end;
-  margin-top: 1.25rem; /* iteration-4 (#24) */
+  margin-top: var(--space-lg);
 }

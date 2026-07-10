@@ -6,26 +6,10 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  /* Legacy layer — aliases onto token vars, plus literals that are
-     intentionally preserved for visual parity until the Iteration 4
-     component convergence (chores-web-frontend#24) removes them:
-     - --border: the token set has no border color (borderless design);
-       web keeps its 1px borders until #24.
-     - --accent-btn / --accent-bg / --gold-bg: static today (applyTheme
-       does not override them); binding them to slot vars would change
-       behavior under runtime themes.
-     - --shadow / --shadow-lg: legacy shadow values; swapped for the
-       M3-derived --elevation-* tokens in #24. */
-  /* stylelint-disable color-no-hex */
-  --border: #2c3f58;
-  --accent-btn: #3574B3;
-  /* stylelint-enable color-no-hex */
-  --accent-bg: rgba(115, 177, 221, 0.1);
-  --gold: var(--points);
-  --gold-bg: rgba(201, 168, 76, 0.13);
-  --radius: var(--radius-md);
-  --shadow: 0 1px 4px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.2);
-  --shadow-lg: 0 2px 8px rgba(0, 0, 0, 0.4), 0 12px 40px rgba(0, 0, 0, 0.3);
+  /* The legacy var layer (--border/--accent-btn/--accent-bg/--gold/--gold-bg/
+     --radius/--shadow/--shadow-lg) was deleted in Iteration 4 (#24):
+     borderless flat-surface design, --elevation-* shadows, and the runtime
+     theme slots (--primary, --points, --accent-rgb tints) everywhere. */
   font-family: var(--font-family-body);
   -webkit-font-smoothing: antialiased;
 }
@@ -36,36 +20,61 @@ body {
   min-height: 100vh;
 }
 
+/* Button base — bound to the button component tokens (label-large type role) */
 button {
   cursor: pointer;
   border: none;
-  border-radius: var(--radius-pill);
-  padding: var(--space-sm) var(--space-lg);
-  font-size: var(--typography-body-medium-size);
-  font-weight: 500;
+  border-radius: var(--component-button-radius);
+  padding: var(--component-button-padding-y) var(--component-button-padding-x);
+  font-size: var(--typography-label-large-size);
+  font-weight: var(--typography-label-large-weight);
   font-family: inherit;
   transition: opacity var(--duration-sm), transform var(--duration-sm);
 }
-button:disabled { opacity: 0.4; cursor: not-allowed; }
+button:disabled { opacity: var(--component-button-disabled-alpha); cursor: not-allowed; }
 button.btn-saving:disabled,
 button.btn-success:disabled { opacity: 1; cursor: default; }
-button:not(:disabled):hover { opacity: 0.85; }
+button:not(:disabled):hover { opacity: var(--component-button-hover-alpha); }
 
-.btn-primary { background: var(--accent-btn); color: var(--on-primary); }
-.btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+.btn-primary { background: var(--primary); color: var(--on-primary); }
+.btn-secondary { background: var(--surface2); color: var(--text); }
 .btn-saving { background: transparent; color: var(--success); border: 1px solid var(--success); }
 .btn-success { background: var(--success); color: var(--on-primary); }
 .btn-error { background: var(--error); color: var(--on-primary); }
 .btn-warning { background: var(--warning); color: var(--bg); }
 
+/* Flat icon-action utility (#24, matches Android IconButton): transparent
+   background, semantic tint, icon.sm glyph; hover = tint of the same color. */
+.icon-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-circle);
+  padding: var(--space-sm);
+  font-size: var(--component-button-icon-action-size);
+  line-height: 1;
+  color: var(--text-muted);
+  transition: background var(--duration-sm), color var(--duration-sm);
+}
+.icon-action:not(:disabled):hover {
+  opacity: 1;
+  background: color-mix(in srgb, currentColor 15%, transparent);
+}
+.icon-action.success { color: var(--success); }
+.icon-action.success:not(:disabled):hover { background: rgba(var(--success-rgb), var(--alpha-tint)); }
+.icon-action.error { color: var(--error); }
+.icon-action.error:not(:disabled):hover { background: rgba(var(--error-rgb), var(--alpha-tint)); }
+
 /* Shared uppercase micro-label utility (extracted in #23) — built on the
-   typography.micro-label token role. line-height is intentionally not set
-   to preserve the pre-extraction line boxes until #24. */
+   typography.micro-label token role. */
 .micro-label {
   font-size: var(--typography-micro-label-size);
   font-weight: var(--typography-micro-label-weight);
   letter-spacing: var(--typography-micro-label-letter-spacing);
   text-transform: var(--typography-micro-label-transform);
+  line-height: var(--typography-micro-label-line-height);
   color: var(--text-muted);
 }
 

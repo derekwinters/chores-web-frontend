@@ -77,11 +77,12 @@ describe("ChoreCard", () => {
       <ChoreCard chore={makeChore()} selected={false} onClick={() => {}} choreState="due" onEdit={onEdit} onHistory={onHistory} onDelete={onDelete} onComplete={onComplete} onSkip={onSkip} onMarkDue={onMarkDue} />
     );
     fireEvent.click(container.querySelector(".chore-card"));
-    expect(screen.getByText("Complete")).toBeInTheDocument();
-    expect(screen.getByText("Skip")).toBeInTheDocument();
-    expect(screen.getByText("Edit")).toBeInTheDocument();
-    expect(screen.getByText("History")).toBeInTheDocument();
-    expect(screen.getByText("Delete")).toBeInTheDocument();
+    // #24: actions are flat icon-only buttons — query by accessible name
+    expect(screen.getByRole("button", { name: /mark vacuum complete/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /skip vacuum/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /edit vacuum/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /history for vacuum/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /delete vacuum/i })).toBeInTheDocument();
   });
 
   it("calls onEdit when Edit button clicked", () => {
@@ -90,7 +91,7 @@ describe("ChoreCard", () => {
       <ChoreCard chore={makeChore()} selected={false} onClick={() => {}} onEdit={onEdit} />
     );
     fireEvent.click(container.querySelector(".chore-card"));
-    fireEvent.click(screen.getByText("Edit"));
+    fireEvent.click(screen.getByRole("button", { name: /edit vacuum/i }));
     expect(onEdit).toHaveBeenCalledWith(makeChore());
   });
 
@@ -100,7 +101,7 @@ describe("ChoreCard", () => {
       <ChoreCard chore={makeChore()} selected={false} onClick={() => {}} onDelete={onDelete} />
     );
     fireEvent.click(container.querySelector(".chore-card"));
-    fireEvent.click(screen.getByText("Delete"));
+    fireEvent.click(screen.getByRole("button", { name: /delete vacuum/i }));
     expect(onDelete).toHaveBeenCalledWith(makeChore());
   });
 
@@ -110,7 +111,7 @@ describe("ChoreCard", () => {
       <ChoreCard chore={makeChore()} selected={false} onClick={() => {}} choreState="due" onComplete={onComplete} />
     );
     fireEvent.click(container.querySelector(".chore-card"));
-    fireEvent.click(screen.getByText("Complete"));
+    fireEvent.click(screen.getByRole("button", { name: /mark vacuum complete/i }));
     expect(onComplete).toHaveBeenCalledWith(makeChore());
   });
 
@@ -120,7 +121,7 @@ describe("ChoreCard", () => {
       <ChoreCard chore={makeChore()} selected={false} onClick={() => {}} choreState="due" onSkip={onSkip} />
     );
     fireEvent.click(container.querySelector(".chore-card"));
-    fireEvent.click(screen.getByText("Skip"));
+    fireEvent.click(screen.getByRole("button", { name: /skip vacuum/i }));
     expect(onSkip).toHaveBeenCalledWith(makeChore());
   });
 
@@ -130,7 +131,7 @@ describe("ChoreCard", () => {
       <ChoreCard chore={makeChore()} selected={false} onClick={() => {}} choreState="complete" onMarkDue={onMarkDue} />
     );
     fireEvent.click(container.querySelector(".chore-card"));
-    expect(screen.getByText("Mark Due Now")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /mark vacuum due now/i })).toBeInTheDocument();
   });
 
   it("calls onMarkDue when Mark Due Now button clicked", () => {
@@ -139,7 +140,7 @@ describe("ChoreCard", () => {
       <ChoreCard chore={makeChore()} selected={false} onClick={() => {}} choreState="complete" onMarkDue={onMarkDue} />
     );
     fireEvent.click(container.querySelector(".chore-card"));
-    fireEvent.click(screen.getByText("Mark Due Now"));
+    fireEvent.click(screen.getByRole("button", { name: /mark vacuum due now/i }));
     expect(onMarkDue).toHaveBeenCalledWith(makeChore());
   });
 

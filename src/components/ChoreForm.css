@@ -13,7 +13,8 @@
 
 .form-divider {
   border: none;
-  border-top: 1px solid var(--border);
+  height: 1px;
+  background: var(--surface2);
   margin: 0;
 }
 
@@ -46,7 +47,7 @@
 .form-display {
   padding: var(--space-sm) var(--space-md);
   background: var(--surface2);
-  border-radius: var(--radius);
+  border-radius: var(--component-form-field-radius);
   color: var(--text);
   font-size: var(--typography-title-small-size);
 }
@@ -64,9 +65,9 @@
 .form-column select {
   background: var(--surface2);
   color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--text-muted);
+  border-radius: var(--component-form-field-radius);
+  padding: var(--component-form-field-padding-y) var(--component-form-field-padding-x);
   font-size: var(--typography-title-small-size);
 }
 
@@ -76,8 +77,9 @@
 .form-column input[type="text"]:focus,
 .form-column input[type="number"]:focus,
 .form-column select:focus {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 var(--component-form-field-focus-ring-width) rgba(var(--accent-rgb), var(--component-form-field-focus-ring-alpha));
 }
 
 .radio-group {
@@ -104,8 +106,8 @@
 .day-btn {
   background: var(--surface2);
   color: var(--text-muted);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border: none;
+  border-radius: var(--radius-md);
   padding: var(--space-xs) var(--space-sm);
   font-size: var(--typography-body-medium-size);
   font-weight: 600;
@@ -113,9 +115,8 @@
 }
 
 .day-btn.active {
-  background: var(--accent-btn);
+  background: var(--primary);
   color: var(--on-primary);
-  border-color: var(--accent-btn);
 }
 
 .people-picker {
@@ -128,17 +129,16 @@
 .person-btn {
   background: var(--surface2);
   color: var(--text-muted);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border: none;
+  border-radius: var(--radius-md);
   padding: var(--space-xs) var(--space-md);
   font-size: var(--typography-body-medium-size);
   font-weight: 600;
 }
 
 .person-btn.active {
-  background: var(--accent-btn);
+  background: var(--primary);
   color: var(--on-primary);
-  border-color: var(--accent-btn);
 }
 
 .inline-selects {
@@ -201,7 +201,7 @@
   font-size: var(--typography-body-medium-size);
   padding: var(--space-sm) var(--space-md);
   background: rgba(var(--error-rgb), var(--alpha-tint-subtle));
-  border-radius: var(--radius);
+  border-radius: var(--radius-md);
   border: 1px solid var(--error);
 }
 
@@ -237,11 +237,11 @@
   background: var(--on-primary);
   border-radius: var(--radius-circle);
   transition: left var(--duration-lg) ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* iteration-4 (#24): one-off shadow, swap for --elevation-* */
+  box-shadow: var(--elevation-1);
 }
 
 .toggle-pill.active .toggle-circle {
-  background: var(--accent-btn);
+  background: var(--primary);
 }
 
 .toggle-pill.active .toggle-circle::after {
@@ -253,7 +253,6 @@
   justify-content: flex-end;
   gap: var(--space-sm);
   padding-top: var(--space-sm);
-  border-top: 1px solid var(--border);
 }
 
 .next-due-controls {
@@ -266,8 +265,7 @@
   flex: 1;
   padding: var(--space-sm) var(--space-md);
   background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--component-form-field-radius);
   color: var(--text);
   font-size: var(--typography-title-small-size);
 }
@@ -282,18 +280,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: var(--z-modal);
 }
 
 .modal-dialog {
   background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  max-width: 320px;
+  border-radius: var(--component-modal-radius);
+  max-width: 320px; /* intentional: content-sized date-picker dialog */
   width: 90%;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3); /* iteration-4 (#24): one-off shadow, swap for --elevation-* */
+  box-shadow: var(--elevation-3);
 }
 
 .modal-header {
@@ -301,7 +298,6 @@
   justify-content: space-between;
   align-items: center;
   padding: var(--space-lg);
-  border-bottom: 1px solid var(--border);
 }
 
 .modal-header h3 {
