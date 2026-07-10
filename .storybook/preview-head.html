@@ -1,0 +1,7 @@
+<!-- Same webfonts index.html loads for the app: DM Sans (body) + Playfair
+     Display (brand-title). Without these the preview falls back to system
+     fonts and visual baselines drift. CI runners must be able to reach
+     fonts.googleapis.com (GitHub-hosted runners can); the visual-regression
+     script additionally awaits document.fonts.ready before screenshotting. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
