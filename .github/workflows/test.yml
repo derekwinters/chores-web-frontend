@@ -65,6 +65,7 @@ jobs:
           name: visual-diffs
           path: .visual-diffs/
           if-no-files-found: ignore
+          include-hidden-files: true
       # The cross-repo token gallery (chores-web-design-tokens#6) pairs these
       # PNGs with the Android Roborazzi goldens by filename.
       - name: Upload web snapshots
@@ -75,6 +76,7 @@ jobs:
           path: |
             storybook-static
             .visual-baselines
+          include-hidden-files: true
 
   docker-build:
     needs: [tests]
