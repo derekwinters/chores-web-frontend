@@ -2,12 +2,12 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.65rem 0.75rem;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-md);
   border-radius: var(--radius);
   background: var(--surface2);
   border: 1px solid var(--border);
-  transition: background 0.2s ease;
+  transition: background var(--duration-md) ease;
 }
 
 .chore-row.done {
@@ -19,14 +19,14 @@
 .chore-row-icon {
   width: 36px;
   height: 36px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background: var(--surface);
   border: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: all 0.3s ease;
+  transition: all var(--duration-lg) ease;
 }
 
 .chore-row-icon.done {
@@ -35,12 +35,12 @@
 }
 
 .chore-icon-check {
-  font-size: 16px;
+  font-size: var(--typography-body-large-size);
   color: var(--on-primary);
 }
 
 .chore-icon-pts {
-  font-size: 0.65rem;
+  font-size: var(--typography-label-small-size);
   font-weight: 700;
   color: var(--gold);
   letter-spacing: -0.5px;
@@ -50,7 +50,7 @@
 .chore-row-info {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: var(--space-sm);
   flex: 1;
   min-width: 0;
   flex-wrap: wrap;
@@ -58,14 +58,14 @@
 
 .chore-row-name {
   font-weight: 500;
-  font-size: 0.875rem;
+  font-size: var(--typography-body-medium-size);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .chore-row-age {
-  font-size: 0.72rem;
+  font-size: var(--typography-label-small-size);
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -74,7 +74,7 @@
 .chore-row-age.future  { color: var(--text-muted); }
 
 .chore-row-due {
-  font-size: 0.72rem;
+  font-size: var(--typography-label-small-size);
   color: var(--text-muted);
   white-space: nowrap;
 }
@@ -82,8 +82,8 @@
 .chore-row-assignee {
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 0.72rem;
+  gap: var(--space-xs);
+  font-size: var(--typography-label-small-size);
   color: var(--text-muted);
 }
 
@@ -91,7 +91,7 @@
   display: inline-block;
   width: 7px;
   height: 7px;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   flex-shrink: 0;
 }
 
@@ -99,22 +99,22 @@
 .chore-row-btns {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: var(--space-xs);
   flex-shrink: 0;
 }
 
 .btn-xs {
-  padding: 0.25rem 0.65rem;
-  font-size: 0.78rem;
+  padding: var(--space-xs) var(--space-md);
+  font-size: var(--typography-body-small-size);
 }
 
 /* Gold points badge */
 .pts-badge {
-  padding: 3px 8px;
-  border-radius: 99px;
+  padding: 3px var(--space-sm); /* iteration-4 (#24) */
+  border-radius: var(--radius-pill);
   background: var(--gold-bg);
   color: var(--gold);
-  font-size: 0.72rem;
+  font-size: var(--typography-label-small-size);
   font-weight: 600;
   white-space: nowrap;
 }
@@ -123,16 +123,16 @@
 .chore-row-reassign {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: var(--space-xs);
 }
 
 .reassign-select-xs {
   background: var(--surface);
   color: var(--text);
   border: 1px solid var(--border);
-  border-radius: 99px;
-  padding: 0.2rem 0.5rem;
-  font-size: 0.78rem;
+  border-radius: var(--radius-pill);
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--typography-body-small-size);
   font-family: inherit;
   cursor: pointer;
   max-width: 8rem;
@@ -140,6 +140,6 @@
 
 .chore-row-error {
   width: 100%;
-  font-size: 0.75rem;
+  font-size: var(--typography-body-small-size);
   color: var(--error);
 }

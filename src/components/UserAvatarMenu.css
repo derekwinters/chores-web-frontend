@@ -1,21 +1,21 @@
 .user-avatar-menu {
   position: relative;
   border-top: 1px solid var(--border);
-  padding: 0.5rem 0.75rem;
+  padding: var(--space-sm) var(--space-md);
 }
 
 .user-avatar-btn {
   background: transparent;
   border: none;
   color: var(--text);
-  padding: 0.5rem;
+  padding: var(--space-sm);
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--space-md);
   cursor: pointer;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   justify-content: flex-start;
-  transition: background-color 0.2s;
+  transition: background-color var(--duration-md);
   width: 100%;
 }
 
@@ -26,7 +26,7 @@
 .user-avatar {
   width: 2.5rem;
   height: 2.5rem;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -36,7 +36,7 @@
 }
 
 .user-name {
-  font-size: 0.85rem;
+  font-size: var(--typography-body-medium-size);
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
@@ -63,9 +63,9 @@
     bottom: auto;
     right: 0;
     left: auto;
-    margin-top: 4px;
+    margin-top: var(--space-xs);
     margin-bottom: 0;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* iteration-4 (#24): one-off shadow, swap for --elevation-* */
   }
 }
 
@@ -76,16 +76,16 @@
   right: 0;
   background: var(--surface2);
   border: 1px solid var(--border);
-  border-radius: 4px;
-  margin-bottom: 4px;
+  border-radius: var(--radius-xs);
+  margin-bottom: var(--space-xs);
   min-width: 150px;
-  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3); /* iteration-4 (#24): one-off shadow, swap for --elevation-* */
   z-index: 1000;
 }
 
 .dropdown-header {
-  padding: 10px 12px;
-  font-size: 0.85rem;
+  padding: 10px var(--space-md); /* iteration-4 (#24) */
+  font-size: var(--typography-body-medium-size);
   font-weight: 600;
   color: var(--text-muted);
   border-bottom: 1px solid var(--border);
@@ -95,14 +95,14 @@
 .dropdown-btn,
 .logout-btn {
   width: 100%;
-  padding: 10px 12px;
+  padding: 10px var(--space-md); /* iteration-4 (#24) */
   background: transparent;
   border: none;
   color: var(--text);
-  font-size: 0.85rem;
+  font-size: var(--typography-body-medium-size);
   text-align: left;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color var(--duration-md);
 }
 
 .dropdown-btn:hover {
@@ -111,6 +111,6 @@
 
 .logout-btn:hover {
   background: var(--surface);
-  color: #ff6b6b;
+  color: var(--error);
 }
 

@@ -16,8 +16,10 @@
        behavior under runtime themes.
      - --shadow / --shadow-lg: legacy shadow values; swapped for the
        M3-derived --elevation-* tokens in #24. */
+  /* stylelint-disable color-no-hex */
   --border: #2c3f58;
   --accent-btn: #3574B3;
+  /* stylelint-enable color-no-hex */
   --accent-bg: rgba(115, 177, 221, 0.1);
   --gold: var(--points);
   --gold-bg: rgba(201, 168, 76, 0.13);
@@ -37,12 +39,12 @@ body {
 button {
   cursor: pointer;
   border: none;
-  border-radius: 99px;
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
+  border-radius: var(--radius-pill);
+  padding: var(--space-sm) var(--space-lg);
+  font-size: var(--typography-body-medium-size);
   font-weight: 500;
   font-family: inherit;
-  transition: opacity 0.15s, transform 0.15s;
+  transition: opacity var(--duration-sm), transform var(--duration-sm);
 }
 button:disabled { opacity: 0.4; cursor: not-allowed; }
 button.btn-saving:disabled,
@@ -55,6 +57,17 @@ button:not(:disabled):hover { opacity: 0.85; }
 .btn-success { background: var(--success); color: var(--on-primary); }
 .btn-error { background: var(--error); color: var(--on-primary); }
 .btn-warning { background: var(--warning); color: var(--bg); }
+
+/* Shared uppercase micro-label utility (extracted in #23) — built on the
+   typography.micro-label token role. line-height is intentionally not set
+   to preserve the pre-extraction line boxes until #24. */
+.micro-label {
+  font-size: var(--typography-micro-label-size);
+  font-weight: var(--typography-micro-label-weight);
+  letter-spacing: var(--typography-micro-label-letter-spacing);
+  text-transform: var(--typography-micro-label-transform);
+  color: var(--text-muted);
+}
 
 @keyframes slideUp {
   from { opacity: 0; transform: translate(-50%, 12px); }

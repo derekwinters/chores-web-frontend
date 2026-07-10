@@ -3,10 +3,10 @@
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: var(--space-xl);
 }
 
-.points-page h2 { font-size: 1.3rem; }
+.points-page h2 { font-size: var(--typography-brand-title-size); }
 
 .leaderboard, .history-table {
   width: 100%;
@@ -18,27 +18,27 @@
 
 .leaderboard th, .history-table th {
   background: var(--surface2);
-  padding: 0.6rem 1rem;
+  padding: var(--space-sm) var(--space-lg);
   text-align: left;
-  font-size: 0.85rem;
+  font-size: var(--typography-body-medium-size);
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .leaderboard td, .history-table td {
-  padding: 0.75rem 1rem;
+  padding: var(--space-md) var(--space-lg);
   border-top: 1px solid var(--border);
 }
 
 .leaderboard tbody tr {
   cursor: pointer;
-  transition: background 0.1s;
+  transition: background var(--duration-xs);
 }
 .leaderboard tbody tr:hover { background: var(--surface2); }
-.leaderboard tbody tr.selected-row { background: var(--surface2); border-left: 3px solid var(--accent); }
+.leaderboard tbody tr.selected-row { background: var(--surface2); border-left: 3px solid var(--accent); } /* iteration-4 (#24): 3px accent bar is off the border-width scale */
 
-.history-panel { display: flex; flex-direction: column; gap: 0.75rem; }
-.history-panel h3 { font-size: 1rem; color: var(--text-muted); }
+.history-panel { display: flex; flex-direction: column; gap: var(--space-md); }
+.history-panel h3 { font-size: var(--typography-body-large-size); color: var(--text-muted); }
 
-.empty { color: var(--text-muted); padding: 1rem 0; }
+.empty { color: var(--text-muted); padding: var(--space-lg) 0; }

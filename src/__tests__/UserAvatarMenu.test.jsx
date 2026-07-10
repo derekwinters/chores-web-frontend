@@ -143,8 +143,8 @@ describe("UserAvatarMenu", () => {
       expect(topnavBlock).toMatch(/left\s*:\s*auto/);
     });
 
-    it("sets margin-top: 4px and margin-bottom: 0 for correct spacing", () => {
-      expect(topnavBlock).toMatch(/margin-top\s*:\s*4px/);
+    it("sets margin-top: var(--space-xs) (4px) and margin-bottom: 0 for correct spacing", () => {
+      expect(topnavBlock).toMatch(/margin-top\s*:\s*var\(--space-xs\)/);
       expect(topnavBlock).toMatch(/margin-bottom\s*:\s*0/);
     });
 

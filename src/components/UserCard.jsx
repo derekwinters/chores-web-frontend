@@ -69,13 +69,13 @@ export default function UserCard({ person, chores, people, summary }) {
 
       <div className="uc-points-grid">
         <div className="uc-points-col">
-          <div className="uc-points-label">Last 7 Days</div>
+          <div className="uc-points-label micro-label">Last 7 Days</div>
           <div className="uc-points-value"><span style={{ color: color7d }}>{pts7}</span><span className="uc-pts-unit">pts</span></div>
           <ProgressBar value={pts7} max={goal7d} color="var(--accent)" />
           <div className="uc-goal-label">Goal: {goal7d} pts</div>
         </div>
         <div className="uc-points-col">
-          <div className="uc-points-label">Last 30 Days</div>
+          <div className="uc-points-label micro-label">Last 30 Days</div>
           <div className="uc-points-value"><span style={{ color: color30d }}>{pts30}</span><span className="uc-pts-unit">pts</span></div>
           <ProgressBar value={pts30} max={goal30d} color="var(--accent)" />
           <div className="uc-goal-label">Goal: {goal30d} pts</div>
@@ -96,7 +96,7 @@ export default function UserCard({ person, chores, people, summary }) {
             navigate(`/chores?${params.toString()}`);
           }}
         >
-          <div className="uc-due-header">Due Now</div>
+          <div className="uc-due-header micro-label">Due Now</div>
           <div className="uc-due-count" style={dueNow === 0 ? { color: "var(--text)" } : {}}>{dueNow}</div>
         </button>
 
@@ -111,7 +111,7 @@ export default function UserCard({ person, chores, people, summary }) {
             navigate(`/chores?${params.toString()}`);
           }}
         >
-          <div className="uc-due-header">Due Soon</div>
+          <div className="uc-due-header micro-label">Due Soon</div>
           <div className="uc-due-count" style={dueSoon === 0 ? { color: "var(--text)" } : {}}>{dueSoon}</div>
         </button>
       </div>
