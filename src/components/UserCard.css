@@ -2,12 +2,12 @@
   background: var(--surface);
   border: none;
   border-radius: var(--radius);
-  padding: 1.25rem;
+  padding: 1.25rem; /* iteration-4 (#24) */
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--space-lg);
   box-shadow: var(--shadow);
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  transition: box-shadow var(--duration-md) ease, transform var(--duration-md) ease;
 }
 .user-card:hover {
   box-shadow: var(--shadow-lg);
@@ -23,11 +23,11 @@
 .uc-identity {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--space-md);
 }
 
 .uc-name {
-  font-size: 1.05rem;
+  font-size: var(--typography-title-medium-size);
   font-weight: 600;
   color: var(--text);
 }
@@ -36,38 +36,32 @@
 .uc-points-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  gap: var(--space-lg);
 }
 
 .uc-points-col {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: var(--space-xs);
 }
 
-.uc-points-label {
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  color: var(--text-muted);
-}
+/* .uc-points-label styling now comes from the shared .micro-label utility (index.css) */
 
 .uc-points-value {
-  font-size: 1.75rem;
+  font-size: var(--typography-headline-medium-size);
   font-weight: 700;
   line-height: 1;
 }
 
 .uc-pts-unit {
-  font-size: 0.8rem;
+  font-size: var(--typography-body-small-size);
   font-weight: 400;
   color: var(--text-muted);
-  margin-left: 3px;
+  margin-left: 3px; /* iteration-4 (#24) */
 }
 
 .uc-goal-label {
-  font-size: 0.7rem;
+  font-size: var(--typography-label-small-size);
   color: var(--text-muted);
 }
 
@@ -79,23 +73,23 @@
 .uc-due-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  gap: var(--space-lg);
 }
 
 .uc-due-col {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: var(--space-xs);
 }
 
 .uc-due-link {
   background: none;
   border: none;
-  padding: 0.5rem;
-  border-radius: 4px;
+  padding: var(--space-sm);
+  border-radius: var(--radius-xs);
   cursor: pointer;
   text-align: left;
-  transition: background-color 0.2s, transform 0.2s;
+  transition: background-color var(--duration-md), transform var(--duration-md);
 }
 
 .uc-due-link:hover {
@@ -103,16 +97,10 @@
   transform: scale(1.02);
 }
 
-.uc-due-header {
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  color: var(--text-muted);
-}
+/* .uc-due-header styling now comes from the shared .micro-label utility (index.css) */
 
 .uc-due-count {
-  font-size: 1.75rem;
+  font-size: var(--typography-headline-medium-size);
   font-weight: 700;
   line-height: 1;
   color: var(--warning);
@@ -121,20 +109,20 @@
 .uc-due-list {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: var(--space-xs);
 }
 
 .uc-chore-link {
   background: none;
   border: none;
-  padding: 0.4rem 0.75rem;
-  border-radius: 4px;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-xs);
   color: var(--accent);
-  font-size: 0.9rem;
+  font-size: var(--typography-body-medium-size);
   font-weight: 500;
   cursor: pointer;
   text-align: left;
-  transition: background-color 0.2s;
+  transition: background-color var(--duration-md);
 }
 
 .uc-chore-link:hover {
@@ -145,13 +133,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.75rem;
+  padding: var(--space-md);
   background-color: var(--surface2);
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
 }
 
 .uc-workload-label {
-  font-size: 0.75rem;
+  font-size: var(--typography-body-small-size);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.07em;
@@ -161,11 +149,11 @@
 .uc-workload-count {
   background: none;
   border: none;
-  font-size: 1.25rem;
+  font-size: 1.25rem; /* iteration-4 (#24) */
   font-weight: 700;
   color: var(--accent);
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: opacity var(--duration-md);
 }
 
 .uc-workload-count:hover {

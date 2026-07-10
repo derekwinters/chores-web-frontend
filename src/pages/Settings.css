@@ -3,18 +3,18 @@
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: var(--space-2xl);
 }
 
 .settings-section {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--space-lg);
 }
 
 .settings-section h3 {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: var(--typography-title-medium-size);
   color: var(--text);
 }
 
@@ -27,11 +27,11 @@
 .setting-group {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--space-sm);
 }
 
 .setting-group label {
-  font-size: 0.9rem;
+  font-size: var(--typography-body-medium-size);
   font-weight: 500;
   color: var(--text);
 }
@@ -39,13 +39,13 @@
 .setting-group input[type="text"],
 .setting-group select {
   width: 100%;
-  padding: 0.5rem 0.75rem;
+  padding: var(--space-sm) var(--space-md);
   background: var(--surface2);
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
   color: var(--text);
   font-family: inherit;
-  font-size: 0.95rem;
+  font-size: var(--typography-title-small-size);
   box-sizing: border-box;
 }
 
@@ -57,14 +57,14 @@
 
 .setting-description {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: var(--typography-body-medium-size);
   color: var(--text-muted);
 }
 
 .checkbox-label {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-sm);
   cursor: pointer;
 }
 
@@ -74,18 +74,18 @@
 
 .input-group {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--space-sm);
 }
 
 .input-group input {
   flex: 1;
-  padding: 0.5rem 0.75rem;
+  padding: var(--space-sm) var(--space-md);
   background: var(--surface2);
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
   color: var(--text);
   font-family: inherit;
-  font-size: 0.95rem;
+  font-size: var(--typography-title-small-size);
 }
 
 .input-group input:focus {
@@ -94,26 +94,26 @@
 }
 
 .error-message {
-  padding: 0.75rem 1rem;
-  background: rgba(var(--error-rgb), 0.1);
+  padding: var(--space-md) var(--space-lg);
+  background: rgba(var(--error-rgb), var(--alpha-tint-subtle));
   border: 1px solid var(--error);
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
   color: var(--error);
-  font-size: 0.9rem;
+  font-size: var(--typography-body-medium-size);
 }
 
 .success-message {
-  padding: 0.75rem 1rem;
-  background: rgba(var(--success-rgb), 0.1);
+  padding: var(--space-md) var(--space-lg);
+  background: rgba(var(--success-rgb), var(--alpha-tint-subtle));
   border: 1px solid var(--success);
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
   color: var(--success);
-  font-size: 0.9rem;
+  font-size: var(--typography-body-medium-size);
 }
 
 .loading {
   text-align: center;
-  padding: 2rem;
+  padding: var(--space-2xl);
   color: var(--text-muted);
 }
 
@@ -137,7 +137,7 @@
 .section-content {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--space-sm);
 }
 
 /* ── Save button states ──────────────────────────────────────────────────── */
@@ -157,7 +157,7 @@
 /* ── Data Management entries ─────────────────────────────────────────────── */
 
 .data-management-entry {
-  font-size: 0.95rem;
+  font-size: var(--typography-title-small-size);
   color: var(--text);
 }
 
@@ -170,12 +170,12 @@
 .db-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.9rem;
+  font-size: var(--typography-body-medium-size);
 }
 
 .db-table th,
 .db-table td {
-  padding: 0.5rem 0.75rem;
+  padding: var(--space-sm) var(--space-md);
   border: 1px solid var(--border);
   text-align: left;
   white-space: nowrap;
@@ -193,13 +193,13 @@
 
 .db-edit-input {
   width: 100%;
-  padding: 0.3rem 0.5rem;
+  padding: var(--space-xs) var(--space-sm);
   background: var(--surface2);
   border: 1px solid var(--accent);
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
   color: var(--text);
   font-family: inherit;
-  font-size: 0.9rem;
+  font-size: var(--typography-body-medium-size);
   box-sizing: border-box;
 }
 
@@ -209,7 +209,7 @@
 
 .db-actions {
   display: flex;
-  gap: 0.4rem;
+  gap: var(--space-sm);
   align-items: center;
 }
 
@@ -217,23 +217,23 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
+  gap: var(--space-sm);
   flex-wrap: wrap;
 }
 
 .db-pagination-info {
-  font-size: 0.85rem;
+  font-size: var(--typography-body-medium-size);
   color: var(--text-muted);
 }
 
 .db-pagination-controls {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--space-sm);
 }
 
 .db-modal-actions {
   display: flex;
-  gap: 0.75rem;
+  gap: var(--space-md);
   justify-content: flex-end;
-  margin-top: 1.25rem;
+  margin-top: 1.25rem; /* iteration-4 (#24) */
 }

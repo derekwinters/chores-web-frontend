@@ -1,7 +1,7 @@
 .dashboard {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.25rem; /* iteration-4 (#24) */
   max-width: 1600px;
   margin: 0 auto;
 }
@@ -9,7 +9,7 @@
 .user-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
-  gap: 1rem;
+  gap: var(--space-lg);
 }
 
 @media (max-width: 1024px) {
@@ -19,16 +19,16 @@
 }
 
 .open-section {
-  margin-top: 1rem;
+  margin-top: var(--space-lg);
 }
 
 .open-section-link {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 1.5rem;
+  padding: var(--space-xl);
   cursor: pointer;
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  transition: box-shadow var(--duration-md) ease, transform var(--duration-md) ease;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -40,7 +40,7 @@
 }
 
 .open-section-title {
-  font-size: 0.85rem;
+  font-size: var(--typography-body-medium-size);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -49,7 +49,7 @@
 }
 
 .open-section-count {
-  font-size: 1.75rem;
+  font-size: var(--typography-headline-medium-size);
   font-weight: 700;
   color: var(--warning);
 }
@@ -57,12 +57,12 @@
 .dashboard-empty {
   text-align: center;
   color: var(--text-muted);
-  padding: 4rem 1rem;
+  padding: var(--space-5xl) var(--space-lg);
   line-height: 1.7;
 }
 
 .loading {
   color: var(--text-muted);
   text-align: center;
-  padding: 4rem;
+  padding: var(--space-5xl);
 }

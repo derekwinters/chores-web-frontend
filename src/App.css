@@ -3,9 +3,9 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: var(--bg-primary, #1a1a1a);
-  color: var(--text-primary, #fff);
-  font-size: 18px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 18px; /* iteration-4 (#24) */
 }
 
 .app { display: flex; min-height: 100vh; }
@@ -23,12 +23,15 @@
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  transition: width 0.3s ease;
+  transition: width var(--duration-lg) ease;
   width: 240px;
   height: 100dvh;
   position: fixed;
   left: 0;
   top: 0;
+  /* z-index cluster (100/99/98 here and below) is left off the --z-* scale on
+     purpose: normalizing it needs the iteration-4 (#24) modal restructure to
+     preserve stacking order. */
   z-index: 100;
 }
 
@@ -40,7 +43,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 0.5rem;
+  padding: var(--space-lg) var(--space-sm);
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }
@@ -51,7 +54,7 @@
 
 .app-title {
   font-family: 'Playfair Display', serif;
-  font-size: 1.3rem;
+  font-size: var(--typography-brand-title-size);
   font-weight: 700;
   letter-spacing: -0.5px;
   color: var(--text);
@@ -60,7 +63,7 @@
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
-  padding: 0 0.75rem;
+  padding: 0 var(--space-md);
 }
 
 .app-sidebar.closed .app-title {
@@ -70,13 +73,13 @@
 .sidebar-toggle {
   background: transparent;
   color: var(--text-muted);
-  padding: 0.5rem;
-  font-size: 1.2rem;
+  padding: var(--space-sm);
+  font-size: 1.2rem; /* iteration-4 (#24) */
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: 0.25rem;
+  margin-left: var(--space-xs);
 }
 
 .sidebar-toggle:hover {
@@ -86,8 +89,8 @@
 .sidebar-nav {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  padding: 1rem 0.5rem;
+  gap: var(--space-sm);
+  padding: var(--space-lg) var(--space-sm);
   flex: 1;
   overflow-y: auto;
 }
@@ -95,13 +98,13 @@
 .nav-btn {
   background: var(--surface);
   color: var(--text-muted);
-  padding: 0.75rem 0.75rem;
-  font-size: 0.85rem;
+  padding: var(--space-md) var(--space-md);
+  font-size: var(--typography-body-medium-size);
   text-align: left;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--space-md);
   border: none;
   cursor: pointer;
   text-decoration: none;
@@ -117,17 +120,17 @@
   color: var(--text);
   border: none;
   border-radius: 0;
-  padding: 0.75rem 1rem 0.75rem 1.3rem;
+  padding: var(--space-md) var(--space-lg) var(--space-md) 1.3rem; /* iteration-4 (#24) */
   margin: 0 -0.5rem;
-  font-size: 0.85rem;
+  font-size: var(--typography-body-medium-size);
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--space-md);
   text-decoration: none;
 }
 
 .nav-icon {
-  font-size: 1.2rem;
+  font-size: 1.2rem; /* iteration-4 (#24) */
   flex-shrink: 0;
 }
 
@@ -142,7 +145,7 @@
 .app-sidebar.closed .nav-btn,
 .app-sidebar.closed .nav-active {
   justify-content: center;
-  padding: 0.75rem;
+  padding: var(--space-md);
   margin: 0;
 }
 
@@ -152,7 +155,7 @@
   flex: 1;
   overflow: hidden;
   margin-left: 240px;
-  transition: margin-left 0.3s ease;
+  transition: margin-left var(--duration-lg) ease;
 }
 
 .app-sidebar.closed ~ .app-content {
@@ -160,13 +163,13 @@
 }
 
 
-.app-main { flex: 1; padding: 2rem 1.5rem; overflow-y: auto; }
+.app-main { flex: 1; padding: var(--space-2xl) var(--space-xl); overflow-y: auto; }
 
 .page-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--space-xl);
   min-height: 44px;
 }
 
@@ -178,7 +181,7 @@
 .page-header h6 {
   margin: 0;
   padding: 0;
-  font-size: 1.3rem;
+  font-size: var(--typography-brand-title-size);
   line-height: 1.4;
   font-weight: 600;
 }
@@ -199,8 +202,8 @@
   .app-topnav {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    padding: 0.75rem 1rem;
+    gap: var(--space-lg);
+    padding: var(--space-md) var(--space-lg);
     background: var(--surface);
     border-bottom: 1px solid var(--border);
     height: 56px;
@@ -208,7 +211,7 @@
     position: sticky;
     top: 0;
     z-index: 100;
-    transition: transform 0.3s ease;
+    transition: transform var(--duration-lg) ease;
   }
 
   .app-topnav.hidden {
@@ -218,8 +221,8 @@
   .topnav-toggle {
     background: transparent;
     color: var(--text-muted);
-    padding: 0.5rem;
-    font-size: 1.2rem;
+    padding: var(--space-sm);
+    font-size: 1.2rem; /* iteration-4 (#24) */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -233,7 +236,7 @@
 
   .topnav-title {
     font-family: 'Playfair Display', serif;
-    font-size: 1.1rem;
+    font-size: var(--typography-title-medium-size);
     font-weight: 700;
     color: var(--text);
     flex: 1;
@@ -261,7 +264,7 @@
     top: 56px;
     left: 0;
     transform: translateX(-100%);
-    transition: transform 0.3s ease;
+    transition: transform var(--duration-lg) ease;
     z-index: 99;
   }
 
@@ -291,11 +294,11 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: var(--overlay);
     z-index: 98;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.3s ease;
+    transition: opacity var(--duration-lg) ease;
   }
 
   .sidebar-backdrop.open {
@@ -304,13 +307,13 @@
   }
 
   .app-main {
-    padding: 1rem;
+    padding: var(--space-lg);
     overflow-y: auto;
     height: calc(100vh - 56px);
   }
 
   .app-title {
-    font-size: 0.95rem;
+    font-size: var(--typography-title-small-size);
   }
 }
 
@@ -318,16 +321,16 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2rem;
+  gap: var(--space-2xl);
 }
 
 .spinner {
   width: 50px;
   height: 50px;
-  border: 4px solid rgba(255, 255, 255, 0.3);
-  border-top-color: var(--accent, #4a9eff);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
+  border: 4px solid rgba(255, 255, 255, 0.3); /* iteration-4 (#24): off-token spinner track color + 4px ring width */
+  border-top-color: var(--accent);
+  border-radius: var(--radius-circle);
+  animation: spin var(--duration-spinner) linear infinite;
 }
 
 @keyframes spin {

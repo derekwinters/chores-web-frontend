@@ -6,12 +6,12 @@
 .preferences-section {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--space-lg);
 }
 
 .preferences-section-heading {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: var(--typography-title-medium-size);
   font-weight: 600;
   color: var(--text);
 }
@@ -24,28 +24,28 @@
 
 .preferences-description {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: var(--typography-body-medium-size);
   color: var(--text-muted);
 }
 
 .preferences-themes-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 0.75rem;
+  gap: var(--space-md);
 }
 
 .preferences-theme-card {
   background: var(--surface);
   border: none;
-  border-radius: 8px;
-  padding: 0.75rem;
+  border-radius: var(--radius-sm);
+  padding: var(--space-md);
   cursor: pointer;
-  transition: box-shadow 0.2s ease, background 0.2s, transform 0.2s ease;
+  transition: box-shadow var(--duration-md) ease, background var(--duration-md), transform var(--duration-md) ease;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--space-sm);
   align-items: flex-start;
-  font-size: 0.9rem;
+  font-size: var(--typography-body-medium-size);
   color: var(--text);
   box-shadow: var(--shadow);
 }
@@ -58,7 +58,7 @@
 
 .preferences-theme-card.preferences-theme-active {
   background: var(--surface2);
-  box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.4), var(--shadow-lg);
+  box-shadow: var(--shadow-accent-glow), var(--shadow-lg);
 }
 
 .preferences-theme-card:disabled {
@@ -72,11 +72,11 @@
 
 .preferences-theme-preview {
   display: flex;
-  gap: 4px;
+  gap: var(--space-xs);
 }
 
 .preferences-color-sample {
   width: 18px;
   height: 18px;
-  border-radius: 3px;
+  border-radius: var(--radius-xs);
 }

@@ -5,7 +5,7 @@
   border: none;
   background: var(--surface);
   cursor: pointer;
-  transition: background 0.1s, border-color 0.1s, max-height 0.3s ease, filter 0.2s ease;
+  transition: background var(--duration-xs), border-color var(--duration-xs), max-height var(--duration-lg) ease, filter var(--duration-md) ease;
   user-select: none;
   overflow: hidden;
 }
@@ -24,7 +24,7 @@
   top: 0;
   bottom: 0;
   width: 4px;
-  transition: background 0.2s;
+  transition: background var(--duration-md);
 }
 
 .chore-card.due .accent-bar { background: var(--error); }
@@ -33,14 +33,14 @@
 .card-content {
   flex: 1;
   width: 100%;
-  padding: 0.75rem 1rem 0.75rem 1rem;
+  padding: var(--space-md) var(--space-lg) var(--space-md) var(--space-lg);
 }
 
 .collapsed-view {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--space-md);
   width: 100%;
 }
 
@@ -54,7 +54,7 @@
 }
 
 .chore-assignee {
-  font-size: 0.9rem;
+  font-size: var(--typography-body-medium-size);
   grid-column: 9 / 11;
   text-align: center;
   white-space: nowrap;
@@ -64,11 +64,11 @@
 }
 
 .chore-due-date {
-  font-size: 0.9rem;
+  font-size: var(--typography-body-medium-size);
   grid-column: 11 / 13;
   text-align: right;
   white-space: nowrap;
-  transition: color 0.2s;
+  transition: color var(--duration-md);
 }
 
 .chore-card.due .chore-due-date { color: var(--error); }
@@ -77,14 +77,14 @@
 .expanded-view {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--space-lg);
 }
 
 .expanded-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 1rem;
+  gap: var(--space-lg);
 }
 
 .expanded-header .chore-name {
@@ -94,8 +94,8 @@
 .expanded-meta {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  padding: 0.75rem 0;
+  gap: var(--space-lg);
+  padding: var(--space-md) 0;
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
 }
@@ -103,38 +103,38 @@
 .meta-item {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: var(--space-xs);
 }
 
 .meta-label {
-  font-size: 0.75rem;
+  font-size: var(--typography-body-small-size);
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .meta-value {
-  font-size: 0.9rem;
+  font-size: var(--typography-body-medium-size);
   font-weight: 500;
   color: var(--text);
 }
 
 .expanded-actions {
   display: flex;
-  gap: 0.75rem;
+  gap: var(--space-md);
 }
 
 .action-btn {
   flex: 1;
-  padding: 0.5rem 0.75rem;
+  padding: var(--space-sm) var(--space-md);
   border: 1px solid var(--border);
   background: transparent;
   border-radius: var(--radius);
   color: var(--text);
-  font-size: 0.85rem;
+  font-size: var(--typography-body-medium-size);
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  transition: background var(--duration-md), color var(--duration-md), border-color var(--duration-md);
 }
 
 .action-btn:hover {
@@ -148,7 +148,7 @@
 }
 
 .action-btn.error:hover {
-  background: rgba(var(--error-rgb), 0.1);
+  background: rgba(var(--error-rgb), var(--alpha-tint-subtle));
   border-color: var(--error);
 }
 
@@ -157,6 +157,6 @@
 }
 
 .action-btn.success:hover {
-  background: rgba(var(--success-rgb), 0.1);
+  background: rgba(var(--success-rgb), var(--alpha-tint-subtle));
   border-color: var(--success);
 }

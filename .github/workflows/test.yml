@@ -39,6 +39,8 @@ jobs:
         run: npm ci
       - name: Check JS formatting
         run: npm run lint 2>/dev/null || echo "No lint script"
+      - name: Lint CSS (design-token guardrail)
+        run: npm run lint:css
 
   docker-build:
     needs: [tests]

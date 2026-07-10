@@ -1,7 +1,7 @@
 .chore-list {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1rem;
+  gap: var(--space-lg);
 }
 
 .chore-state-spacer {
@@ -18,13 +18,13 @@
 .chore-card {
   background: var(--surface);
   border: none;
-  border-radius: 8px;
-  padding: 1.5rem;
+  border-radius: var(--radius-sm);
+  padding: var(--space-xl);
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--space-lg);
   box-shadow: var(--shadow);
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  transition: box-shadow var(--duration-md) ease, transform var(--duration-md) ease;
 }
 
 .chore-card:hover {
@@ -35,48 +35,48 @@
 .chore-header {
   display: flex;
   align-items: flex-start;
-  gap: 1rem;
+  gap: var(--space-lg);
 }
 
 .chore-title-group {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--space-md);
 }
 
 .chore-name {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: var(--typography-title-medium-size);
   font-weight: 600;
   color: var(--text);
 }
 
 .chore-state-badge {
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.75rem;
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-pill);
+  font-size: var(--typography-label-medium-size);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .chore-state-badge.due {
-  background: rgba(var(--error-rgb), 0.15);
+  background: rgba(var(--error-rgb), var(--alpha-tint));
   color: var(--error);
 }
 
 .chore-state-badge.complete {
-  background: rgba(var(--success-rgb), 0.15);
+  background: rgba(var(--success-rgb), var(--alpha-tint));
   color: var(--success);
 }
 
 .chore-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 1rem;
-  padding-top: 1rem;
+  gap: var(--space-lg);
+  padding-top: var(--space-lg);
   border-top: 1px solid transparent;
-  margin-top: 1rem;
+  margin-top: var(--space-lg);
 }
 
 .chore-actions.expanded {
@@ -88,7 +88,7 @@
   border: none;
   padding: 0;
   color: var(--accent);
-  font-size: 0.9rem;
+  font-size: var(--typography-body-medium-size);
   cursor: pointer;
   text-decoration: none;
   font-weight: 500;
@@ -115,51 +115,51 @@
 .chore-content {
   display: flex;
   justify-content: space-between;
-  gap: 2rem;
+  gap: var(--space-2xl);
   align-items: flex-start;
 }
 
 .chore-left {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--space-lg);
 }
 
 .chore-details {
   display: grid;
   grid-template-columns: repeat(2, auto);
-  gap: 1.5rem;
+  gap: var(--space-xl);
 }
 
 .chore-right {
   display: flex;
-  gap: 1rem;
+  gap: var(--space-lg);
   align-items: flex-start;
 }
 
 .due-icon {
-  font-size: 2.5rem;
+  font-size: 2.5rem; /* iteration-4 (#24) */
   color: var(--text);
   flex-shrink: 0;
-  margin-top: 0.15rem;
+  margin-top: var(--space-2xs);
 }
 
 .due-content {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 0.3rem;
+  gap: var(--space-xs);
   text-align: right;
 }
 
 .due-value {
-  font-size: 1.4rem;
+  font-size: var(--typography-title-large-size);
   font-weight: 600;
   color: var(--text);
 }
 
 .due-label {
-  font-size: 0.8rem;
+  font-size: var(--typography-body-small-size);
   color: var(--text-muted);
 }
 
@@ -178,7 +178,7 @@
   }
 
   .chore-actions {
-    gap: 0.75rem;
+    gap: var(--space-md);
     display: none;
   }
 
@@ -189,12 +189,12 @@
 
 .chore-detail-item {
   display: flex;
-  gap: 0.75rem;
+  gap: var(--space-md);
   align-items: flex-start;
 }
 
 .detail-icon {
-  font-size: 1.2rem;
+  font-size: 1.2rem; /* iteration-4 (#24) */
   flex-shrink: 0;
   line-height: 1.4;
 }
@@ -202,12 +202,12 @@
 .detail-content {
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: var(--space-xs);
   min-width: 0;
 }
 
 .detail-label {
-  font-size: 0.75rem;
+  font-size: var(--typography-body-small-size);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -223,11 +223,11 @@
 .points-info {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: var(--space-xs);
   width: fit-content;
-  padding: 0.3rem 0.6rem;
-  border-radius: 999px;
-  background: rgba(var(--accent-rgb), 0.12);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-pill);
+  background: rgba(var(--accent-rgb), 0.12); /* iteration-4 (#24): 0.12 alpha off the --alpha-* scale */
   color: var(--text);
 }
 
@@ -237,7 +237,7 @@
 }
 
 .points-label {
-  font-size: 0.72rem;
+  font-size: var(--typography-label-small-size);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -246,43 +246,43 @@
 
 .assignment-row {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--space-sm);
   align-items: center;
   flex-wrap: wrap;
 }
 
 .assignment-info {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--space-sm);
   align-items: center;
   width: fit-content;
-  padding: 0.3rem 0.6rem;
-  border-radius: 999px;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-pill);
 }
 
 .assignment-icon {
-  font-size: 0.95rem;
+  font-size: var(--typography-title-small-size);
   flex-shrink: 0;
 }
 
 .assignment-type {
-  font-size: 0.75rem;
+  font-size: var(--typography-body-small-size);
   font-weight: 600;
   text-transform: capitalize;
 }
 
 .assignment-info.rotating {
-  background: rgba(var(--accent-rgb), 0.15);
+  background: rgba(var(--accent-rgb), var(--alpha-tint));
   color: var(--accent);
 }
 
 .assignment-info.open {
-  background: rgba(var(--warning-rgb), 0.15);
+  background: rgba(var(--warning-rgb), var(--alpha-tint));
   color: var(--warning);
 }
 
 .assignment-info.fixed {
-  background: rgba(var(--success-rgb), 0.15);
+  background: rgba(var(--success-rgb), var(--alpha-tint));
   color: var(--success);
 }
 
@@ -293,12 +293,12 @@
 
 .empty {
   text-align: center;
-  padding: 3rem 1rem;
+  padding: var(--space-4xl) var(--space-lg);
   color: var(--text-muted);
 }
 
 .loading {
   text-align: center;
-  padding: 2rem;
+  padding: var(--space-2xl);
   color: var(--text-muted);
 }
