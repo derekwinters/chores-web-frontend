@@ -44,12 +44,8 @@ jobs:
 
   visual-regression:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write # TEMPORARY: one-time baseline bootstrap commit
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
-        with:
-          ref: ${{ github.head_ref }}
       - uses: derekwinters/chores-web-actions/actions/setup-node@19729c4d6ee3366dc32f4bd8946cb8ac7f6b05e5
         with:
           node-version: 20.x
@@ -61,17 +57,7 @@ jobs:
       - name: Build Storybook
         run: npm run build-storybook
       - name: Visual regression (design-token guardrail)
-        # TEMPORARY (one run): record baselines on CI's renderer; reverts to
-        # `npm run visual` once the recorded baselines are committed.
-        run: npm run visual:update
-      # TEMPORARY (one-time bootstrap): commit CI-rendered baselines back to
-      # the branch; removed together with restoring `npm run visual`.
-      - name: Commit recorded baselines
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add .visual-baselines
-          git diff --cached --quiet || { git commit -m "test: record visual baselines on CI renderer [skip ci]"; git push; }
+        run: npm run visual
       - name: Upload visual diffs
         if: failure()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
