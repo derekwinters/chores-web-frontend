@@ -101,11 +101,24 @@ export const getUserStats = (person) => request("GET", `/points/stats/${person}`
 export const getConfig = () => request("GET", "/config");
 export const updateConfig = (data) => request("PUT", "/config", data);
 
-// Update Check
+// Update Check (backend's own admin-configured polling of its own releases —
+// authenticated, distinct from the public /version endpoint below)
 export const getUpdateCheckStatus = () => request("GET", "/config/updates/status");
 export const triggerUpdateCheck = () => request("POST", "/config/updates/check");
 export const configureUpdateChecking = (enabled, intervalHours) =>
   request("PUT", "/config/updates/config", { enabled, interval_hours: intervalHours });
+
+// Backend Version (public, unauthenticated; chores-web-backend#27). Unlike
+// request(), this hits the unversioned root path — same convention as
+// /status/db-status — and is deliberately allowed to throw so callers can
+// implement their own graceful-degradation UI (see SettingsAbout.jsx).
+export const getBackendVersion = () =>
+  fetch("/version").then(async (res) => {
+    if (!res.ok) {
+      throw new Error(`Backend version check failed: ${res.status}`);
+    }
+    return res.json();
+  });
 
 // Theme
 export const getThemes = () => request("GET", "/theme/list");

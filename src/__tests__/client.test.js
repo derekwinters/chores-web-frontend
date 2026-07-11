@@ -87,4 +87,18 @@ describe("API client", () => {
     const body = JSON.parse(callArgs[1].body);
     expect(body).not.toHaveProperty("color");
   });
+
+  it("getBackendVersion calls GET /version (unversioned root path)", async () => {
+    mockOk({ version: "2.2.0", latest_version: null, update_available: false, checked_at: null });
+    const { getBackendVersion } = await import("../api/client");
+    const result = await getBackendVersion();
+    expect(result.version).toBe("2.2.0");
+    expect(mockFetch).toHaveBeenCalledWith("/version");
+  });
+
+  it("getBackendVersion throws on a non-ok response so callers can degrade gracefully", async () => {
+    mockError("Not Found", 404);
+    const { getBackendVersion } = await import("../api/client");
+    await expect(getBackendVersion()).rejects.toThrow();
+  });
 });

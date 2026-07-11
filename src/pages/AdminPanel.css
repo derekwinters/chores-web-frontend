@@ -144,6 +144,34 @@
   color: var(--accent);
 }
 
+/* Backend Version section (#31) — visually distinct from the App Version
+   panel above it: left accent border to signal "this is server data, not
+   this app's own version". */
+.backend-version-panel {
+  border-left: var(--space-2xs) solid var(--secondary);
+}
+
+/* ── Project Links ───────────────────────────────────────────────────────── */
+
+.about-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.about-links a {
+  color: var(--accent);
+  font-size: var(--typography-body-medium-size);
+  text-decoration: none;
+}
+
+.about-links a:hover {
+  text-decoration: underline;
+}
+
 .button-group {
   display: flex;
   gap: var(--space-lg);
