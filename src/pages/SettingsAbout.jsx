@@ -6,9 +6,26 @@ import {
   getUpdateCheckStatus,
   triggerUpdateCheck,
   configureUpdateChecking,
+  getBackendVersion,
 } from "../api/client";
+import { checkForUpdate } from "../utils/appVersion";
 import "./Settings.css";
 import "./AdminPanel.css";
+
+const PROJECT_LINKS = [
+  {
+    label: "chores-web-docs",
+    href: "https://github.com/derekwinters/chores-web-docs",
+  },
+  {
+    label: "Frontend Releases",
+    href: "https://github.com/derekwinters/chores-web-frontend/releases",
+  },
+  {
+    label: "Backend Releases",
+    href: "https://github.com/derekwinters/chores-web-backend/releases",
+  },
+];
 
 export default function SettingsAbout() {
   const queryClient = useQueryClient();
@@ -74,6 +91,25 @@ export default function SettingsAbout() {
     queryFn: getUpdateCheckStatus,
   });
 
+  // Client-side "is this frontend build out of date" check, entirely
+  // decoupled from the backend — see chores-web-frontend#31. Cached in
+  // localStorage internally (see utils/appVersion.js), so this is cheap to
+  // run on every mount.
+  const { data: appVersionInfo } = useQuery({
+    queryKey: ["app-version-check"],
+    queryFn: () => checkForUpdate(),
+    retry: false,
+  });
+
+  // Backend's own version, from its public /version endpoint. Degrades
+  // gracefully (see the isError branch in render) rather than blocking the
+  // page if the backend predates this endpoint or is unreachable.
+  const { data: backendVersion, isError: backendVersionIsError } = useQuery({
+    queryKey: ["backend-version"],
+    queryFn: getBackendVersion,
+    retry: false,
+  });
+
   const updateCheckConfigMutation = useMutation({
     mutationFn: () =>
       configureUpdateChecking(
@@ -131,31 +167,59 @@ export default function SettingsAbout() {
           <div className="status-info">
             <p>
               Current Version:{" "}
-              <strong>{updateCheckStatus?.current_version ?? "—"}</strong>
+              <strong>{appVersionInfo?.currentVersion ?? "—"}</strong>
             </p>
             <p>
               Latest Version:{" "}
-              <strong>
-                {updateCheckStatus?.latest_version ?? "Unknown"}
-              </strong>
+              <strong>{appVersionInfo?.latestVersion ?? "Unknown"}</strong>
             </p>
-            {updateCheckStatus?.last_checked_at && (
+            {appVersionInfo?.checkedAt && (
               <p>
                 Last Checked:{" "}
                 <strong>
-                  {new Date(
-                    updateCheckStatus.last_checked_at
-                  ).toLocaleString()}
+                  {new Date(appVersionInfo.checkedAt).toLocaleString()}
                 </strong>
               </p>
             )}
           </div>
-          {updateCheckStatus?.update_available && (
+          {appVersionInfo?.updateAvailable && (
             <div className="update-available-banner">
               <strong>Update Available:</strong> Version{" "}
-              {updateCheckStatus.latest_version} is available!
+              {appVersionInfo.latestVersion} is available!
             </div>
           )}
+        </div>
+      </section>
+
+      <section className="settings-section">
+        <div className="section-row">
+          <h3>Backend Version</h3>
+        </div>
+        <hr />
+        <div className="section-content">
+          <div className="status-info backend-version-panel">
+            <p>
+              Version:{" "}
+              <strong>
+                {backendVersionIsError ? "unknown" : backendVersion?.version ?? "unknown"}
+              </strong>
+            </p>
+            <p>
+              Update Status:{" "}
+              <strong>
+                {backendVersionIsError || !backendVersion
+                  ? "unsupported check"
+                  : backendVersion.update_available
+                    ? "update available"
+                    : "up to date"}
+              </strong>
+            </p>
+            {!backendVersionIsError && backendVersion?.latest_version && (
+              <p>
+                Latest Version: <strong>{backendVersion.latest_version}</strong>
+              </p>
+            )}
+          </div>
         </div>
       </section>
 
@@ -176,7 +240,7 @@ export default function SettingsAbout() {
         ) : (
           <div className="section-content">
             <p className="setting-description">
-              Periodically check for new application versions on GitHub.
+              Periodically check for new server (backend) versions on GitHub.
             </p>
             <div className="update-check-control">
               <div className="control-row">
@@ -225,6 +289,24 @@ export default function SettingsAbout() {
             </div>
           </div>
         )}
+      </section>
+
+      <section className="settings-section">
+        <div className="section-row">
+          <h3>Project Links</h3>
+        </div>
+        <hr />
+        <div className="section-content">
+          <ul className="about-links">
+            {PROJECT_LINKS.map((link) => (
+              <li key={link.href}>
+                <a href={link.href} target="_blank" rel="noopener noreferrer">
+                  {link.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
       </section>
     </div>
   );

@@ -5,6 +5,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import SettingsAbout from "../pages/SettingsAbout";
 import * as client from "../api/client";
+import packageJson from "../../package.json";
+
+const GITHUB_RELEASES_URL =
+  "https://api.github.com/repos/derekwinters/chores-web-frontend/releases/latest";
 
 vi.mock("../api/client");
 vi.mock("../contexts/AuthContext", () => ({
@@ -35,6 +39,7 @@ function wrap() {
 describe("SettingsAbout", () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    localStorage.clear();
     client.getConfig.mockResolvedValue({
       title: "Family Chores",
       auth_enabled: true,
@@ -49,6 +54,22 @@ describe("SettingsAbout", () => {
       update_available: false,
       last_checked_at: null,
     });
+    client.getBackendVersion.mockResolvedValue({
+      version: "9.9.9",
+      latest_version: "9.9.9",
+      update_available: false,
+      checked_at: null,
+    });
+    // App Version section checks GitHub directly (client-side, chores-web-frontend#31)
+    global.fetch = vi.fn((url) => {
+      if (typeof url === "string" && url.includes("api.github.com")) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ tag_name: `v${packageJson.version}` }),
+        });
+      }
+      return Promise.reject(new Error(`Fetch not mocked for: ${url}`));
+    });
   });
 
   it("renders the App Version section heading", () => {
@@ -61,21 +82,30 @@ describe("SettingsAbout", () => {
     expect(screen.getByText("Update Checker")).toBeInTheDocument();
   });
 
-  it("displays the current version from the status endpoint", async () => {
+  it("displays the current version from the injected build version (not the backend), via the GitHub check", async () => {
     wrap();
     await waitFor(() => {
-      // The version appears in both Current Version and Latest Version rows
-      const matches = screen.getAllByText("1.2.3");
+      // The build-injected version appears in both Current Version and Latest Version rows
+      const matches = screen.getAllByText(packageJson.version);
       expect(matches.length).toBeGreaterThan(0);
     });
+    expect(global.fetch).toHaveBeenCalledWith(
+      GITHUB_RELEASES_URL,
+      expect.any(Object)
+    );
+    // Confirms the old backend-sourced value ("1.2.3") is NOT used for the app version anymore
+    expect(screen.queryByText("1.2.3")).not.toBeInTheDocument();
   });
 
-  it("shows Update Available banner when an update is available", async () => {
-    client.getUpdateCheckStatus.mockResolvedValue({
-      current_version: "1.0.0",
-      latest_version: "2.0.0",
-      update_available: true,
-      last_checked_at: null,
+  it("shows Update Available banner when a newer GitHub release exists", async () => {
+    global.fetch = vi.fn((url) => {
+      if (typeof url === "string" && url.includes("api.github.com")) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ tag_name: "v999.0.0" }),
+        });
+      }
+      return Promise.reject(new Error(`Fetch not mocked for: ${url}`));
     });
     wrap();
     await waitFor(() => {
@@ -86,9 +116,61 @@ describe("SettingsAbout", () => {
   it("does not show Update Available banner when up to date", async () => {
     wrap();
     await waitFor(() => {
-      expect(screen.getAllByText("1.2.3").length).toBeGreaterThan(0);
+      expect(screen.getAllByText(packageJson.version).length).toBeGreaterThan(0);
     });
     expect(screen.queryByText(/update available/i)).not.toBeInTheDocument();
+  });
+
+  it("renders the Backend Version section with data from GET /version", async () => {
+    wrap();
+    await waitFor(() => {
+      expect(screen.getByText("Backend Version")).toBeInTheDocument();
+      expect(screen.getAllByText("9.9.9").length).toBeGreaterThan(0);
+    });
+    expect(screen.getByText("up to date")).toBeInTheDocument();
+  });
+
+  it("falls back to 'unknown'/'unsupported check' when the backend version fetch fails", async () => {
+    client.getBackendVersion.mockRejectedValue(new Error("Not Found"));
+    wrap();
+    await waitFor(() => {
+      expect(screen.getByText("unknown")).toBeInTheDocument();
+      expect(screen.getByText("unsupported check")).toBeInTheDocument();
+    });
+    // Must not crash the rest of the page
+    expect(screen.getByText("App Version")).toBeInTheDocument();
+    expect(screen.getByText("Update Checker")).toBeInTheDocument();
+  });
+
+  it("falls back to 'unknown'/'unsupported check' when the backend returns 404", async () => {
+    client.getBackendVersion.mockRejectedValue(new Error("Backend version check failed: 404"));
+    wrap();
+    await waitFor(() => {
+      expect(screen.getByText("unknown")).toBeInTheDocument();
+      expect(screen.getByText("unsupported check")).toBeInTheDocument();
+    });
+  });
+
+  it("renders links to chores-web-docs, frontend releases, and backend releases", () => {
+    wrap();
+    const docsLink = screen.getByRole("link", { name: /chores-web-docs/i });
+    expect(docsLink).toHaveAttribute("href", "https://github.com/derekwinters/chores-web-docs");
+    expect(docsLink).toHaveAttribute("target", "_blank");
+    expect(docsLink).toHaveAttribute("rel", "noopener noreferrer");
+
+    const frontendLink = screen.getByRole("link", { name: /frontend releases/i });
+    expect(frontendLink).toHaveAttribute(
+      "href",
+      "https://github.com/derekwinters/chores-web-frontend/releases"
+    );
+    expect(frontendLink).toHaveAttribute("rel", "noopener noreferrer");
+
+    const backendLink = screen.getByRole("link", { name: /backend releases/i });
+    expect(backendLink).toHaveAttribute(
+      "href",
+      "https://github.com/derekwinters/chores-web-backend/releases"
+    );
+    expect(backendLink).toHaveAttribute("rel", "noopener noreferrer");
   });
 
   it("renders the Enable Update Checking checkbox pre-populated from config", async () => {
