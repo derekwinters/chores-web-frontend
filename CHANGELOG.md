@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.3.0](https://github.com/derekwinters/chores-web-frontend/compare/v2.2.0...v2.3.0) (2026-07-12)
+
+
+### Features
+
+* **settings:** retroactively document e4a45de for release-please ([716c74e](https://github.com/derekwinters/chores-web-frontend/commit/716c74e0c6e9e5e074ce2a31175979ad6da07da1))
+
+
+### Documentation
+
+* require conventional commits and agent-delegated commit work ([7557be0](https://github.com/derekwinters/chores-web-frontend/commit/7557be049d8f9ea34c2299498b9e1d730ff08838))
+
 ## [2.2.0](https://github.com/derekwinters/chores-web-frontend/compare/v2.1.0...v2.2.0) (2026-07-10)
 
 
