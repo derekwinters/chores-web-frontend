@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.4.0](https://github.com/derekwinters/chores-web-frontend/compare/v2.3.0...v2.4.0) (2026-07-14)
+
+
+### Features
+
+* in-app notification surfacing and log view ([#45](https://github.com/derekwinters/chores-web-frontend/issues/45)) ([9410912](https://github.com/derekwinters/chores-web-frontend/commit/941091279b645d11d953449e40b3dc2e6310a89e))
+* notifications API client and preferences settings section ([#42](https://github.com/derekwinters/chores-web-frontend/issues/42)) ([7b8fdcd](https://github.com/derekwinters/chores-web-frontend/commit/7b8fdcd3b1911b9c49823fbbd1e7cc1bb5f2ed14))
+
+
+### CI/CD
+
+* add workflow to record Storybook visual baselines on the runner ([#43](https://github.com/derekwinters/chores-web-frontend/issues/43)) ([19c2477](https://github.com/derekwinters/chores-web-frontend/commit/19c2477cf5e6b3b5576b7cb6bebae5b2b5d15c77))
+
 ## [2.3.0](https://github.com/derekwinters/chores-web-frontend/compare/v2.2.0...v2.3.0) (2026-07-12)
 
 
