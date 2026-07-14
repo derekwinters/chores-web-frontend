@@ -1,7 +1,16 @@
 import React from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getThemes, getCurrentTheme, getDefaultThemeInfo, setTheme, clearPersonalTheme } from "../api/client";
+import {
+  getThemes,
+  getCurrentTheme,
+  getDefaultThemeInfo,
+  setTheme,
+  clearPersonalTheme,
+  getNotificationPreferences,
+  putNotificationPreferences,
+} from "../api/client";
 import { applyTheme } from "../utils/theme";
+import NotificationPreferences from "../components/NotificationPreferences";
 import "./Preferences.css";
 
 const PREVIEW_COLORS = ["primary", "secondary", "accent", "bg"];
@@ -43,6 +52,18 @@ export default function Preferences() {
           applyTheme(defaultTheme.colors);
         }
       }
+    },
+  });
+
+  const { data: notificationPreferences } = useQuery({
+    queryKey: ["notification-preferences"],
+    queryFn: getNotificationPreferences,
+  });
+
+  const notificationPrefsMutation = useMutation({
+    mutationFn: (prefs) => putNotificationPreferences(prefs),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["notification-preferences"] });
     },
   });
 
@@ -119,6 +140,31 @@ export default function Preferences() {
           ))}
         </div>
       </section>
+
+      {notificationPreferences && (
+        <section className="preferences-section">
+          <h2 className="preferences-section-heading">Notifications</h2>
+          <hr className="preferences-section-rule" />
+          <p className="preferences-description">
+            Choose which notifications you receive. These settings are personal to you.
+          </p>
+
+          <NotificationPreferences
+            preferences={notificationPreferences}
+            disabled={notificationPrefsMutation.isPending}
+            onToggle={(type, enabled) =>
+              notificationPrefsMutation.mutate({ ...notificationPreferences, [type]: enabled })
+            }
+            onToggleAll={(enabled) =>
+              notificationPrefsMutation.mutate(
+                Object.fromEntries(
+                  Object.keys(notificationPreferences).map((type) => [type, enabled])
+                )
+              )
+            }
+          />
+        </section>
+      )}
     </div>
   );
 }

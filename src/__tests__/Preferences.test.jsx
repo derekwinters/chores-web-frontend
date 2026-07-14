@@ -66,6 +66,7 @@ describe("Preferences", () => {
     client.getThemes.mockResolvedValue(MOCK_THEMES);
     client.getCurrentTheme.mockResolvedValue(MOCK_CURRENT_THEME_PERSONAL);
     client.getDefaultThemeInfo.mockResolvedValue(MOCK_DEFAULT_INFO);
+    client.getNotificationPreferences.mockResolvedValue({ chore_due: true });
   });
 
   it("renders the Preferences page heading", async () => {
@@ -170,5 +171,60 @@ describe("Preferences", () => {
     await waitFor(() => {
       expect(screen.getByText(/applies only to your account/i)).toBeInTheDocument();
     });
+  });
+
+  it("renders the Notifications section from the fetched preferences map", async () => {
+    wrap();
+    await waitFor(() => {
+      expect(screen.getByText("Notifications")).toBeInTheDocument();
+      expect(screen.getByRole("switch", { name: /chore due/i })).toBeInTheDocument();
+    });
+  });
+
+  it("toggling a type persists via putNotificationPreferences with the updated map", async () => {
+    client.putNotificationPreferences.mockResolvedValue({ chore_due: false });
+    wrap();
+    await waitFor(() => screen.getByRole("switch", { name: /chore due/i }));
+
+    fireEvent.click(screen.getByRole("switch", { name: /chore due/i }));
+
+    await waitFor(() => {
+      expect(client.putNotificationPreferences).toHaveBeenCalledWith({ chore_due: false });
+    });
+  });
+
+  it("global toggle writes every type in the map", async () => {
+    client.getNotificationPreferences.mockResolvedValue({ chore_due: true, weekly_summary: true });
+    client.putNotificationPreferences.mockResolvedValue({ chore_due: false, weekly_summary: false });
+    wrap();
+    await waitFor(() => screen.getByRole("switch", { name: /enable notifications/i }));
+
+    fireEvent.click(screen.getByRole("switch", { name: /enable notifications/i }));
+
+    await waitFor(() => {
+      expect(client.putNotificationPreferences).toHaveBeenCalledWith({
+        chore_due: false,
+        weekly_summary: false,
+      });
+    });
+  });
+
+  it("disables the notification toggles while the mutation is pending", async () => {
+    let resolveMutation;
+    client.putNotificationPreferences.mockReturnValue(
+      new Promise((resolve) => {
+        resolveMutation = resolve;
+      })
+    );
+    wrap();
+    await waitFor(() => screen.getByRole("switch", { name: /chore due/i }));
+
+    fireEvent.click(screen.getByRole("switch", { name: /chore due/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("switch", { name: /chore due/i })).toBeDisabled();
+    });
+
+    resolveMutation({ chore_due: false });
   });
 });
