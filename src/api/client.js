@@ -120,6 +120,34 @@ export const getBackendVersion = () =>
     return res.json();
   });
 
+// Notifications
+// Caller-scoped, newest-first (chores-web-backend#39). Query params (`since`
+// ISO datetime, `include_dismissed` bool) are appended only when provided,
+// mirroring getLog's URLSearchParams idiom. Side effect: GET marks returned
+// notifications delivered — the first time an item is returned here the
+// backend sets its delivered_at (the server owns delivery state).
+export const getNotifications = (filters = {}) => {
+  const params = new URLSearchParams();
+  if (filters.since) params.append("since", filters.since);
+  if (filters.include_dismissed !== undefined)
+    params.append("include_dismissed", filters.include_dismissed);
+  const queryString = params.toString();
+  return request("GET", `/notifications${queryString ? `?${queryString}` : ""}`);
+};
+
+// Returns the updated notification. Backend 404s for a nonexistent id or one
+// belonging to another person; idempotent for an already-acked notification.
+export const ackNotification = (id) => request("POST", `/notifications/${id}/ack`);
+
+// Per-type preference map, e.g. { chore_due: true }. Every known type is
+// present; an absent row means enabled.
+export const getNotificationPreferences = () =>
+  request("GET", "/notifications/preferences");
+
+// Accepts the same per-type map shape and returns the resulting map.
+export const putNotificationPreferences = (prefs) =>
+  request("PUT", "/notifications/preferences", prefs);
+
 // Theme
 export const getThemes = () => request("GET", "/theme/list");
 export const getCurrentTheme = () => request("GET", "/theme/current");

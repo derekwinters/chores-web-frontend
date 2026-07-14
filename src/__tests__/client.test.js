@@ -101,4 +101,78 @@ describe("API client", () => {
     const { getBackendVersion } = await import("../api/client");
     await expect(getBackendVersion()).rejects.toThrow();
   });
+
+  it("getNotifications calls GET /notifications with no query string when no filters", async () => {
+    mockOk([]);
+    const { getNotifications } = await import("../api/client");
+    const result = await getNotifications();
+    expect(result).toEqual([]);
+    const url = mockFetch.mock.calls[0][0];
+    expect(url).toContain("/notifications");
+    expect(url).not.toContain("?");
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ method: "GET" })
+    );
+  });
+
+  it("getNotifications appends since and include_dismissed only when provided", async () => {
+    mockOk([]);
+    const { getNotifications } = await import("../api/client");
+    await getNotifications({ since: "2026-07-14T00:00:00Z", include_dismissed: true });
+    const url = mockFetch.mock.calls[0][0];
+    expect(url).toContain("since=2026-07-14T00%3A00%3A00Z");
+    expect(url).toContain("include_dismissed=true");
+  });
+
+  it("getNotifications appends include_dismissed=false when explicitly provided", async () => {
+    mockOk([]);
+    const { getNotifications } = await import("../api/client");
+    await getNotifications({ include_dismissed: false });
+    const url = mockFetch.mock.calls[0][0];
+    expect(url).toContain("include_dismissed=false");
+    expect(url).not.toContain("since=");
+  });
+
+  it("ackNotification calls POST /notifications/:id/ack", async () => {
+    mockOk({ id: "n1", acknowledged_at: "2026-07-14T00:00:00Z" });
+    const { ackNotification } = await import("../api/client");
+    const result = await ackNotification("n1");
+    expect(result.id).toBe("n1");
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("/notifications/n1/ack"),
+      expect.objectContaining({ method: "POST" })
+    );
+  });
+
+  it("ackNotification surfaces backend errors (404 for another person's notification)", async () => {
+    mockError("Not found", 404);
+    const { ackNotification } = await import("../api/client");
+    await expect(ackNotification("nope")).rejects.toThrow("Not found");
+  });
+
+  it("getNotificationPreferences calls GET /notifications/preferences and returns the map", async () => {
+    mockOk({ chore_due: true });
+    const { getNotificationPreferences } = await import("../api/client");
+    const result = await getNotificationPreferences();
+    expect(result).toEqual({ chore_due: true });
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("/notifications/preferences"),
+      expect.objectContaining({ method: "GET" })
+    );
+  });
+
+  it("putNotificationPreferences calls PUT /notifications/preferences with the map body", async () => {
+    mockOk({ chore_due: false });
+    const { putNotificationPreferences } = await import("../api/client");
+    const result = await putNotificationPreferences({ chore_due: false });
+    expect(result).toEqual({ chore_due: false });
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("/notifications/preferences"),
+      expect.objectContaining({
+        method: "PUT",
+        body: JSON.stringify({ chore_due: false }),
+      })
+    );
+  });
 });
