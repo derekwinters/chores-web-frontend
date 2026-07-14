@@ -9,6 +9,7 @@ import Chores from "./pages/Chores";
 import UserManagement from "./components/UserManagement";
 import Log from "./components/Log";
 import Preferences from "./pages/Preferences";
+import Notifications from "./pages/Notifications";
 import SettingsLayout from "./pages/SettingsLayout";
 import SettingsGeneral from "./pages/SettingsGeneral";
 import SettingsAuth from "./pages/SettingsAuth";
@@ -20,6 +21,9 @@ import SettingsAbout from "./pages/SettingsAbout";
 import SettingsAuthLog from "./pages/SettingsAuthLog";
 import UserDetail from "./pages/UserDetail";
 import UserAvatarMenu from "./components/UserAvatarMenu";
+import NotificationBell from "./components/NotificationBell";
+import Toast from "./components/Toast";
+import { useNotifications } from "./hooks/useNotifications";
 import { getConfig, getCurrentTheme, getPeople } from "./api/client";
 import { MdDashboard, MdCheckCircle, MdPeople, MdHistory, MdSettings, MdMenu } from "react-icons/md";
 import { applyTheme, DEFAULT_THEME_COLORS } from "./utils/theme";
@@ -58,6 +62,39 @@ function AppContent() {
     queryKey: ["people"],
     queryFn: getPeople,
   });
+
+  const { notifications, unreadCount, query: notificationsQuery } = useNotifications();
+  const [toast, setToast] = useState(null); // null | { message, variant }
+  // Ids seen across polls; null until the first successful fetch primes it, so
+  // the initial batch never toasts — only genuinely new arrivals do.
+  const seenNotificationIds = useRef(null);
+
+  useEffect(() => {
+    if (!notificationsQuery.isSuccess) return;
+
+    if (seenNotificationIds.current === null) {
+      // Prime on first success: everything currently present is "already seen".
+      seenNotificationIds.current = new Set(notifications.map((n) => n.id));
+      return;
+    }
+
+    const fresh = notifications.filter(
+      (n) => !seenNotificationIds.current.has(n.id)
+    );
+    if (fresh.length === 0) return;
+
+    fresh.forEach((n) => seenNotificationIds.current.add(n.id));
+    setToast({
+      message:
+        fresh.length === 1
+          ? fresh[0].title
+          : `${fresh.length} new notifications`,
+      variant: "default",
+    });
+    // dataUpdatedAt changes on every successful poll, so arrivals are detected
+    // each cycle without re-running on unrelated re-renders.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notificationsQuery.isSuccess, notificationsQuery.dataUpdatedAt]);
 
   useEffect(() => {
     if (!window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT}px)`).matches) {
@@ -118,6 +155,10 @@ function AppContent() {
         </button>
         <span className="topnav-title">{appTitle}</span>
         <div className="topnav-user">
+          <NotificationBell
+            unreadCount={unreadCount}
+            onClick={() => navigate("/notifications")}
+          />
           <UserAvatarMenu
             user={displayUser}
             onLogout={logout}
@@ -169,6 +210,7 @@ function AppContent() {
             <Route path="/users/:userName" element={<UserDetail />} />
             <Route path="/log" element={<Log />} />
             <Route path="/preferences" element={<Preferences />} />
+            <Route path="/notifications" element={<Notifications />} />
             <Route
               path="/settings"
               element={<SettingsLayout onTitleUpdate={(newTitle) => setAppTitle(newTitle)} />}
@@ -187,6 +229,13 @@ function AppContent() {
           </Routes>
         </main>
       </div>
+      {toast && (
+        <Toast
+          message={toast.message}
+          variant={toast.variant}
+          onDone={() => setToast(null)}
+        />
+      )}
     </div>
   );
 }

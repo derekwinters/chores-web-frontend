@@ -1,0 +1,39 @@
+/* Top-bar notification bell. The badge uses the notification component tokens
+   (design-tokens 0.4.0); its fill binds to the `accent` runtime slot per the
+   mapping-matrix contract in derekwinters/chores-web-design-tokens. */
+.notification-bell {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  padding: var(--space-sm);
+  font-size: var(--icon-md);
+  line-height: 1;
+  transition: color var(--duration-sm);
+}
+
+.notification-bell:not(:disabled):hover {
+  color: var(--text);
+}
+
+.notification-bell-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-width: var(--component-notification-badge-size);
+  height: var(--component-notification-badge-size);
+  padding: 0 var(--component-notification-badge-padding-x);
+  border-radius: var(--component-notification-badge-radius);
+  background: var(--accent);
+  color: var(--on-primary);
+  font-size: var(--typography-micro-label-size);
+  font-weight: var(--typography-label-large-weight);
+  line-height: 1;
+}

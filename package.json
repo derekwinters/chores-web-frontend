@@ -18,7 +18,7 @@
     "visual:update": "node scripts/visual-regression.mjs --update"
   },
   "dependencies": {
-    "@derekwinters/design-tokens": "https://github.com/derekwinters/chores-web-design-tokens/releases/download/design-tokens-v0.3.0/derekwinters-design-tokens-0.3.0.tgz",
+    "@derekwinters/design-tokens": "https://github.com/derekwinters/chores-web-design-tokens/releases/download/design-tokens-v0.4.0/derekwinters-design-tokens-0.4.0.tgz",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/material": "^9.1.2",
