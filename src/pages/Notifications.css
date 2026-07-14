@@ -1,0 +1,84 @@
+.notifications-page {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.notifications-empty {
+  color: var(--text-muted);
+  font-size: var(--typography-body-medium-size);
+}
+
+.notification-log-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+/* Log row uses the notification log-row component tokens (design-tokens 0.4.0).
+   Unread rows carry the accent bar and an accent tint composited over the
+   surface, per the mapping-matrix color contract in
+   derekwinters/chores-web-design-tokens (accent runtime slot). */
+.notification-log-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+  background: var(--surface);
+  padding: var(--component-notification-log-row-padding-y)
+    var(--component-notification-log-row-padding-x);
+  border-radius: var(--component-notification-log-row-radius);
+}
+
+.notification-log-row--unread {
+  border-left: var(--component-notification-log-row-unread-bar-width) solid
+    var(--accent);
+  /* accent tint at the token alpha, layered over the surface fill */
+  background: linear-gradient(
+      rgba(var(--accent-rgb), var(--component-notification-log-row-unread-fill-alpha)),
+      rgba(var(--accent-rgb), var(--component-notification-log-row-unread-fill-alpha))
+    ),
+    var(--surface);
+}
+
+.notification-log-row--dismissed {
+  opacity: var(--component-button-disabled-alpha);
+}
+
+.notification-log-row-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  min-width: 0;
+}
+
+.notification-log-row-header {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.notification-log-row-title {
+  font-size: var(--typography-body-medium-size);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.notification-log-row-state {
+  flex-shrink: 0;
+}
+
+.notification-log-row-body {
+  margin: 0;
+  font-size: var(--typography-body-medium-size);
+  color: var(--text-muted);
+}
+
+.notification-log-row-time {
+  font-size: var(--typography-micro-label-size);
+  color: var(--text-muted);
+}
+
+.notification-log-row-ack {
+  flex-shrink: 0;
+}

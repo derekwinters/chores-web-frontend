@@ -77,6 +77,7 @@ describe("App", () => {
     client.getLog.mockResolvedValue([]);
     client.getSetupStatus.mockResolvedValue({ setup_needed: false });
     client.getConfig.mockResolvedValue({ title: "Family Chores" });
+    client.getNotifications.mockResolvedValue([]);
     client.getCurrentTheme.mockResolvedValue(DARK_THEME);
     client.getThemes.mockResolvedValue([DARK_THEME, LIGHT_THEME]);
     client.setTheme.mockResolvedValue(DARK_THEME);
@@ -153,6 +154,62 @@ describe("App", () => {
     await waitFor(() => {
       expect(screen.getAllByText(/Last 7 Days/i).length).toBeGreaterThan(0);
     });
+  });
+
+  it("does not toast for the initial batch of notifications", async () => {
+    client.getNotifications.mockResolvedValue([
+      { id: "n1", title: "Preexisting notification", acknowledged_at: null },
+    ]);
+
+    wrap(<App />);
+
+    // Badge reflects the initial unread count once the first poll resolves.
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: /1 unread/i })
+      ).toBeInTheDocument();
+    });
+    // The initial batch must never surface as a toast.
+    expect(
+      screen.queryByText("Preexisting notification")
+    ).not.toBeInTheDocument();
+  });
+
+  it("toasts when a later poll returns a newly arrived notification", async () => {
+    client.getNotifications.mockResolvedValue([
+      { id: "n1", title: "Preexisting notification", acknowledged_at: null },
+    ]);
+
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={qc}>
+        <App />
+      </QueryClientProvider>
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: /1 unread/i })
+      ).toBeInTheDocument();
+    });
+    expect(
+      screen.queryByText("Brand new arrival")
+    ).not.toBeInTheDocument();
+
+    // A subsequent poll returns an additional, previously unseen notification.
+    client.getNotifications.mockResolvedValue([
+      { id: "n1", title: "Preexisting notification", acknowledged_at: null },
+      { id: "n2", title: "Brand new arrival", acknowledged_at: null },
+    ]);
+    await qc.invalidateQueries({ queryKey: ["notifications"] });
+
+    await waitFor(() => {
+      expect(screen.getByText("Brand new arrival")).toBeInTheDocument();
+    });
+    // The already-seen notification is not re-toasted.
+    expect(
+      screen.queryByText("Preexisting notification")
+    ).not.toBeInTheDocument();
   });
 
   it("navigates to Chores page when clicked", async () => {
