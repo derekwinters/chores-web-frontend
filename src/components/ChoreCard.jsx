@@ -77,7 +77,7 @@ export default function ChoreCard({ chore, selected, onClick, onEdit, onDelete, 
                   <span className="meta-value">{frequency}</span>
                 </div>
               )}
-              {chore.points != null && (
+              {chore.points > 0 && (
                 <div className="meta-item">
                   <span className="meta-label">Points</span>
                   <span className="meta-value">{chore.points}</span>
