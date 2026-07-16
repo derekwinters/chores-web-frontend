@@ -60,6 +60,12 @@ describe("SettingsAbout", () => {
       update_available: false,
       checked_at: null,
     });
+    // /status/ endpoint (chores-web-backend#16): matching API major by default
+    client.getStatus.mockResolvedValue({
+      version: "8.8.8",
+      api_version: "v1",
+      versions: ["v1"],
+    });
     // App Version section checks GitHub directly (client-side, chores-web-frontend#31)
     global.fetch = vi.fn((url) => {
       if (typeof url === "string" && url.includes("api.github.com")) {
@@ -149,6 +155,58 @@ describe("SettingsAbout", () => {
       expect(screen.getByText("unknown")).toBeInTheDocument();
       expect(screen.getByText("unsupported check")).toBeInTheDocument();
     });
+  });
+
+  it("renders the Version section with the build-time frontend version", async () => {
+    wrap();
+    await waitFor(() => {
+      expect(screen.getByText("Version")).toBeInTheDocument();
+      expect(screen.getByText("Frontend version:")).toBeInTheDocument();
+    });
+    // FRONTEND_VERSION comes from the build-time-injected VITE_APP_VERSION,
+    // which is baked from package.json (see vite.config.js define block).
+    expect(screen.getByText(packageJson.version)).toBeInTheDocument();
+  });
+
+  it("displays the backend version and API version from GET /status/", async () => {
+    wrap();
+    await waitFor(() => {
+      expect(screen.getByText("8.8.8")).toBeInTheDocument();
+    });
+    expect(screen.getByText("v1")).toBeInTheDocument();
+  });
+
+  it("warns when the backend's API major differs from the frontend's expected major", async () => {
+    client.getStatus.mockResolvedValue({
+      version: "8.8.8",
+      api_version: "v2",
+      versions: ["v2"],
+    });
+    wrap();
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toBeInTheDocument();
+    });
+    expect(screen.getByText(/api version mismatch/i)).toBeInTheDocument();
+  });
+
+  it("does not warn when the backend's API major matches", async () => {
+    wrap();
+    await waitFor(() => {
+      expect(screen.getByText("Backend version:")).toBeInTheDocument();
+    });
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.queryByText(/api version mismatch/i)).not.toBeInTheDocument();
+  });
+
+  it("does not warn (and shows 'unknown') when /status/ is unreachable", async () => {
+    client.getStatus.mockRejectedValue(new Error("Backend status check failed: 404"));
+    wrap();
+    await waitFor(() => {
+      expect(screen.getByText("Backend version:")).toBeInTheDocument();
+    });
+    // No confident API major → no false mismatch warning
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.getAllByText("unknown").length).toBeGreaterThan(0);
   });
 
   it("renders links to chores-web-docs, frontend releases, and backend releases", () => {

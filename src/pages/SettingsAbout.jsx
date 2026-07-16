@@ -7,10 +7,17 @@ import {
   triggerUpdateCheck,
   configureUpdateChecking,
   getBackendVersion,
+  getStatus,
 } from "../api/client";
 import { checkForUpdate } from "../utils/appVersion";
+import { EXPECTED_API_MAJOR, parseApiMajor } from "../config/apiVersion";
 import "./Settings.css";
 import "./AdminPanel.css";
+
+// The frontend version, baked in at build time from the release-please-managed
+// package.json version (see the `define` block in vite.config.js,
+// chores-web-frontend#16). Falls back to "unknown" outside a Vite build.
+const FRONTEND_VERSION = import.meta.env.VITE_APP_VERSION ?? "unknown";
 
 const PROJECT_LINKS = [
   {
@@ -110,6 +117,23 @@ export default function SettingsAbout() {
     retry: false,
   });
 
+  // Backend app version + API major from the unversioned /status/ endpoint
+  // (chores-web-backend#16). Used to display the backend version alongside the
+  // build-time frontend version and to detect a frontend/backend API-major
+  // mismatch. Degrades gracefully (see render) instead of blocking the page.
+  const { data: status, isError: statusIsError } = useQuery({
+    queryKey: ["backend-status"],
+    queryFn: getStatus,
+    retry: false,
+  });
+
+  // Compare the backend's reported API major against the single major this
+  // frontend was built against. Only a confidently-parsed, differing major
+  // raises the warning — an unreachable backend or unparseable value does not.
+  const backendApiMajor = status ? parseApiMajor(status.api_version) : null;
+  const apiMajorMismatch =
+    backendApiMajor !== null && backendApiMajor !== EXPECTED_API_MAJOR;
+
   const updateCheckConfigMutation = useMutation({
     mutationFn: () =>
       configureUpdateChecking(
@@ -157,6 +181,41 @@ export default function SettingsAbout() {
   return (
     <div className="settings-page">
       {error && <div className="error-message">{error}</div>}
+
+      <section className="settings-section">
+        <div className="section-row">
+          <h3>Version</h3>
+        </div>
+        <hr />
+        <div className="section-content">
+          {apiMajorMismatch && (
+            <div className="api-mismatch-warning" role="alert">
+              <strong>API version mismatch:</strong> this frontend expects API{" "}
+              v{EXPECTED_API_MAJOR}, but the backend reports API{" "}
+              {status?.api_version ?? `v${backendApiMajor}`}. Some features may
+              not work correctly — update the frontend and backend to matching
+              versions.
+            </div>
+          )}
+          <div className="status-info">
+            <p>
+              Frontend version: <strong>{FRONTEND_VERSION}</strong>
+            </p>
+            <p>
+              Backend version:{" "}
+              <strong>
+                {statusIsError ? "unknown" : status?.version ?? "unknown"}
+              </strong>
+            </p>
+            <p>
+              Backend API version:{" "}
+              <strong>
+                {statusIsError ? "unknown" : status?.api_version ?? "unknown"}
+              </strong>
+            </p>
+          </div>
+        </div>
+      </section>
 
       <section className="settings-section">
         <div className="section-row">

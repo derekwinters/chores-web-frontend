@@ -102,6 +102,20 @@ describe("API client", () => {
     await expect(getBackendVersion()).rejects.toThrow();
   });
 
+  it("getStatus calls GET /status/ (unversioned) and returns the status shape", async () => {
+    mockOk({ version: "2.4.0", api_version: "v1", versions: ["v1"] });
+    const { getStatus } = await import("../api/client");
+    const result = await getStatus();
+    expect(result).toEqual({ version: "2.4.0", api_version: "v1", versions: ["v1"] });
+    expect(mockFetch).toHaveBeenCalledWith("/status/");
+  });
+
+  it("getStatus throws on a non-ok response so callers can degrade gracefully", async () => {
+    mockFetch.mockResolvedValueOnce({ ok: false, status: 404, json: () => Promise.resolve({}) });
+    const { getStatus } = await import("../api/client");
+    await expect(getStatus()).rejects.toThrow();
+  });
+
   it("getNotifications calls GET /notifications with no query string when no filters", async () => {
     mockOk([]);
     const { getNotifications } = await import("../api/client");
