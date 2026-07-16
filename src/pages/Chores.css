@@ -86,6 +86,39 @@
   font-size: var(--typography-title-medium-size);
 }
 
+/* Mobile: collapsed search renders as an icon button matching the search box height */
+.search-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.5rem;
+  width: 2.5rem;
+  min-width: 2.5rem;
+  padding: 0;
+  background: var(--surface);
+  border: 1px solid var(--text-muted);
+  border-radius: var(--component-form-field-radius);
+  color: var(--text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.search-toggle:hover {
+  color: var(--text);
+  border-color: var(--text);
+}
+
+.search-toggle:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 var(--component-form-field-focus-ring-width) rgba(var(--accent-rgb), var(--component-form-field-focus-ring-alpha));
+}
+
+.search-toggle-icon {
+  font-size: var(--typography-headline-small-size);
+}
+
 .header-actions {
   display: flex;
   gap: var(--space-md);
@@ -111,6 +144,12 @@
   .search-box {
     min-width: auto;
     max-width: 50%;
+  }
+
+  /* When expanded from the icon on mobile, let the input use the full row */
+  .search-box--mobile-expanded {
+    max-width: 100%;
+    flex: 1 1 100%;
   }
 
   .header-actions {
