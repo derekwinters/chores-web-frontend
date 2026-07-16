@@ -1,5 +1,20 @@
 # Changelog
 
+## [2.5.0](https://github.com/derekwinters/chores-web-frontend/compare/v2.4.0...v2.5.0) (2026-07-16)
+
+
+### Features
+
+* add admin UI for one-time point awards ([#50](https://github.com/derekwinters/chores-web-frontend/issues/50)) ([27f538b](https://github.com/derekwinters/chores-web-frontend/commit/27f538bb925364c7b47267095655bbd3dea2c5d8))
+* allow zero-point chores in chore form ([#49](https://github.com/derekwinters/chores-web-frontend/issues/49)) ([05a9792](https://github.com/derekwinters/chores-web-frontend/commit/05a97929ae61747cd59c5e957766901de30d5235))
+* collapse /chores search to an expanding icon on mobile ([#51](https://github.com/derekwinters/chores-web-frontend/issues/51)) ([fae046f](https://github.com/derekwinters/chores-web-frontend/commit/fae046f4511ff1bab6ab8f61aa3261cf23dbe8ab))
+* show frontend/backend versions and warn on API mismatch ([#47](https://github.com/derekwinters/chores-web-frontend/issues/47)) ([db7e5d0](https://github.com/derekwinters/chores-web-frontend/commit/db7e5d0d5d366694e27c0e27963b961a88c2600a))
+
+
+### Bug Fixes
+
+* keep mobile avatar/settings menu within the viewport ([#52](https://github.com/derekwinters/chores-web-frontend/issues/52)) ([b7b50f5](https://github.com/derekwinters/chores-web-frontend/commit/b7b50f5690b8c2ced2d4584bae42ec8616de0463))
+
 ## [2.4.0](https://github.com/derekwinters/chores-web-frontend/compare/v2.3.0...v2.4.0) (2026-07-14)
 
 
