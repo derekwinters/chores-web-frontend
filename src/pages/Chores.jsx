@@ -17,6 +17,8 @@ import {
 import { compareChoresByNextDue } from "../utils/choreSort";
 import "./Chores.css";
 
+const MOBILE_BREAKPOINT = 768;
+
 const SELECT_CONFIG = {
   sx: {
     color: "var(--text)",
@@ -90,8 +92,50 @@ export default function Manage() {
     if (stored !== null) return stored === "true";
     return window.innerWidth > 768;
   });
+  const [isMobile, setIsMobile] = useState(() =>
+    window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT}px)`).matches
+  );
+  // On mobile the search collapses to an icon by default; tapping it expands the
+  // input. Desktop always shows the full search box.
+  const [searchExpanded, setSearchExpanded] = useState(false);
+  const searchInputRef = useRef(null);
 
   const filters = useMemo(() => getFiltersFromSearchParams(searchParams), [searchParams]);
+
+  // Track viewport so the search control can switch between icon and full box.
+  useEffect(() => {
+    const mq = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT}px)`);
+    const handleChange = (e) => setIsMobile(e.matches);
+    mq.addEventListener("change", handleChange);
+    return () => mq.removeEventListener("change", handleChange);
+  }, []);
+
+  // On desktop the box is always open. On mobile it opens when the user expands
+  // it or when there is an active search term to display.
+  const searchOpen = !isMobile || searchExpanded || Boolean(filters.search);
+
+  // Move focus into the input when it expands on mobile (per a11y criteria).
+  useEffect(() => {
+    if (isMobile && searchExpanded && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [isMobile, searchExpanded]);
+
+  const handleSearchBlur = useCallback(() => {
+    // Collapse back to the icon only when there is nothing to preserve.
+    if (isMobile && !filters.search) {
+      setSearchExpanded(false);
+    }
+  }, [isMobile, filters.search]);
+
+  const handleSearchKeyDown = useCallback((e) => {
+    if (e.key === "Escape") {
+      if (!filters.search) {
+        setSearchExpanded(false);
+      }
+      e.currentTarget.blur();
+    }
+  }, [filters.search]);
 
   const { data: chores = [], isLoading } = useQuery({
     queryKey: ["chores"],
@@ -246,26 +290,42 @@ export default function Manage() {
     <div className="manage-page">
       <div className="page-header">
         <h2>All Chores</h2>
-        <div className="search-box">
-          <MdSearch className="search-icon" />
-          <input
-            type="text"
-            placeholder="Search..."
-            value={filters.search || ""}
-            onChange={(e) => handleSearchChange(e.target.value)}
-            className="search-input"
-          />
-          {filters.search && (
-            <button
-              className="search-clear"
-              onClick={() => handleSearchChange("")}
-              title="Clear search"
-              aria-label="Clear search"
-            >
-              <MdClose className="search-clear-icon" />
-            </button>
-          )}
-        </div>
+        {isMobile && !searchOpen ? (
+          <button
+            className="search-toggle"
+            onClick={() => setSearchExpanded(true)}
+            title="Search"
+            aria-label="Search chores"
+            aria-expanded="false"
+          >
+            <MdSearch className="search-toggle-icon" />
+          </button>
+        ) : (
+          <div className={`search-box${isMobile ? " search-box--mobile-expanded" : ""}`}>
+            <MdSearch className="search-icon" />
+            <input
+              ref={searchInputRef}
+              type="text"
+              placeholder="Search..."
+              value={filters.search || ""}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              onBlur={handleSearchBlur}
+              onKeyDown={handleSearchKeyDown}
+              className="search-input"
+              aria-label="Search chores"
+            />
+            {filters.search && (
+              <button
+                className="search-clear"
+                onClick={() => handleSearchChange("")}
+                title="Clear search"
+                aria-label="Clear search"
+              >
+                <MdClose className="search-clear-icon" />
+              </button>
+            )}
+          </div>
+        )}
         <div className="header-actions">
           <button className="btn-secondary" onClick={() => setFiltersExpanded(!filtersExpanded)} title={filtersExpanded ? "Hide filters" : "Show filters"}>
             <MdFilterList className="action-icon" />

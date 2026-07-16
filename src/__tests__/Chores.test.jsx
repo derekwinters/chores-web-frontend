@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter, useLocation } from "react-router-dom";
 import { AuthProvider } from "../contexts/AuthContext";
@@ -753,6 +753,114 @@ describe("Manage page", () => {
       const pageHeader = document.querySelector('.page-header');
       const headerActions = document.querySelector('.header-actions');
       expect(headerActions.parentElement).toBe(pageHeader);
+    });
+  });
+
+  describe("mobile expanding search", () => {
+    // Restore the default desktop matchMedia (a plain function that survives
+    // vi.resetAllMocks) so later tests are unaffected by the mobile override.
+    afterEach(() => {
+      Object.defineProperty(window, "matchMedia", {
+        writable: true,
+        configurable: true,
+        value: function matchMedia() {
+          return {
+            matches: false,
+            addEventListener: vi.fn(),
+            removeEventListener: vi.fn(),
+            dispatchEvent: vi.fn(),
+          };
+        },
+      });
+    });
+
+    // Force the matchMedia mock to report a mobile viewport for the max-width query.
+    function setMobileViewport() {
+      Object.defineProperty(window, "innerWidth", { writable: true, configurable: true, value: 375 });
+      window.matchMedia = vi.fn().mockImplementation((query) => ({
+        matches: /max-width/.test(query),
+        media: query,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      }));
+    }
+
+    it("renders a search icon button (not the input) by default on mobile", async () => {
+      setMobileViewport();
+      wrap(<Chores />);
+      await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
+
+      expect(screen.getByRole("button", { name: /search chores/i })).toBeInTheDocument();
+      expect(screen.queryByPlaceholderText("Search...")).not.toBeInTheDocument();
+    });
+
+    it("expands into a focused text input when the icon is tapped", async () => {
+      setMobileViewport();
+      wrap(<Chores />);
+      const user = userEvent.setup();
+      await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
+
+      await user.click(screen.getByRole("button", { name: /search chores/i }));
+
+      const searchInput = await screen.findByPlaceholderText("Search...");
+      expect(searchInput).toBeInTheDocument();
+      await waitFor(() => expect(searchInput).toHaveFocus());
+    });
+
+    it("preserves search/filter behavior while expanded on mobile", async () => {
+      setMobileViewport();
+      wrap(<Chores />);
+      const user = userEvent.setup();
+      await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
+
+      await user.click(screen.getByRole("button", { name: /search chores/i }));
+      const searchInput = await screen.findByPlaceholderText("Search...");
+      await user.type(searchInput, "vacuum");
+
+      await waitFor(() => {
+        expect(screen.getByText("Vacuum")).toBeInTheDocument();
+        expect(screen.queryByText("Bathroom")).not.toBeInTheDocument();
+      });
+      expect(screen.getByTestId("location")).toHaveTextContent("search=vacuum");
+    });
+
+    it("collapses back to the icon when the input is empty and blurred", async () => {
+      setMobileViewport();
+      wrap(<Chores />);
+      const user = userEvent.setup();
+      await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
+
+      await user.click(screen.getByRole("button", { name: /search chores/i }));
+      const searchInput = await screen.findByPlaceholderText("Search...");
+      fireEvent.blur(searchInput);
+
+      await waitFor(() => {
+        expect(screen.queryByPlaceholderText("Search...")).not.toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /search chores/i })).toBeInTheDocument();
+      });
+    });
+
+    it("stays expanded on blur when a search term is present", async () => {
+      setMobileViewport();
+      wrap(<Chores />, { initialEntries: ["/chores?search=vacuum"] });
+      await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
+
+      // With an active search term, mobile shows the input (not the icon).
+      const searchInput = screen.getByPlaceholderText("Search...");
+      expect(searchInput).toHaveValue("vacuum");
+      fireEvent.blur(searchInput);
+      expect(screen.getByPlaceholderText("Search...")).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: /search chores/i })).not.toBeInTheDocument();
+    });
+
+    it("keeps the full search box on desktop (no icon toggle)", async () => {
+      // Default matchMedia mock reports desktop (matches: false).
+      wrap(<Chores />);
+      await waitFor(() => expect(screen.getByText("Vacuum")).toBeInTheDocument());
+
+      expect(screen.getByPlaceholderText("Search...")).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: /search chores/i })).not.toBeInTheDocument();
     });
   });
 
