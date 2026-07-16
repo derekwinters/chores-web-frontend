@@ -5,7 +5,7 @@ import { MdFilterList } from "react-icons/md";
 import { getLog, getPeople, getChores } from "../api/client";
 import "./Log.css";
 
-const ACTIONS = ["completed", "skipped", "reassigned", "created", "deleted", "updated", "marked_due"];
+const ACTIONS = ["completed", "skipped", "reassigned", "created", "deleted", "updated", "marked_due", "points_awarded"];
 
 const ACTION_LABELS = {
   completed: "Completed",
@@ -15,6 +15,7 @@ const ACTION_LABELS = {
   deleted: "Deleted",
   updated: "Updated",
   marked_due: "Marked Due",
+  points_awarded: "Points Awarded",
 };
 
 const PAGE_SIZE = 20;
@@ -40,6 +41,7 @@ function LogRow({ entry }) {
 
   const targetType = entry.chore_name.startsWith("Person:") ? "user" : "chore";
   const targetName = entry.chore_name.replace("Person: ", "");
+  const isAward = entry.action === "points_awarded";
   const actionClass = `action-badge action-badge--${entry.action}`;
   const actionLabel = ACTION_LABELS[entry.action] || entry.action;
   const fullTimestamp = new Date(entry.timestamp).toLocaleString();
@@ -128,25 +130,53 @@ function LogRow({ entry }) {
                 </div>
               )}
 
-              {entry.field_name && (
-                <div className="detail-item">
-                  <span className="detail-label">Field</span>
-                  <span className="detail-value">{entry.field_name}</span>
-                </div>
-              )}
+              {/* A one-time admin award encodes the granted amount in
+                  new_value and the reason in old_value; present those with
+                  award-specific labels rather than the generic field diff. */}
+              {isAward ? (
+                <>
+                  {entry.new_value !== undefined && entry.new_value !== null && (
+                    <div className="detail-item">
+                      <span className="detail-label">Points</span>
+                      <span className="detail-value">+{entry.new_value}</span>
+                    </div>
+                  )}
 
-              {entry.old_value !== undefined && entry.old_value !== null && (
-                <div className="detail-item">
-                  <span className="detail-label">Old Value</span>
-                  <span className="detail-value">{entry.old_value}</span>
-                </div>
-              )}
+                  {entry.old_value !== undefined && entry.old_value !== null && (
+                    <div className="detail-item">
+                      <span className="detail-label">Reason</span>
+                      <span className="detail-value">{entry.old_value}</span>
+                    </div>
+                  )}
 
-              {entry.new_value !== undefined && entry.new_value !== null && (
-                <div className="detail-item">
-                  <span className="detail-label">New Value</span>
-                  <span className="detail-value">{entry.new_value}</span>
-                </div>
+                  <div className="detail-item">
+                    <span className="detail-label">Awarded By</span>
+                    <span className="detail-value">{entry.person}</span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {entry.field_name && (
+                    <div className="detail-item">
+                      <span className="detail-label">Field</span>
+                      <span className="detail-value">{entry.field_name}</span>
+                    </div>
+                  )}
+
+                  {entry.old_value !== undefined && entry.old_value !== null && (
+                    <div className="detail-item">
+                      <span className="detail-label">Old Value</span>
+                      <span className="detail-value">{entry.old_value}</span>
+                    </div>
+                  )}
+
+                  {entry.new_value !== undefined && entry.new_value !== null && (
+                    <div className="detail-item">
+                      <span className="detail-label">New Value</span>
+                      <span className="detail-value">{entry.new_value}</span>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </td>

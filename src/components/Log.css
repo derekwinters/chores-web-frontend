@@ -208,6 +208,7 @@
 .action-badge--marked_due { background: rgba(var(--warning-rgb), var(--component-pill-badge-fill-alpha)); color: var(--warning); }
 .action-badge--reassigned { background: rgba(var(--warning-rgb), var(--component-pill-badge-fill-alpha)); color: var(--warning); }
 .action-badge--deleted    { background: rgba(var(--error-rgb), var(--component-pill-badge-fill-alpha)); color: var(--error); }
+.action-badge--points_awarded { background: rgba(var(--success-rgb), var(--component-pill-badge-fill-alpha)); color: var(--success); }
 
 /* Detail row — expands inline below the clicked row */
 .log-detail-row {

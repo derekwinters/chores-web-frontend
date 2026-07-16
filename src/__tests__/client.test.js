@@ -78,6 +78,25 @@ describe("API client", () => {
     expect(result[0].person).toBe("Alice");
   });
 
+  it("awardPoints calls POST /points/award with person, points, and reason", async () => {
+    mockOk({ id: 1, person: "alice", points: 10 }, 201);
+    const { awardPoints } = await import("../api/client");
+    await awardPoints("alice", 10, "Helping with gardening");
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("/points/award"),
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ person: "alice", points: 10, reason: "Helping with gardening" }),
+      })
+    );
+  });
+
+  it("awardPoints surfaces backend validation errors (422 blank reason)", async () => {
+    mockError("reason is required", 422);
+    const { awardPoints } = await import("../api/client");
+    await expect(awardPoints("alice", 10, "")).rejects.toThrow("reason is required");
+  });
+
   it("createPerson never sends color in request body", async () => {
     mockOk({ id: 1, name: "Alice", username: "alice" });
     const { createPerson } = await import("../api/client");
