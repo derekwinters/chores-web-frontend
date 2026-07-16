@@ -65,6 +65,11 @@
     margin-top: var(--space-xs);
     margin-bottom: 0;
     box-shadow: var(--elevation-3);
+    /* Keep the menu inside the viewport below the top bar: cap its height to
+       the space beneath the top nav and let long content scroll instead of
+       spilling past the bottom edge, so every control stays reachable. */
+    max-height: calc(100dvh - var(--component-top-bar-height) - var(--space-lg));
+    overflow-y: auto;
   }
 }
 
