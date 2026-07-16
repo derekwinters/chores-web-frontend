@@ -152,6 +152,21 @@ describe("UserAvatarMenu", () => {
       expect(topnavBlock).toMatch(/box-shadow\s*:\s*var\(--elevation-3\)/);
     });
 
+    it("caps height to the space below the top bar so it never spills past the viewport (#14)", () => {
+      expect(topnavBlock).toMatch(
+        /max-height\s*:\s*calc\(\s*100dvh\s*-\s*var\(--component-top-bar-height\)\s*-\s*var\(--space-lg\)\s*\)/
+      );
+    });
+
+    it("scrolls internally when content exceeds the available height (#14)", () => {
+      expect(topnavBlock).toMatch(/overflow-y\s*:\s*auto/);
+    });
+
+    it("does not hardcode colors in the topnav override (theming, #14)", () => {
+      expect(topnavBlock).not.toMatch(/#[0-9a-fA-F]{3,8}\b/);
+      expect(topnavBlock).not.toMatch(/\brgb|\bhsl/);
+    });
+
     it("renders .avatar-dropdown element when dropdown is open", async () => {
       const { container } = render(<UserAvatarMenu user={mockUser} onLogout={mockLogout} />);
       fireEvent.click(screen.getByRole("button", { name: /admin user menu/i }));
