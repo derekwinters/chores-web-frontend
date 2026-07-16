@@ -120,6 +120,21 @@ export const getBackendVersion = () =>
     return res.json();
   });
 
+// Backend status (public, unauthenticated; chores-web-backend#16). Hits the
+// UNVERSIONED `/status/` path that nginx proxies to the backend — same
+// convention as /status/db-status, deliberately NOT under /api/v1. Returns
+// { version, api_version, versions }: the backend app version, its current
+// API major (e.g. "v1"), and the list of API majors it still supports. Like
+// getBackendVersion() this is allowed to throw so the About page can degrade
+// gracefully when the backend predates this endpoint or is unreachable.
+export const getStatus = () =>
+  fetch("/status/").then(async (res) => {
+    if (!res.ok) {
+      throw new Error(`Backend status check failed: ${res.status}`);
+    }
+    return res.json();
+  });
+
 // Notifications
 // Caller-scoped, newest-first (chores-web-backend#39). Query params (`since`
 // ISO datetime, `include_dismissed` bool) are appended only when provided,
