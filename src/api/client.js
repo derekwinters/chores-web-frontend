@@ -75,6 +75,14 @@ export const getLeaderboard = () => request("GET", "/points");
 export const getPointsSummary = () => request("GET", "/points/summary");
 export const getPersonHistory = (person) => request("GET", `/points/${person}`);
 
+// One-time admin point award (chores-web-backend#13). ADMIN-ONLY: non-admins
+// get 403. `person` is the recipient's username. Appends a Points Log Credit
+// and a `points_awarded` Activity Log entry recording who granted it and why.
+// Backend validates: blank reason → 422, non-positive points → 422, unknown
+// person → 404.
+export const awardPoints = (person, points, reason) =>
+  request("POST", "/points/award", { person, points, reason });
+
 // Log
 export const getLog = (filters = {}) => {
   const params = new URLSearchParams();

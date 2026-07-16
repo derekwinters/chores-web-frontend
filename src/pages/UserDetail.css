@@ -23,6 +23,10 @@
 }
 
 .user-detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
   padding-bottom: var(--space-lg);
 }
 
@@ -30,6 +34,23 @@
   margin: 0;
   font-size: var(--typography-headline-medium-size);
   color: var(--text);
+}
+
+.award-btn {
+  background: var(--primary);
+  color: var(--on-primary);
+  border: none;
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: var(--radius-xs);
+  font-size: var(--typography-body-medium-size);
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity var(--duration-md);
+  white-space: nowrap;
+}
+
+.award-btn:hover {
+  opacity: var(--component-button-hover-alpha);
 }
 
 .total-earned-card {

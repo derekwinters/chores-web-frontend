@@ -1,0 +1,162 @@
+.award-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-modal);
+}
+
+.award-modal {
+  background: var(--surface);
+  border-radius: var(--component-modal-radius);
+  box-shadow: var(--elevation-3);
+  max-width: var(--component-modal-max-width);
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.award-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--component-modal-padding);
+  padding-bottom: 0;
+}
+
+.award-modal-header h2 {
+  margin: 0;
+  font-size: var(--typography-title-medium-size);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.award-close-btn {
+  background: none;
+  border: none;
+  font-size: var(--typography-headline-small-size);
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-xs);
+  transition: background-color var(--duration-md);
+}
+
+.award-close-btn:hover:not(:disabled) {
+  background-color: var(--surface2);
+}
+
+.award-close-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.award-modal-content {
+  padding: var(--component-modal-padding);
+  flex: 1;
+}
+
+.award-user-name {
+  margin: 0 0 var(--space-xl) 0;
+  font-size: var(--typography-title-medium-size);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.award-field {
+  margin-bottom: var(--space-xl);
+}
+
+.award-field label {
+  display: block;
+  margin-bottom: var(--space-sm);
+  font-size: var(--typography-body-medium-size);
+  font-weight: 500;
+  color: var(--text);
+}
+
+.award-field input {
+  width: 100%;
+  padding: var(--component-form-field-padding-y) var(--component-form-field-padding-x);
+  border: 1px solid var(--text-muted);
+  border-radius: var(--component-form-field-radius);
+  font-size: var(--typography-body-medium-size);
+  box-sizing: border-box;
+  background: var(--surface2);
+  color: var(--text);
+  transition: border-color var(--duration-md);
+}
+
+.award-field input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 var(--component-form-field-focus-ring-width) rgba(var(--accent-rgb), var(--component-form-field-focus-ring-alpha));
+}
+
+.award-field input:disabled {
+  background: var(--surface2);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+.award-error-message {
+  margin: var(--space-lg) 0 0 0;
+  padding: var(--space-md);
+  background: rgba(var(--error-rgb), var(--alpha-tint));
+  border-radius: var(--radius-sm);
+  color: var(--error);
+  font-size: var(--typography-body-medium-size);
+  border-left: var(--border-width-accent-bar) solid var(--error);
+}
+
+.award-modal-footer {
+  display: flex;
+  gap: var(--space-md);
+  justify-content: flex-end;
+  padding: var(--component-modal-padding);
+  padding-top: 0;
+}
+
+.award-modal-footer .btn-cancel,
+.award-modal-footer .btn-primary {
+  padding: var(--component-button-padding-y) var(--component-button-padding-x);
+  border-radius: var(--component-button-radius);
+  border: none;
+  font-size: var(--typography-body-medium-size);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color var(--duration-md), opacity var(--duration-md);
+}
+
+.award-modal-footer .btn-cancel {
+  background: var(--surface2);
+  color: var(--text);
+}
+
+.award-modal-footer .btn-primary {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.award-modal-footer .btn-cancel:hover:not(:disabled),
+.award-modal-footer .btn-primary:hover:not(:disabled) {
+  opacity: var(--component-button-hover-alpha);
+}
+
+.award-modal-footer .btn-cancel:disabled,
+.award-modal-footer .btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

@@ -634,4 +634,73 @@ describe("Log", () => {
       });
     });
   });
+
+  describe("One-time point awards (points_awarded)", () => {
+    const awardEntry = {
+      id: 200,
+      chore_id: 0,
+      chore_name: "Person: Bob",
+      person: "admin",
+      action: "points_awarded",
+      timestamp: "2026-04-20T12:00:00Z",
+      field_name: "points",
+      old_value: "Helping with gardening",
+      new_value: "10",
+    };
+
+    it("renders the 'Points Awarded' action label and 'user' target for an award entry", async () => {
+      client.getLog.mockResolvedValue([awardEntry]);
+      wrap(<Log />);
+
+      await waitFor(() => {
+        expect(screen.getByText("Points Awarded")).toBeInTheDocument();
+        // recipient shown as the target (Person: prefix stripped)
+        expect(screen.getByText("Bob")).toBeInTheDocument();
+        // granter shown as the actor
+        expect(screen.getByText("admin")).toBeInTheDocument();
+      });
+    });
+
+    it("expands to show the reason, points, and who granted them", async () => {
+      client.getLog.mockResolvedValue([awardEntry]);
+      wrap(<Log />);
+
+      await waitFor(() => {
+        expect(screen.getByText("Points Awarded")).toBeInTheDocument();
+      });
+
+      const rows = document.querySelectorAll("tbody tr.log-table-row");
+      fireEvent.click(rows[0]);
+
+      await waitFor(() => {
+        expect(screen.getByText("Reason")).toBeInTheDocument();
+        expect(screen.getByText("Helping with gardening")).toBeInTheDocument();
+        expect(screen.getByText("Points")).toBeInTheDocument();
+        expect(screen.getByText("+10")).toBeInTheDocument();
+        expect(screen.getByText("Awarded By")).toBeInTheDocument();
+      });
+
+      // Award entries use award-specific labels, not the generic field diff.
+      expect(screen.queryByText("Old Value")).not.toBeInTheDocument();
+      expect(screen.queryByText("New Value")).not.toBeInTheDocument();
+    });
+
+    it("offers 'Points Awarded' as an action filter option", async () => {
+      wrap(<Log />);
+      await waitFor(() => {
+        const vacuums = screen.getAllByText("Vacuum");
+        expect(vacuums.length).toBeGreaterThan(0);
+      });
+
+      fireEvent.click(screen.getByRole("button", { name: /show filters/i }));
+      const actionFilter = screen.getByLabelText(/filter by action/i);
+      fireEvent.change(actionFilter, { target: { value: "points_awarded" } });
+
+      await waitFor(() => {
+        expect(client.getLog).toHaveBeenCalledWith(
+          expect.objectContaining({ action: "points_awarded" })
+        );
+      });
+    });
+  });
 });

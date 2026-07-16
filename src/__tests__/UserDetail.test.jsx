@@ -8,6 +8,13 @@ import * as client from "../api/client";
 
 vi.mock("../api/client");
 
+// Controllable auth mock: default to an admin; individual tests reassign
+// mockUser to exercise the non-admin path.
+let mockUser = { username: "admin", is_admin: true };
+vi.mock("../contexts/AuthContext", () => ({
+  useAuth: () => ({ user: mockUser }),
+}));
+
 const USER_NAME = "Alice";
 const USER_HISTORY = [
   {
@@ -70,10 +77,12 @@ function wrap(ui) {
 describe("UserDetail", () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    mockUser = { username: "admin", is_admin: true };
     client.getLog.mockResolvedValue(USER_HISTORY);
     client.getUserStats.mockResolvedValue(USER_STATS);
     client.getPeople.mockResolvedValue(PEOPLE);
     client.getRedemptionHistory.mockResolvedValue(REDEMPTIONS);
+    client.awardPoints.mockResolvedValue({ id: 1, person: "Alice", points: 10 });
   });
 
   it("renders user name", async () => {
@@ -147,5 +156,96 @@ describe("UserDetail", () => {
     client.getLog.mockImplementation(() => new Promise(() => {}));
     wrap(<UserDetail />);
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
+  });
+
+  describe("one-time point awards", () => {
+    it("shows the Award Points action for admins", async () => {
+      wrap(<UserDetail />);
+      await waitFor(() => {
+        expect(screen.getByRole("button", { name: /award points/i })).toBeInTheDocument();
+      });
+    });
+
+    it("hides the Award Points action for non-admins", async () => {
+      mockUser = { username: "bob", is_admin: false };
+      wrap(<UserDetail />);
+      await waitFor(() => {
+        expect(screen.getByText(USER_NAME)).toBeInTheDocument();
+      });
+      expect(screen.queryByRole("button", { name: /award points/i })).not.toBeInTheDocument();
+    });
+
+    it("opens the award modal when the action is clicked", async () => {
+      wrap(<UserDetail />);
+      await waitFor(() => {
+        fireEvent.click(screen.getByRole("button", { name: /award points/i }));
+      });
+      expect(screen.getByRole("dialog", { name: /award points/i })).toBeInTheDocument();
+      expect(screen.getByLabelText(/points to award/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/reason/i)).toBeInTheDocument();
+    });
+
+    it("submits a valid award and calls the endpoint with username, points, reason", async () => {
+      wrap(<UserDetail />);
+      await waitFor(() => {
+        fireEvent.click(screen.getByRole("button", { name: /award points/i }));
+      });
+
+      fireEvent.change(screen.getByLabelText(/points to award/i), { target: { value: "10" } });
+      fireEvent.change(screen.getByLabelText(/reason/i), { target: { value: "Helping with gardening" } });
+      fireEvent.click(screen.getByRole("dialog").querySelector(".btn-primary"));
+
+      await waitFor(() => {
+        expect(client.awardPoints).toHaveBeenCalledWith(USER_NAME, 10, "Helping with gardening");
+      });
+    });
+
+    it("blocks submit and shows an error when the reason is blank", async () => {
+      wrap(<UserDetail />);
+      await waitFor(() => {
+        fireEvent.click(screen.getByRole("button", { name: /award points/i }));
+      });
+
+      fireEvent.change(screen.getByLabelText(/points to award/i), { target: { value: "5" } });
+      // Leave reason blank, force a submit attempt.
+      fireEvent.click(screen.getByRole("dialog").querySelector(".btn-primary"));
+
+      await waitFor(() => {
+        expect(screen.getByText(/reason is required/i)).toBeInTheDocument();
+      });
+      expect(client.awardPoints).not.toHaveBeenCalled();
+    });
+
+    it("rejects non-positive amounts", async () => {
+      wrap(<UserDetail />);
+      await waitFor(() => {
+        fireEvent.click(screen.getByRole("button", { name: /award points/i }));
+      });
+
+      fireEvent.change(screen.getByLabelText(/points to award/i), { target: { value: "-3" } });
+      fireEvent.change(screen.getByLabelText(/reason/i), { target: { value: "Nope" } });
+      fireEvent.click(screen.getByRole("dialog").querySelector(".btn-primary"));
+
+      await waitFor(() => {
+        expect(screen.getByText(/positive number/i)).toBeInTheDocument();
+      });
+      expect(client.awardPoints).not.toHaveBeenCalled();
+    });
+
+    it("surfaces backend errors returned by the award endpoint", async () => {
+      client.awardPoints.mockRejectedValue(new Error("Person not found"));
+      wrap(<UserDetail />);
+      await waitFor(() => {
+        fireEvent.click(screen.getByRole("button", { name: /award points/i }));
+      });
+
+      fireEvent.change(screen.getByLabelText(/points to award/i), { target: { value: "10" } });
+      fireEvent.change(screen.getByLabelText(/reason/i), { target: { value: "Helping with gardening" } });
+      fireEvent.click(screen.getByRole("dialog").querySelector(".btn-primary"));
+
+      await waitFor(() => {
+        expect(screen.getByText("Person not found")).toBeInTheDocument();
+      });
+    });
   });
 });

@@ -1,8 +1,11 @@
 import React, { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
-import { getLog, getUserStats, getPeople, getRedemptionHistory, redeemPoints } from "../api/client";
+import { getLog, getUserStats, getPeople, getRedemptionHistory, redeemPoints, awardPoints } from "../api/client";
 import RedemptionModal from "../components/RedemptionModal";
+import AwardPointsModal from "../components/AwardPointsModal";
+import Toast from "../components/Toast";
+import { useAuth } from "../contexts/AuthContext";
 import "./UserDetail.css";
 
 const USER_ACTIVITY_ACTIONS = ["completed", "skipped", "reassigned"];
@@ -11,7 +14,11 @@ export default function UserDetail() {
   const { userName = "" } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const isAdmin = user?.is_admin ?? false;
   const [showRedemptionModal, setShowRedemptionModal] = useState(false);
+  const [showAwardModal, setShowAwardModal] = useState(false);
+  const [toast, setToast] = useState(null);
 
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["user-stats", userName],
@@ -48,6 +55,16 @@ export default function UserDetail() {
     setShowRedemptionModal(false);
   };
 
+  const handleAwardSuccess = async (points, reason) => {
+    await awardPoints(userName, points, reason);
+    // Refresh the balance, leaderboard, and activity log so the award and the
+    // new total appear without a full page reload.
+    queryClient.invalidateQueries({ queryKey: ["user-stats", userName] });
+    queryClient.invalidateQueries({ queryKey: ["leaderboard"] });
+    queryClient.invalidateQueries({ queryKey: ["log"] });
+    setToast({ message: `Awarded ${points} points to ${userName}`, variant: "default" });
+  };
+
   if (statsLoading || historyLoading || redemptionsLoading) return <div className="loading">Loading…</div>;
 
   return (
@@ -58,6 +75,11 @@ export default function UserDetail() {
 
       <div className="user-detail-header">
         <h1>{userName}</h1>
+        {isAdmin && (
+          <button className="award-btn" onClick={() => setShowAwardModal(true)}>
+            Award Points
+          </button>
+        )}
       </div>
 
       {stats && (
@@ -138,6 +160,22 @@ export default function UserDetail() {
           person={stats}
           onClose={() => setShowRedemptionModal(false)}
           onRedeemSuccess={handleRedeemSuccess}
+        />
+      )}
+
+      {showAwardModal && isAdmin && (
+        <AwardPointsModal
+          person={stats ?? { name: userName, username: userName }}
+          onClose={() => setShowAwardModal(false)}
+          onAwardSuccess={handleAwardSuccess}
+        />
+      )}
+
+      {toast && (
+        <Toast
+          message={toast.message}
+          variant={toast.variant}
+          onDone={() => setToast(null)}
         />
       )}
     </div>
