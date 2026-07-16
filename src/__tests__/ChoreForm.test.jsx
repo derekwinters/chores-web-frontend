@@ -95,6 +95,24 @@ describe("ChoreForm — empty (create)", () => {
     fireEvent.click(screen.getByText("Cancel"));
     expect(onCancel).toHaveBeenCalled();
   });
+
+  it("offers a zero-point option in the points selector", () => {
+    render(<ChoreForm initial={null} people={PEOPLE} onSubmit={() => {}} onCancel={() => {}} />);
+    // The zero option is labelled to convey it is a reminder-only chore.
+    expect(screen.getByRole("option", { name: /0 \(reminder\)/i })).toBeInTheDocument();
+  });
+
+  it("submits points: 0 when the zero-point option is chosen", async () => {
+    const onSubmit = vi.fn().mockResolvedValue();
+    render(<ChoreForm initial={null} people={PEOPLE} onSubmit={onSubmit} onCancel={() => {}} />);
+    fireEvent.change(screen.getByPlaceholderText(/e.g. Vacuum/i), { target: { value: "Water plants" } });
+    fireEvent.click(screen.getByText("Mon"));
+    // In the default weekly create view the points selector is the only combobox.
+    fireEvent.change(screen.getByRole("combobox"), { target: { value: "0" } });
+    fireEvent.click(screen.getByText("Save"));
+    await waitFor(() => expect(onSubmit).toHaveBeenCalled());
+    expect(onSubmit.mock.calls[0][0].points).toBe(0);
+  });
 });
 
 describe("ChoreForm — prefilled (edit)", () => {
@@ -206,6 +224,17 @@ describe("ChoreForm — prefilled (edit)", () => {
     await waitFor(() => expect(onSubmit).toHaveBeenCalled());
     expect(onSubmit.mock.calls[0][0].assignee).toBe("Bob");
     expect(onSubmit.mock.calls[0][0].current_assignee).toBe("Bob");
+  });
+
+  it("pre-fills and preserves a zero-point chore when editing", async () => {
+    const onSubmit = vi.fn().mockResolvedValue();
+    const zeroPointChore = { ...existingChore, points: 0 };
+    render(<ChoreForm initial={zeroPointChore} people={PEOPLE} onSubmit={onSubmit} onCancel={() => {}} />);
+    // The selector reflects the stored zero value rather than falling back to a default.
+    expect(screen.getByDisplayValue("0 (reminder)")).toBeInTheDocument();
+    fireEvent.click(screen.getByText("Save"));
+    await waitFor(() => expect(onSubmit).toHaveBeenCalled());
+    expect(onSubmit.mock.calls[0][0].points).toBe(0);
   });
 
   it("does not display metadata when creating new chore", () => {

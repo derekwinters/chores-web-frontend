@@ -66,6 +66,25 @@ describe("ChoreCard", () => {
     expect(screen.getByText("Me")).toBeInTheDocument();
   });
 
+  it("shows the Points meta when a chore is worth points", () => {
+    const { container } = render(
+      <ChoreCard chore={makeChore({ points: 5 })} selected={false} onClick={() => {}} />
+    );
+    fireEvent.click(container.querySelector(".chore-card"));
+    expect(screen.getByText("Points")).toBeInTheDocument();
+    expect(screen.getByText("5")).toBeInTheDocument();
+  });
+
+  it("hides the Points meta for a zero-point chore instead of showing '0'", () => {
+    const { container } = render(
+      <ChoreCard chore={makeChore({ points: 0 })} selected={false} onClick={() => {}} status="Open" />
+    );
+    fireEvent.click(container.querySelector(".chore-card"));
+    // A reminder-only chore should not surface a prominent "0" points badge.
+    expect(screen.queryByText("Points")).not.toBeInTheDocument();
+    expect(screen.queryByText("0")).not.toBeInTheDocument();
+  });
+
   it("shows action buttons when expanded with handlers", () => {
     const onEdit = vi.fn();
     const onHistory = vi.fn();

@@ -6,7 +6,9 @@ import "./ChoreForm.css";
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const WEEKDAY_MAP = { Mon: 0, Tue: 1, Wed: 2, Thu: 3, Fri: 4, Sat: 5, Sun: 6 };
 const ORDINALS = ["1st", "2nd", "3rd", "4th", "5th"];
-const FIBONACCI = [1, 2, 3, 5, 8, 13];
+// Zero is a valid points value — a zero-point chore is a simple task reminder
+// that earns nothing when completed. Negatives are never offered.
+const POINT_OPTIONS = [0, 1, 2, 3, 5, 8, 13];
 const MONTHS = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December",
@@ -306,8 +308,8 @@ export default function ChoreForm({ initial, people, onSubmit, onCancel, onSaveS
           <div className="form-column">
             <label>Points</label>
             <select value={s.points} onChange={(e) => set("points", e.target.value)} style={{ width: "8rem" }}>
-              {FIBONACCI.map((p, idx) => (
-                <option key={idx} value={p}>{p}</option>
+              {POINT_OPTIONS.map((p) => (
+                <option key={p} value={p}>{p === 0 ? "0 (reminder)" : p}</option>
               ))}
             </select>
           </div>
