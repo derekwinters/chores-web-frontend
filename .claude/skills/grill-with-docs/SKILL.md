@@ -26,16 +26,13 @@ If a question can be answered by exploring the codebase, explore the codebase in
 
 ## Area Checklist
 
-Every grilling session MUST explicitly cover all six areas. Work through them as part of the conversation, not just in the output:
+Every grilling session MUST explicitly cover all of this repo's impact areas. Work through each one as part of the conversation, not just in the output:
 
-- [ ] **UI** — React components, pages, MUI usage, UX flows, state/props hoisting
-- [ ] **API Client** — API endpoint usage changes, request/response shapes, auth headers, error handling, React Query hooks
-- [ ] **Theming/Tokens** — CSS custom properties in `src/index.css`, `@derekwinters/design-tokens` usage, runtime `/theme` overrides; never hardcode color values
-- [ ] **Routing** — react-router-dom routes, navigation, route guards, URL/params
-- [ ] **Tests/Stories** — vitest suites, Storybook stories, visual-regression coverage
-- [ ] **Docs** — README, CONTEXT.md, ADRs, any other affected docs
+**Impact areas:** ui, api, theming, routing, auth, build
 
-If an area has no changes, state that explicitly ("Routing: no changes needed") so it's clear it was considered, not skipped.
+Treat each listed area as a checklist item, and consult this repo's `CLAUDE.md` for what that area entails and any rituals it carries (migrations, API-contract drift, versioning, etc.). Always include a **docs** review — README, architecture docs, `CONTEXT.md`, ADRs, and any other affected docs — even if it is not listed above.
+
+If an area has no changes, state that explicitly (e.g. "scheduler: no changes needed") so it's clear it was considered, not skipped.
 
 </what-to-do>
 
@@ -126,16 +123,11 @@ After the session is complete and the user confirms the decisions are captured, 
 ### Impact Areas
 | Area | Changes | Notes |
 |------|---------|-------|
-| UI | ... | ... |
-| API Client | ... | ... |
-| Theming/Tokens | ... | ... |
-| Routing | ... | ... |
-| Tests/Stories | ... | ... |
-| Docs | ... | ... |
+| <one row per impact area for this repo: ui, api, theming, routing, auth, build, plus Docs> | ... | ... |
 
 ### Behaviors to Implement
-- [ ] Behavior 1 (area: ui)
-- [ ] Behavior 2 (area: api client)
+- [ ] Behavior 1 (area: Backend)
+- [ ] Behavior 2 (area: API Contract)
 
 ### CONTEXT.md Updates
 - New terms added: ...

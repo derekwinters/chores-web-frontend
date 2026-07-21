@@ -53,7 +53,9 @@ START
           ↓
 [6] build-verify
   ├─ Call: /implementation-verify <issue-number>
-  ├─ Runs `npm run build` (vite production build), shows changes summary
+  ├─ Runs pytest, regenerates the OpenAPI schema and diffs it against the
+  │   chores-web-docs golden snapshot (flags contract drift), reminds about
+  │   Alembic migrations if app/models.py changed, shows changes summary
   └─ PAUSE: Awaits user approval
           ↓
 [7] user-review
@@ -78,7 +80,7 @@ START
           ↓
 [10] reflect (compilation-only — no commits, no file writes)
   ├─ Gather tdd-loop deviations, doc-validate findings, and mid-run decisions
-  ├─ Assemble the `## Deviations and Decisions` block (see PR Body Format below)
+  ├─ Compose the `## Deviations and Decisions` block (see PR Body Format below)
   ├─ Empty `### Deviations` and/or `### Decisions` subsection → emit `None.`
   ├─ Standalone mode: block becomes the FIRST content of the PR body (above `## Summary`)
   ├─ Milestone mode: return the block verbatim in the per-issue summary (this
@@ -201,7 +203,7 @@ Resumable by checking branch state and git log.
   - All behaviors from grilling checklist implemented via TDD
   - Documentation drafted before coding and verified/corrected after user approval
   - All tests passing
-  - Production build compiling successfully (`npm run build`)
+  - API contract in sync with the chores-web-docs golden snapshot (drift flagged if not)
   - Two or three conventional commits (docs-pre, code, docs-post conditional)
   - Pull request created with auto-close markers
   - `in-development` label removed
@@ -212,7 +214,7 @@ Resumable by checking branch state and git log.
 3. *(doc-pre)* — agent drafts + commits docs directly
 4. *(tdd-loop)* — agent runs TDD autonomously
 5. **implementation-test** — full test suite
-6. **implementation-verify** — vite production build (`npm run build`) + changes summary; includes CSS-custom-properties theming check note
+6. **implementation-verify** — pytest + OpenAPI contract check + changes summary
 7. *User review pause*
 8. *(code-commit)* — agent commits code directly
 9. *(doc-validate)* — agent reconciles + commits if needed
@@ -226,7 +228,7 @@ Resumable by checking branch state and git log.
 - Missing `branch` input → ABORT — this agent never invents a branch name
 - Issue already closed → ABORT
 - Test failures → PAUSE, show errors, return to TDD loop
-- Build failures → PAUSE, show errors
+- Verification failures (test failures or API contract drift) → PAUSE, show errors
 - Git push failures → PAUSE, investigate
 
 ## Key Features
@@ -264,7 +266,7 @@ Resumable by checking branch state and git log.
 - **implementation-validate**: Issue validation and label swap
 - **implementation-prepare**: Branch creation and setup
 - **implementation-test**: Test suite verification
-- **implementation-verify**: vite production build and changes summary
+- **implementation-verify**: pytest + OpenAPI contract check and changes summary
 - **implementation-finalize**: Push and PR creation
 
 ## Notes
