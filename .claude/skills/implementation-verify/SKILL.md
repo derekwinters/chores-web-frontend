@@ -1,11 +1,12 @@
 ---
 name: implementation-verify
-description: Verify the vite production build compiles cleanly and show changes summary for user review
+description: Build/verify the change and show a changes summary for user review, then pause.
 ---
 
 # Implementation Verify Skill
 
-Runs the vite production build (`npm run build`) to verify the app compiles cleanly, then shows a summary of changes for user review.
+Runs the repo's verification, then shows a summary of changes for user review.
+This is the human control point before commit.
 
 ## Usage
 
@@ -15,41 +16,21 @@ Runs the vite production build (`npm run build`) to verify the app compiles clea
 
 ## Workflow
 
-1. **Build**: `npm run build` (vite production build)
-2. **Verify build succeeded**: Check exit code, report any compile/bundle errors
-3. **Theming check** (CSS custom properties only): confirm no hardcoded color
-   values were introduced in component CSS. All colors and visual primitives
-   must use the CSS custom properties from `src/index.css` /
-   `@derekwinters/design-tokens` — never hardcoded values (per `CLAUDE.md`
-   "Theming"). `src/__tests__/designTokens.test.js` enforces part of this; flag
-   any hardcoded color so it is fixed before commit rather than tripping the test.
-4. **Prepare changes summary**:
-   - List all files modified
-   - Show line change counts
-   - Summarize implementation
-   - Display test results
-5. **Pause workflow**: Wait for user approval or request for changes
+1. **Verify:** `npm run build` — must succeed. It must NEVER
+   silently pass; report the real result.
+- **Theming:** confirm no hardcoded color values — components must use the CSS
+  custom properties / `@derekwinters/design-tokens` (runtime themes override
+  them). See `src/__tests__/designTokens.test.js`.
+
+2. **Prepare a changes summary:** `git diff --stat`; list files modified with
+   line counts; summarize the implementation; include the test/verify results.
+3. **Pause:** wait for the user to Approve for commit / Request changes / Abort.
 
 ## Parameters
 
-- `issue_number` (optional): For reference in output
-
-## Output
-
-Shows:
-- Files modified with line counts
-- Implementation summary
-- Test results
-- Build status
-- Ready for user to:
-  - Approve for commit
-  - Request more changes
-  - Abort
+- `issue_number` (optional): for reference in the output.
 
 ## Notes
 
-- Called by orchestrator after tests pass
-- Build verification (`npm run build`) confirms no compile/bundle errors introduced
-- The theming check keeps hardcoded colors from reaching commit / tripping `src/__tests__/designTokens.test.js`
-- Shows all changes before user reviews
-- User has control point here
+- Called by the orchestrator after tests pass.
+- Shows all changes before the user reviews; the user has the control point here.
