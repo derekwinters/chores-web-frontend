@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.6.0](https://github.com/derekwinters/chores-web-frontend/compare/v2.5.0...v2.6.0) (2026-07-21)
+
+
+### Features
+
+* **ai:** adopt shared ai-skills bundles (self-updater, shared skills, dev agent) ([#61](https://github.com/derekwinters/chores-web-frontend/issues/61)) ([4706c92](https://github.com/derekwinters/chores-web-frontend/commit/4706c92413c092e848bbc619afdb401c0a912f5a))
+
 ## [2.5.0](https://github.com/derekwinters/chores-web-frontend/compare/v2.4.0...v2.5.0) (2026-07-16)
 
 
