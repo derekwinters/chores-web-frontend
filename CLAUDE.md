@@ -53,3 +53,5 @@ PR are all implementation work and belong to a delegated implementation
 agent. The orchestrating session's job is to delegate that work, review CI
 results, and merge — applying the Conventional Commits rule above to
 whatever squash-merge title it chooses at merge time.
+
+@.ai-sdlc/house-rules.md
